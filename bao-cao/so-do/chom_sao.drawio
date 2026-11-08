@@ -1,0 +1,39 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="chom-sao" name="Fact constellation">
+    <mxGraphModel dx="1500" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="tg" value="&lt;b&gt;dim_thoi_gian&lt;/b&gt;&lt;br&gt;PK date_key&lt;br&gt;ngay, thang, hoc_ky&lt;br&gt;nam_hoc&lt;br&gt;Chiều dùng chung" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E7F0EA;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;align=left;spacingLeft=10;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="280" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="hs" value="&lt;b&gt;dim_hoc_sinh · SCD Type 2&lt;/b&gt;&lt;br&gt;PK hoc_sinh_key&lt;br&gt;lop, trang_thai_hoc_vu&lt;br&gt;start_date, end_date, is_current&lt;br&gt;Chiều dùng chung" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E7F0EA;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;align=left;spacingLeft=10;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="500" y="40" width="320" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="mon" value="&lt;b&gt;dim_mon_hoc&lt;/b&gt;&lt;br&gt;PK mon_hoc_key&lt;br&gt;ma_mon, ten_mon&lt;br&gt;khoa, so_tin_chi&lt;br&gt;Chiều dùng chung" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E7F0EA;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;align=left;spacingLeft=10;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="40" width="280" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="f1" value="&lt;b&gt;fact_ket_qua_thi&lt;/b&gt;&lt;br&gt;PK fact_id · NK lan_lam_id&lt;br&gt;FK hoc_sinh_key, date_key&lt;br&gt;FK mon_hoc_key, de_thi_key&lt;br&gt;diem_so, so_cau_dung, ty_le_dung&lt;br&gt;thoi_gian_lam_giay, loai_bai" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8F1DE;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;align=left;spacingLeft=10;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="80" y="320" width="420" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="f2" value="&lt;b&gt;fact_chuyen_can&lt;/b&gt;&lt;br&gt;PK fact_id · NK phien_hoc_id&lt;br&gt;FK hoc_sinh_key, date_key&lt;br&gt;FK mon_hoc_key, bai_hoc_key&lt;br&gt;thoi_luong_phut, so_video_da_xem&lt;br&gt;so_tuong_tac, diem_chuyen_can" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8F1DE;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;align=left;spacingLeft=10;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="820" y="320" width="440" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="de" value="&lt;b&gt;dim_de_thi&lt;/b&gt;&lt;br&gt;PK de_thi_key&lt;br&gt;ma_de, loai, do_kho, so_cau&lt;br&gt;Chiều riêng fact kết quả" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E8F0F6;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;align=left;spacingLeft=10;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="80" y="600" width="420" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="bai" value="&lt;b&gt;dim_bai_hoc&lt;/b&gt;&lt;br&gt;PK bai_hoc_key&lt;br&gt;ma_bai, loai_noi_dung&lt;br&gt;Chiều riêng fact chuyên cần" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E8F0F6;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;align=left;spacingLeft=10;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="820" y="600" width="440" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.25;" edge="1" parent="1" source="tg" target="f1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.25;" edge="1" parent="1" source="tg" target="f2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.25;" edge="1" parent="1" source="hs" target="f1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.25;" edge="1" parent="1" source="hs" target="f2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.25;" edge="1" parent="1" source="mon" target="f1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.25;" edge="1" parent="1" source="mon" target="f2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1C2430;strokeWidth=1.25;" edge="1" parent="1" source="de" target="f1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1C2430;strokeWidth=1.25;" edge="1" parent="1" source="bai" target="f2"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

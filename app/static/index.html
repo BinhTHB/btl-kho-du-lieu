@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LearnWH · Kho học tập và ôn luyện</title>
+  <link rel="stylesheet" href="/static/app.css?v=3">
+</head>
+<body>
+  <div id="toast" role="status"></div>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <span class="mark">DW</span>
+        <div>
+          <strong>LearnWH</strong>
+          <small>Kho dữ liệu DAE1408</small>
+        </div>
+      </div>
+      <nav>
+        <button data-page="dash" class="active">Bảng điều khiển</button>
+        <button data-page="hoc">Cổng học tập</button>
+        <button data-page="scd">Học vụ · SCD</button>
+        <button data-page="stream">Dòng dữ liệu</button>
+        <button data-page="olap">Phân tích OLAP</button>
+        <button data-page="chat">Chất lượng ETL</button>
+      </nav>
+      <div class="aside-foot">
+        <p>Nhóm 9 · D23CQKD02-B</p>
+        <p>GV: ThS. Nguyễn Thị Thu Hiên</p>
+        <p class="link-row"><span id="ws-dot"></span><span id="ws-text">Đang nối</span></p>
+      </div>
+    </aside>
+    <main>
+      <section id="page-dash" class="page active">
+        <header class="page-head">
+          <div>
+            <p class="kicker">Hệ thống quản lý học tập và ôn luyện trực tuyến</p>
+            <h1>Bảng điều khiển kho</h1>
+          </div>
+          <button id="btn-refresh" class="ghost">Làm mới</button>
+        </header>
+        <ol class="pipe" id="pipe"></ol>
+        <div class="kpis" id="kpis"></div>
+        <div class="grid-2">
+          <article class="card">
+            <h2>Điểm trung bình theo môn</h2>
+            <p class="hint">Đọc từ bảng tổng hợp <code>mv_diem_theo_mon_thang</code>, không quét lại fact.</p>
+            <div id="bars-mon" class="bars"></div>
+          </article>
+          <article class="card">
+            <h2>Lượt nộp bài theo ngày</h2>
+            <p class="hint">Mức hạt fact: một dòng là một lần nộp. Biểu đồ lấy 16 ngày có bài gần nhất.</p>
+            <div id="bars-ngay" class="bars"></div>
+          </article>
+        </div>
+        <article class="card">
+          <h2>Kịch bản khi bảo vệ</h2>
+          <ol class="steps">
+            <li>Nhìn dải OLTP → cổng chất lượng → fact → summary. Số đã có sẵn từ ngày 08/09 đến 03/11/2026.</li>
+            <li>Sang Cổng học tập, chạy kịch bản nộp bài thi hợp lệ. Mẻ ETL chạy ngay.</li>
+            <li>Sang Học vụ, chạy kịch bản kiểm thử biến động học vụ. Bảng SCD thêm bản, fact cũ giữ khóa cũ.</li>
+            <li>Bật bộ sinh dữ liệu để thấy dòng chảy liên tục, rồi chạy kịch bản kiểm thử bản ghi lỗi.</li>
+            <li>Ở OLAP, bấm lần lượt Roll-up, Drill-down, Slice, Dice, Pivot và Drill-across.</li>
+          </ol>
+        </article>
+      </section>
+
+      <section id="page-hoc" class="page">
+        <header class="page-head">
+          <div>
+            <p class="kicker">Nguồn OLTP</p>
+            <h1>Cổng học tập</h1>
+          </div>
+        </header>
+        <article class="card">
+          <label>Học sinh đang thao tác</label>
+          <div id="member-chips" class="chips"></div>
+          <select id="hs-select"></select>
+        </article>
+        <div class="grid-2">
+          <article class="card">
+            <h2>Làm đề</h2>
+            <select id="de-select"></select>
+            <div id="quiz"></div>
+          </article>
+          <article class="card">
+            <h2>Ghi phiên học</h2>
+            <select id="bai-select"></select>
+            <div id="lesson"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="page-scd" class="page">
+        <header class="page-head">
+          <div>
+            <p class="kicker">Slowly Changing Dimension Type 2</p>
+            <h1>Biến động học vụ</h1>
+          </div>
+        </header>
+        <article class="card">
+          <p class="hint">Đổi lớp, bảo lưu hoặc cảnh báo học vụ sẽ đóng bản hiện tại và thêm bản mới. Cột đúng tên yêu cầu: Start_Date, End_Date, Is_Current. Fact đã nạp không bị viết lại.</p>
+          <div class="row-form">
+            <select id="scd-hs"></select>
+            <select id="scd-lop"></select>
+            <select id="scd-tt">
+              <option value="DANG_HOC">Đang học</option>
+              <option value="BAO_LUU">Bảo lưu</option>
+              <option value="CANH_BAO_HOC_VU">Cảnh báo học vụ</option>
+            </select>
+            <button id="btn-scd">Cập nhật và sinh phiên bản</button>
+          </div>
+          <div class="chips" id="scd-quick"></div>
+        </article>
+        <article class="card">
+          <h2>Lịch sử phiên bản</h2>
+          <div id="scd-table" class="table-wrap"></div>
+        </article>
+        <article class="card">
+          <h2>Bài thi gần đây gắn với khóa nào</h2>
+          <div id="scd-facts" class="table-wrap"></div>
+        </article>
+      </section>
+
+      <section id="page-stream" class="page">
+        <header class="page-head">
+          <div>
+            <p class="kicker">Streaming simulator</p>
+            <h1>Dòng dữ liệu tác nghiệp</h1>
+          </div>
+        </header>
+        <article class="card">
+          <div class="row-form">
+            <label>Học sinh mỗi nhịp <input id="sim-n" type="number" min="1" max="20" value="3"></label>
+            <label>Giãn cách (ms) <input id="sim-ms" type="number" min="200" max="5000" step="100" value="800"></label>
+            <label class="check"><input id="sim-bad" type="checkbox" checked> Sinh cả bản ghi bẩn và mã lạ</label>
+            <label class="check"><input id="sim-mem" type="checkbox"> Đụng 4 thành viên nhóm</label>
+            <button id="sim-start">Chạy dòng</button>
+            <button id="sim-stop" class="ghost">Dừng</button>
+          </div>
+          <div class="kpis compact" id="sim-kpis"></div>
+          <div class="row-form">
+            <button id="btn-e2e">Kịch bản nộp bài thi hợp lệ</button>
+            <button id="btn-bad" class="warn">Kịch bản kiểm thử bản ghi lỗi</button>
+          </div>
+          <p id="demo-note" class="hint"></p>
+        </article>
+        <article class="card">
+          <h2>Nhật ký trực tiếp</h2>
+          <ul id="log" class="log"></ul>
+        </article>
+      </section>
+
+      <section id="page-olap" class="page">
+        <header class="page-head">
+          <div>
+            <p class="kicker">Năm thao tác đa chiều và drill-across</p>
+            <h1>Phân tích OLAP</h1>
+          </div>
+        </header>
+        <article class="card">
+          <div class="chips">
+            <button data-preset="roll-up">Roll-up</button>
+            <button data-preset="drill-down">Drill-down</button>
+            <button data-preset="slice">Slice</button>
+            <button data-preset="dice">Dice</button>
+            <button data-preset="pivot">Pivot</button>
+          </div>
+          <div class="row-form filters">
+            <select id="f-nguon">
+              <option value="ket_qua">Fact kết quả thi</option>
+              <option value="chuyen_can">Fact chuyên cần</option>
+            </select>
+            <select id="f-muc">
+              <option value="ngay">Ngày</option>
+              <option value="tuan">Tuần</option>
+              <option value="thang" selected>Tháng</option>
+              <option value="hoc_ky">Học kỳ</option>
+              <option value="nam">Năm học</option>
+            </select>
+            <select id="f-mon"><option value="">Mọi môn</option></select>
+            <select id="f-lop"><option value="">Mọi lớp</option></select>
+            <input id="f-tu" type="date" value="2026-09-01">
+            <input id="f-den" type="date" value="2026-11-04">
+            <button id="btn-rollup" class="ghost">Roll-up thêm</button>
+            <button id="btn-drill" class="ghost">Drill-down thêm</button>
+            <button id="btn-slice">Slice theo môn</button>
+            <button id="btn-dice">Dice các điều kiện</button>
+          </div>
+          <div class="row-form">
+            <label>Hàng <select id="p-hang">
+              <option value="lop">Lớp</option>
+              <option value="mon">Môn</option>
+              <option value="loai">Loại bài</option>
+              <option value="trang_thai">Trạng thái</option>
+            </select></label>
+            <label>Cột <select id="p-cot">
+              <option value="mon">Môn</option>
+              <option value="lop">Lớp</option>
+              <option value="loai">Loại bài</option>
+              <option value="trang_thai">Trạng thái</option>
+            </select></label>
+            <button id="btn-pivot">Pivot</button>
+            <button id="btn-swap" class="ghost">Đảo hàng / cột</button>
+          </div>
+        </article>
+        <article class="card">
+          <h2 id="olap-title">Kết quả</h2>
+          <p id="olap-note" class="hint">Chọn một thao tác. Câu SQL phía dưới là câu vừa chạy.</p>
+          <div id="olap-result" class="table-wrap"></div>
+          <pre id="olap-sql" class="sql"></pre>
+        </article>
+        <article class="card">
+          <h2>Drill-across hai fact</h2>
+          <p class="hint">Không nối thẳng fact kết quả với fact chuyên cần. Mỗi fact được gộp về hạt mã học sinh × môn, rồi FULL OUTER JOIN.</p>
+          <div class="row-form">
+            <select id="ax-lop"><option value="">Mọi lớp hiện tại</option></select>
+            <select id="ax-mon"><option value="">Mọi môn</option></select>
+            <button id="btn-across">Chạy drill-across</button>
+          </div>
+          <p id="across-note" class="hint"></p>
+          <div id="fanout" class="callout"></div>
+          <div id="across-table" class="table-wrap"></div>
+        </article>
+      </section>
+
+      <section id="page-chat" class="page">
+        <header class="page-head">
+          <div>
+            <p class="kicker">Data quality gate và audit count</p>
+            <h1>Chất lượng và tầng tổng hợp</h1>
+          </div>
+          <button id="btn-bench" class="ghost">Đo summary và fact</button>
+          <button id="btn-reset" class="warn">Làm lại dữ liệu mẫu</button>
+        </header>
+        <div class="kpis" id="q-kpis"></div>
+        <p id="bench-note" class="hint"></p>
+        <article class="card">
+          <h2>Các mẻ ETL</h2>
+          <div id="q-batch" class="table-wrap"></div>
+        </article>
+        <article class="card">
+          <h2>Bản ghi bị loại</h2>
+          <div id="q-reject" class="table-wrap"></div>
+        </article>
+        <article class="card">
+          <h2>EXPLAIN QUERY PLAN</h2>
+          <p class="hint">Index trên khóa ngoại là B-Tree. Cột <code>loai_bai</code> ít giá trị: giáo trình dùng bitmap index trên Oracle; SQLite chỉ có B-Tree nên nhóm vẫn đánh index để kế hoạch lọc đúng cột đó. Script PostgreSQL materialized view nằm ở <code>sql/05_postgres_materialized.sql</code>.</p>
+          <pre id="q-plan" class="sql"></pre>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="/static/app.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="kien-truc" name="Kiến trúc">
+    <mxGraphModel dx="1400" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="web" value="&lt;b&gt;Web Frontend&lt;/b&gt;&lt;br&gt;Streaming Simulator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=14;fontColor=#1C2430;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="220" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="oltp" value="&lt;b&gt;OLTP&lt;/b&gt;&lt;br&gt;Nguồn tác nghiệp" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E8F0F6;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=14;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="360" y="80" width="220" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="etl" value="&lt;b&gt;ETL&lt;/b&gt;&lt;br&gt;Cổng chất lượng&lt;br&gt;SCD Type 2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8F1DE;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=14;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="680" y="70" width="220" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="dw" value="&lt;b&gt;Kho SQL Server&lt;/b&gt;&lt;br&gt;DW_QuanLyHocTap&lt;br&gt;Fact Constellation" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E7F0EA;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=14;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="70" width="240" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="mv" value="&lt;b&gt;Tầng tổng hợp&lt;/b&gt;&lt;br&gt;Indexed view&lt;br&gt;iv_diem_theo_mon_thang&lt;br&gt;iv_chuyen_can_theo_lop_tuan" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="80" y="360" width="280" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="ssas" value="&lt;b&gt;Khối SSAS&lt;/b&gt;&lt;br&gt;Hai measure group&lt;br&gt;Hierarchy thời gian,&lt;br&gt;học sinh, học thuật" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8F1DE;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="500" y="360" width="280" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="phan" value="&lt;b&gt;Phân tích&lt;/b&gt;&lt;br&gt;Dashboard web&lt;br&gt;Excel PivotTable" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E8F0F6;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;fontColor=#1C2430;" vertex="1" parent="1">
+          <mxGeometry x="920" y="360" width="280" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1C2430;strokeWidth=1.5;fontFamily=Times New Roman;" edge="1" parent="1" source="web" target="oltp">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1C2430;strokeWidth=1.5;" edge="1" parent="1" source="oltp" target="etl">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1C2430;strokeWidth=1.5;" edge="1" parent="1" source="etl" target="dw">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.5;" edge="1" parent="1" source="dw" target="mv">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.5;" edge="1" parent="1" source="dw" target="ssas">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.5;" edge="1" parent="1" source="dw" target="phan">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
