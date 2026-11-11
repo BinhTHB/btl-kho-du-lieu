@@ -1,0 +1,248 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DataSourceView xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ddl2="http://schemas.microsoft.com/analysisservices/2003/engine/2" xmlns:ddl2_2="http://schemas.microsoft.com/analysisservices/2003/engine/2/2" xmlns:ddl100_100="http://schemas.microsoft.com/analysisservices/2008/engine/100/100" xmlns:ddl200="http://schemas.microsoft.com/analysisservices/2010/engine/200" xmlns:ddl200_200="http://schemas.microsoft.com/analysisservices/2010/engine/200/200" xmlns:ddl300="http://schemas.microsoft.com/analysisservices/2011/engine/300" xmlns:ddl300_300="http://schemas.microsoft.com/analysisservices/2011/engine/300/300" xmlns:ddl400="http://schemas.microsoft.com/analysisservices/2012/engine/400" xmlns:ddl400_400="http://schemas.microsoft.com/analysisservices/2012/engine/400/400" xmlns:ddl500="http://schemas.microsoft.com/analysisservices/2013/engine/500" xmlns:ddl500_500="http://schemas.microsoft.com/analysisservices/2013/engine/500/500" xmlns:dwd="http://schemas.microsoft.com/DataWarehouse/Designer/1.0" dwd:design-time-name="e30270ed-5d33-4964-9ada-84d0d4cd3203" xmlns="http://schemas.microsoft.com/analysisservices/2003/engine">
+  <ID>DW_QuanLyHocTap</ID>
+  <Name>DW_QuanLyHocTap</Name>
+  <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+  <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+  <Annotations>
+    <Annotation><Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:ShowFriendlyNames</Name><Value>true</Value></Annotation>
+    <Annotation><Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:CurrentLayout</Name><Value>_ALL_TABLES_</Value></Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:Layouts</Name>
+      <Value>
+        <Layouts xmlns="">
+          <Diagram>
+            <Name>_ALL_TABLES_</Name>
+            <DiagramLayout>
+              <dds>
+                <diagram fontclsid="{0BE35203-8F91-11CE-9DE3-00AA004BB851}" mouseiconclsid="{0BE35204-8F91-11CE-9DE3-00AA004BB851}" defaultlayout="MSDDS.Rectilinear" defaultlineroute="MSDDS.Rectilinear" version="7" nextobject="16" scale="100" pagebreakanchorx="0" pagebreakanchory="0" pagebreaksizex="0" pagebreaksizey="0" scrollleft="0" scrolltop="0" gridx="150" gridy="150" marginx="5000" marginy="5000" zoom="80" x="23000" y="12000" backcolor="16119285" defaultpersistence="2" PrintPageNumbersMode="3" PrintMarginTop="0" PrintMarginBottom="635" PrintMarginLeft="0" PrintMarginRight="0" marqueeselectionmode="0" mousepointer="0" snaptogrid="0" autotypeannotation="1" showscrollbars="1" viewpagebreaks="0" donotforceconnectorsbehindshapes="0" backpictureclsid="{00000000-0000-0000-0000-000000000000}">
+                  <font><ddsxmlobjectstreamwrapper binary="010000009001153e0100065461686f6d61" /></font>
+                  <mouseicon><ddsxmlobjectstreamwrapper binary="6c74000000000000" /></mouseicon>
+                </diagram>
+                <layoutmanager><ddsxmlobj /></layoutmanager>
+                <ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="dim_thoi_gian" left="400" top="400" logicalid="1" controlid="1" masterid="0" hint1="0" hint2="0" width="3600" height="3400" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobjectstreaminitwrapper binary="0e000000100e0000480d0000" /></control>
+                  <layoutobject><ddsxmlobj><property name="LogicalObject" value="dim_thoi_gian" vartype="8" /></ddsxmlobj></layoutobject>
+                  <shape groupshapeid="0" groupnode="0" />
+                </ddscontrol>
+<ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="dim_hoc_sinh" left="4600" top="400" logicalid="2" controlid="2" masterid="0" hint1="0" hint2="0" width="3600" height="3400" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobjectstreaminitwrapper binary="0e000000100e0000480d0000" /></control>
+                  <layoutobject><ddsxmlobj><property name="LogicalObject" value="dim_hoc_sinh" vartype="8" /></ddsxmlobj></layoutobject>
+                  <shape groupshapeid="0" groupnode="0" />
+                </ddscontrol>
+<ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="dim_mon_hoc" left="8800" top="400" logicalid="3" controlid="3" masterid="0" hint1="0" hint2="0" width="3600" height="3400" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobjectstreaminitwrapper binary="0e000000100e0000480d0000" /></control>
+                  <layoutobject><ddsxmlobj><property name="LogicalObject" value="dim_mon_hoc" vartype="8" /></ddsxmlobj></layoutobject>
+                  <shape groupshapeid="0" groupnode="0" />
+                </ddscontrol>
+<ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="dim_de_thi" left="13000" top="400" logicalid="4" controlid="4" masterid="0" hint1="0" hint2="0" width="3600" height="3400" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobjectstreaminitwrapper binary="0e000000100e0000480d0000" /></control>
+                  <layoutobject><ddsxmlobj><property name="LogicalObject" value="dim_de_thi" vartype="8" /></ddsxmlobj></layoutobject>
+                  <shape groupshapeid="0" groupnode="0" />
+                </ddscontrol>
+<ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="dim_bai_hoc" left="17200" top="400" logicalid="5" controlid="5" masterid="0" hint1="0" hint2="0" width="3600" height="3400" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobjectstreaminitwrapper binary="0e000000100e0000480d0000" /></control>
+                  <layoutobject><ddsxmlobj><property name="LogicalObject" value="dim_bai_hoc" vartype="8" /></ddsxmlobj></layoutobject>
+                  <shape groupshapeid="0" groupnode="0" />
+                </ddscontrol>
+<ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="fact_ket_qua_thi" left="2800" top="5600" logicalid="6" controlid="6" masterid="0" hint1="0" hint2="0" width="3800" height="4600" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobjectstreaminitwrapper binary="0e000000d80e0000f8110000" /></control>
+                  <layoutobject><ddsxmlobj><property name="LogicalObject" value="fact_ket_qua_thi" vartype="8" /></ddsxmlobj></layoutobject>
+                  <shape groupshapeid="0" groupnode="0" />
+                </ddscontrol>
+<ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="fact_chuyen_can" left="11200" top="5600" logicalid="7" controlid="7" masterid="0" hint1="0" hint2="0" width="3800" height="4600" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobjectstreaminitwrapper binary="0e000000d80e0000f8110000" /></control>
+                  <layoutobject><ddsxmlobj><property name="LogicalObject" value="fact_chuyen_can" vartype="8" /></ddsxmlobj></layoutobject>
+                  <shape groupshapeid="0" groupnode="0" />
+                </ddscontrol>
+<ddscontrol controlprogid="MSDDS.Polyline.080.1" left="4700" top="3800" logicalid="8" controlid="8" masterid="0" hint1="0" hint2="0" width="1700" height="1800" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobj><polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" /></ddsxmlobj></control>
+                  <layoutobject><ddsxmlobj>
+                      <property name="LogicalObject" value="dataSet.Relations[FK_exam_hs]" vartype="8" />
+                      <property name="Virtual" value="0" vartype="11" />
+                      <property name="VisibleAP" value="0" vartype="3" />
+                  </ddsxmlobj></layoutobject>
+                  <connector lineroutestyle="MSDDS.Rectilinear" sourceid="2" destid="6" sourceattachpoint="4" destattachpoint="5" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+                    <point x="6400" y="3800" />
+                    <point x="4700" y="5600" />
+                  </connector>
+                </ddscontrol>
+<ddscontrol controlprogid="MSDDS.Polyline.080.1" left="2200" top="3800" logicalid="9" controlid="9" masterid="0" hint1="0" hint2="0" width="2500" height="1800" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobj><polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" /></ddsxmlobj></control>
+                  <layoutobject><ddsxmlobj>
+                      <property name="LogicalObject" value="dataSet.Relations[FK_exam_date]" vartype="8" />
+                      <property name="Virtual" value="0" vartype="11" />
+                      <property name="VisibleAP" value="0" vartype="3" />
+                  </ddsxmlobj></layoutobject>
+                  <connector lineroutestyle="MSDDS.Rectilinear" sourceid="1" destid="6" sourceattachpoint="4" destattachpoint="5" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+                    <point x="2200" y="3800" />
+                    <point x="4700" y="5600" />
+                  </connector>
+                </ddscontrol>
+<ddscontrol controlprogid="MSDDS.Polyline.080.1" left="4700" top="3800" logicalid="10" controlid="10" masterid="0" hint1="0" hint2="0" width="5900" height="1800" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobj><polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" /></ddsxmlobj></control>
+                  <layoutobject><ddsxmlobj>
+                      <property name="LogicalObject" value="dataSet.Relations[FK_exam_mon]" vartype="8" />
+                      <property name="Virtual" value="0" vartype="11" />
+                      <property name="VisibleAP" value="0" vartype="3" />
+                  </ddsxmlobj></layoutobject>
+                  <connector lineroutestyle="MSDDS.Rectilinear" sourceid="3" destid="6" sourceattachpoint="4" destattachpoint="5" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+                    <point x="10600" y="3800" />
+                    <point x="4700" y="5600" />
+                  </connector>
+                </ddscontrol>
+<ddscontrol controlprogid="MSDDS.Polyline.080.1" left="4700" top="3800" logicalid="11" controlid="11" masterid="0" hint1="0" hint2="0" width="10100" height="1800" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobj><polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" /></ddsxmlobj></control>
+                  <layoutobject><ddsxmlobj>
+                      <property name="LogicalObject" value="dataSet.Relations[FK_exam_de]" vartype="8" />
+                      <property name="Virtual" value="0" vartype="11" />
+                      <property name="VisibleAP" value="0" vartype="3" />
+                  </ddsxmlobj></layoutobject>
+                  <connector lineroutestyle="MSDDS.Rectilinear" sourceid="4" destid="6" sourceattachpoint="4" destattachpoint="5" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+                    <point x="14800" y="3800" />
+                    <point x="4700" y="5600" />
+                  </connector>
+                </ddscontrol>
+<ddscontrol controlprogid="MSDDS.Polyline.080.1" left="6400" top="3800" logicalid="12" controlid="12" masterid="0" hint1="0" hint2="0" width="6700" height="1800" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobj><polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" /></ddsxmlobj></control>
+                  <layoutobject><ddsxmlobj>
+                      <property name="LogicalObject" value="dataSet.Relations[FK_cc_hs]" vartype="8" />
+                      <property name="Virtual" value="0" vartype="11" />
+                      <property name="VisibleAP" value="0" vartype="3" />
+                  </ddsxmlobj></layoutobject>
+                  <connector lineroutestyle="MSDDS.Rectilinear" sourceid="2" destid="7" sourceattachpoint="4" destattachpoint="5" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+                    <point x="6400" y="3800" />
+                    <point x="13100" y="5600" />
+                  </connector>
+                </ddscontrol>
+<ddscontrol controlprogid="MSDDS.Polyline.080.1" left="2200" top="3800" logicalid="13" controlid="13" masterid="0" hint1="0" hint2="0" width="10900" height="1800" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobj><polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" /></ddsxmlobj></control>
+                  <layoutobject><ddsxmlobj>
+                      <property name="LogicalObject" value="dataSet.Relations[FK_cc_date]" vartype="8" />
+                      <property name="Virtual" value="0" vartype="11" />
+                      <property name="VisibleAP" value="0" vartype="3" />
+                  </ddsxmlobj></layoutobject>
+                  <connector lineroutestyle="MSDDS.Rectilinear" sourceid="1" destid="7" sourceattachpoint="4" destattachpoint="5" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+                    <point x="2200" y="3800" />
+                    <point x="13100" y="5600" />
+                  </connector>
+                </ddscontrol>
+<ddscontrol controlprogid="MSDDS.Polyline.080.1" left="10600" top="3800" logicalid="14" controlid="14" masterid="0" hint1="0" hint2="0" width="2500" height="1800" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobj><polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" /></ddsxmlobj></control>
+                  <layoutobject><ddsxmlobj>
+                      <property name="LogicalObject" value="dataSet.Relations[FK_cc_mon]" vartype="8" />
+                      <property name="Virtual" value="0" vartype="11" />
+                      <property name="VisibleAP" value="0" vartype="3" />
+                  </ddsxmlobj></layoutobject>
+                  <connector lineroutestyle="MSDDS.Rectilinear" sourceid="3" destid="7" sourceattachpoint="4" destattachpoint="5" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+                    <point x="10600" y="3800" />
+                    <point x="13100" y="5600" />
+                  </connector>
+                </ddscontrol>
+<ddscontrol controlprogid="MSDDS.Polyline.080.1" left="13100" top="3800" logicalid="15" controlid="15" masterid="0" hint1="0" hint2="0" width="5900" height="1800" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+                  <control><ddsxmlobj><polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" /></ddsxmlobj></control>
+                  <layoutobject><ddsxmlobj>
+                      <property name="LogicalObject" value="dataSet.Relations[FK_cc_bai]" vartype="8" />
+                      <property name="Virtual" value="0" vartype="11" />
+                      <property name="VisibleAP" value="0" vartype="3" />
+                  </ddsxmlobj></layoutobject>
+                  <connector lineroutestyle="MSDDS.Rectilinear" sourceid="5" destid="7" sourceattachpoint="4" destattachpoint="5" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+                    <point x="19000" y="3800" />
+                    <point x="13100" y="5600" />
+                  </connector>
+                </ddscontrol>
+              </dds>
+            </DiagramLayout>
+            <ShowRelationshipNames>False</ShowRelationshipNames>
+            <UseDiagramDefaultLayout>False</UseDiagramDefaultLayout>
+            <DiagramViewPortLeft>0</DiagramViewPortLeft>
+            <DiagramViewPortTop>0</DiagramViewPortTop>
+            <DiagramBoundingLeft>0</DiagramBoundingLeft>
+            <DiagramBoundingTop>0</DiagramBoundingTop>
+            <DiagramZoom>80</DiagramZoom>
+          </Diagram>
+        </Layouts>
+      </Value>
+    </Annotation>
+    <Annotation><Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:ShowRelationshipNames</Name><Value>false</Value></Annotation>
+    <Annotation><Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:UseDiagramDefaultLayout</Name><Value>false</Value></Annotation>
+    <Annotation><Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramZoom</Name><Value>80</Value></Annotation>
+  </Annotations>
+  <DataSourceID>DW_QuanLyHocTap</DataSourceID>
+  <Schema>
+    <xs:schema id="DW_QuanLyHocTap" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop">
+      <xs:element name="DW_QuanLyHocTap" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:design-time-name="a65435fe-168d-4ab2-9c97-f022dc44228a">
+        <xs:complexType>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="dim_thoi_gian" msprop:DbTableName="dim_thoi_gian" msprop:design-time-name="e128454d-bc17-416d-9b0f-49a2f10306df" msprop:TableType="Table" msprop:DbSchemaName="dbo" msprop:FriendlyName="dim_thoi_gian"><xs:complexType><xs:sequence><xs:element name="date_key" msprop:design-time-name="dc079f89-6cae-435a-a4b4-5a9c37177488" type="xs:int" />
+<xs:element name="ngay" msprop:design-time-name="8176de84-1f39-4397-a03c-f0fa6ca1f4fa" type="xs:date" minOccurs="0" />
+<xs:element name="thu" msprop:design-time-name="feb46a13-a912-4aef-a9d2-7255f2a944dd"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="tuan" msprop:design-time-name="9ad6aad1-fd2a-40b7-ae8b-00c19efb0c07" type="xs:int" />
+<xs:element name="thang" msprop:design-time-name="b4d5c90e-b2e7-43b1-a9f8-35c82e1d4932" type="xs:int" />
+<xs:element name="ten_thang" msprop:design-time-name="d13adab0-be2e-4745-be0a-e2a28d654811"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="quy" msprop:design-time-name="cd73e19a-e66f-4fb0-a1fa-1e0d708abcd3" type="xs:int" />
+<xs:element name="nam" msprop:design-time-name="2c4238b2-071a-46e9-987e-0ec030c374c2" type="xs:int" />
+<xs:element name="hoc_ky" msprop:design-time-name="4722a1ee-eb9b-458e-a715-40970b08e2bb"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="10" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="nam_hoc" msprop:design-time-name="786e8296-81c0-4351-93c4-b9f89757bb5c"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="12" /></xs:restriction></xs:simpleType></xs:element></xs:sequence></xs:complexType></xs:element>
+<xs:element name="dim_hoc_sinh" msprop:DbTableName="dim_hoc_sinh" msprop:design-time-name="81992297-29f3-4e09-b713-fdc9932903a8" msprop:TableType="Table" msprop:DbSchemaName="dbo" msprop:FriendlyName="dim_hoc_sinh"><xs:complexType><xs:sequence><xs:element name="hoc_sinh_key" msprop:design-time-name="acd9a9bd-2dd4-40dd-bd32-c0e50f40ebd6" type="xs:int" />
+<xs:element name="ma_hoc_sinh" msprop:design-time-name="4c72de41-a919-43a8-b067-f3320f783d1b"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="30" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="ho_ten" msprop:design-time-name="25080a24-ecef-4770-a73d-94f0bd23551a"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="120" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="ngay_sinh" msprop:design-time-name="0b4ccc1c-bd02-4972-9ad2-243cc461a415" type="xs:date" minOccurs="0" />
+<xs:element name="lop" msprop:design-time-name="03acf908-088e-4d73-abe5-1c62c5b452f0"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="trang_thai_hoc_vu" msprop:design-time-name="56b01778-c61d-45b3-82ee-27fbc1f610b5"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="40" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="ly_do" msprop:design-time-name="7c654d94-e5e0-47ab-a4f4-d14120965775"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="40" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="start_date" msprop:design-time-name="7c05fd74-b947-4571-8583-96223b74ac91" type="xs:dateTime" />
+<xs:element name="end_date" msprop:design-time-name="c9c1bd64-ebcf-42aa-a8e3-3dcb4442df1c" type="xs:dateTime" />
+<xs:element name="is_current" msprop:design-time-name="4cd23af1-c341-4cfd-bae8-cbe0841ef402" type="xs:unsignedByte" />
+<xs:element name="version_no" msprop:design-time-name="8b571325-b942-400b-aa70-b182b4fa5c59" type="xs:int" /></xs:sequence></xs:complexType></xs:element>
+<xs:element name="dim_mon_hoc" msprop:DbTableName="dim_mon_hoc" msprop:design-time-name="e640f344-b95f-44c2-b94d-e2a86e2d5f86" msprop:TableType="Table" msprop:DbSchemaName="dbo" msprop:FriendlyName="dim_mon_hoc"><xs:complexType><xs:sequence><xs:element name="mon_hoc_key" msprop:design-time-name="e5ceed2a-b3eb-4b1c-b219-1c65becae697" type="xs:int" />
+<xs:element name="ma_mon" msprop:design-time-name="47d03c47-9182-4bb7-83db-bf5447582b23"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="ten_mon" msprop:design-time-name="7cc08eb8-529f-4cfc-89c9-8f1100974fc9"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="120" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="so_tin_chi" msprop:design-time-name="78b080ff-9eda-4136-a115-da34e1596994" type="xs:int" />
+<xs:element name="khoa" msprop:design-time-name="ec7b231d-b75c-49c7-a512-5b04edbc1da2"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="80" /></xs:restriction></xs:simpleType></xs:element></xs:sequence></xs:complexType></xs:element>
+<xs:element name="dim_de_thi" msprop:DbTableName="dim_de_thi" msprop:design-time-name="586cc40f-5102-4eb9-82d0-b8c45099ea59" msprop:TableType="Table" msprop:DbSchemaName="dbo" msprop:FriendlyName="dim_de_thi"><xs:complexType><xs:sequence><xs:element name="de_thi_key" msprop:design-time-name="b49f5bd5-f598-44e4-ad63-ae111c4fb937" type="xs:int" />
+<xs:element name="ma_de" msprop:design-time-name="8ec6cd37-576e-4f47-b1bc-e7dd364423db"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="ten_de" msprop:design-time-name="227a20e9-e0a7-4c87-8fe4-6f959a701bdb"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="200" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="loai" msprop:design-time-name="feb6b693-ff15-4f64-8312-31bb4bdc2583"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="do_kho" msprop:design-time-name="6c66402f-ce52-41c6-9132-7eeb1cd9270a"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="so_cau" msprop:design-time-name="0f461331-e7f9-4fc9-98d3-47da0fa50b62" type="xs:int" />
+<xs:element name="ma_mon" msprop:design-time-name="670a50af-d202-4ccc-abff-3906d3468c10"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element></xs:sequence></xs:complexType></xs:element>
+<xs:element name="dim_bai_hoc" msprop:DbTableName="dim_bai_hoc" msprop:design-time-name="4c7fbe5f-b550-481a-bacc-3ac1d3cd7f19" msprop:TableType="Table" msprop:DbSchemaName="dbo" msprop:FriendlyName="dim_bai_hoc"><xs:complexType><xs:sequence><xs:element name="bai_hoc_key" msprop:design-time-name="19591fba-f4c3-46bf-921e-80a2bc58753a" type="xs:int" />
+<xs:element name="ma_bai" msprop:design-time-name="55f99d32-a03f-4f1d-a699-3ee5b004bbeb"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="ten_bai" msprop:design-time-name="4c25bc04-b06b-4140-98a4-66c3c78fc3ec"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="200" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="loai_noi_dung" msprop:design-time-name="93e90a0b-8549-483b-a559-9f70f091008c"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element>
+<xs:element name="thoi_luong_phut" msprop:design-time-name="d9e7fe61-d7fe-4c7f-85f4-3bd3780385cf" type="xs:int" />
+<xs:element name="ma_mon" msprop:design-time-name="e4e2a7ae-06ba-45c4-a190-018f048d5496"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element></xs:sequence></xs:complexType></xs:element>
+<xs:element name="fact_ket_qua_thi" msprop:DbTableName="fact_ket_qua_thi" msprop:design-time-name="b7af24ad-c6ff-46c2-9e62-30536980f717" msprop:TableType="Table" msprop:DbSchemaName="dbo" msprop:FriendlyName="fact_ket_qua_thi"><xs:complexType><xs:sequence><xs:element name="fact_id" msprop:design-time-name="596ec8c1-5ab7-475a-9bf8-6d7e6b873a32" type="xs:int" />
+<xs:element name="lan_lam_id" msprop:design-time-name="f1e1c840-da20-4818-acea-dabb39408e1a" type="xs:int" />
+<xs:element name="hoc_sinh_key" msprop:design-time-name="289e0133-8df9-45b4-8496-5a7420218b64" type="xs:int" />
+<xs:element name="date_key" msprop:design-time-name="94fcec50-5bdc-4e6c-a5f0-95fef283cb44" type="xs:int" />
+<xs:element name="mon_hoc_key" msprop:design-time-name="b10d63d0-c889-4d50-aa7c-e9396704e27b" type="xs:int" />
+<xs:element name="de_thi_key" msprop:design-time-name="6afcc191-b994-4c53-a7c7-d0fcc5a15116" type="xs:int" />
+<xs:element name="diem_so" msprop:design-time-name="ed4b30bb-c3d2-48f2-95ac-e0953d113eeb" type="xs:decimal" />
+<xs:element name="so_cau_dung" msprop:design-time-name="86807ff5-4d00-4f1d-a0aa-920ccc144645" type="xs:int" />
+<xs:element name="so_cau_sai" msprop:design-time-name="95a54a64-b7ba-4c1c-b4c2-4bc9b670d36e" type="xs:int" />
+<xs:element name="tong_so_cau" msprop:design-time-name="ad598664-0dba-4cf4-820b-18419c68d061" type="xs:int" />
+<xs:element name="ty_le_dung" msprop:design-time-name="4289b36a-2ae1-4261-b2f3-975e2f64931e" type="xs:decimal" />
+<xs:element name="thoi_gian_lam_giay" msprop:design-time-name="860c37f4-c7bd-4e46-8e42-d9e6db290e80" type="xs:int" />
+<xs:element name="loai_bai" msprop:design-time-name="15f4a992-277f-4f82-9d2e-fc38665da722"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element></xs:sequence></xs:complexType></xs:element>
+<xs:element name="fact_chuyen_can" msprop:DbTableName="fact_chuyen_can" msprop:design-time-name="43095b02-cd3f-41eb-b5f8-b6eafe0e4150" msprop:TableType="Table" msprop:DbSchemaName="dbo" msprop:FriendlyName="fact_chuyen_can"><xs:complexType><xs:sequence><xs:element name="fact_id" msprop:design-time-name="0ed3d187-c648-4b2e-a301-e11577579294" type="xs:int" />
+<xs:element name="phien_hoc_id" msprop:design-time-name="3d2381a1-1f46-4ad3-92b6-2d3ede7e473c" type="xs:int" />
+<xs:element name="hoc_sinh_key" msprop:design-time-name="c79bbf8a-41a7-4a74-a7ed-d506822505c0" type="xs:int" />
+<xs:element name="date_key" msprop:design-time-name="96000ffe-4976-47d0-b681-84649d60095b" type="xs:int" />
+<xs:element name="mon_hoc_key" msprop:design-time-name="3206205b-f3d9-49f0-aeca-14c4d46d7bd7" type="xs:int" />
+<xs:element name="bai_hoc_key" msprop:design-time-name="4828baa0-6d5e-4382-8794-45ddfc5c7a85" type="xs:int" />
+<xs:element name="thoi_luong_phut" msprop:design-time-name="5f62d425-2a4e-45c8-bf53-0fb4a218cfc4" type="xs:decimal" />
+<xs:element name="so_video_da_xem" msprop:design-time-name="87311e79-4251-437e-ae75-42657737ced4" type="xs:int" />
+<xs:element name="so_tuong_tac" msprop:design-time-name="ee1bca98-ca16-42ba-bede-d17aa9595374" type="xs:int" />
+<xs:element name="diem_chuyen_can" msprop:design-time-name="847e771e-8cd1-47e1-b9fb-5b01dbeb5a1c" type="xs:decimal" />
+<xs:element name="loai_noi_dung" msprop:design-time-name="8930270f-64b0-4660-9bab-3c2d41e85468"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="20" /></xs:restriction></xs:simpleType></xs:element></xs:sequence></xs:complexType></xs:element>
+          </xs:choice>
+        </xs:complexType>
+        <xs:unique name="Constraint1" msdata:PrimaryKey="true"><xs:selector xpath=".//dim_thoi_gian" /><xs:field xpath="date_key" /></xs:unique><xs:unique name="dim_hoc_sinh_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true"><xs:selector xpath=".//dim_hoc_sinh" /><xs:field xpath="hoc_sinh_key" /></xs:unique><xs:unique name="dim_mon_hoc_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true"><xs:selector xpath=".//dim_mon_hoc" /><xs:field xpath="mon_hoc_key" /></xs:unique><xs:unique name="dim_de_thi_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true"><xs:selector xpath=".//dim_de_thi" /><xs:field xpath="de_thi_key" /></xs:unique><xs:unique name="dim_bai_hoc_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true"><xs:selector xpath=".//dim_bai_hoc" /><xs:field xpath="bai_hoc_key" /></xs:unique><xs:unique name="fact_ket_qua_thi_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true"><xs:selector xpath=".//fact_ket_qua_thi" /><xs:field xpath="fact_id" /></xs:unique><xs:unique name="fact_chuyen_can_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true"><xs:selector xpath=".//fact_chuyen_can" /><xs:field xpath="fact_id" /></xs:unique>
+        <xs:keyref name="FK_exam_hs" refer="dim_hoc_sinh_Constraint1"><xs:selector xpath=".//fact_ket_qua_thi" /><xs:field xpath="hoc_sinh_key" /></xs:keyref><xs:keyref name="FK_exam_date" refer="Constraint1"><xs:selector xpath=".//fact_ket_qua_thi" /><xs:field xpath="date_key" /></xs:keyref><xs:keyref name="FK_exam_mon" refer="dim_mon_hoc_Constraint1"><xs:selector xpath=".//fact_ket_qua_thi" /><xs:field xpath="mon_hoc_key" /></xs:keyref><xs:keyref name="FK_exam_de" refer="dim_de_thi_Constraint1"><xs:selector xpath=".//fact_ket_qua_thi" /><xs:field xpath="de_thi_key" /></xs:keyref><xs:keyref name="FK_cc_hs" refer="dim_hoc_sinh_Constraint1"><xs:selector xpath=".//fact_chuyen_can" /><xs:field xpath="hoc_sinh_key" /></xs:keyref><xs:keyref name="FK_cc_date" refer="Constraint1"><xs:selector xpath=".//fact_chuyen_can" /><xs:field xpath="date_key" /></xs:keyref><xs:keyref name="FK_cc_mon" refer="dim_mon_hoc_Constraint1"><xs:selector xpath=".//fact_chuyen_can" /><xs:field xpath="mon_hoc_key" /></xs:keyref><xs:keyref name="FK_cc_bai" refer="dim_bai_hoc_Constraint1"><xs:selector xpath=".//fact_chuyen_can" /><xs:field xpath="bai_hoc_key" /></xs:keyref>
+      </xs:element>
+    </xs:schema>
+    <DW_QuanLyHocTap xmlns="" />
+  </Schema>
+</DataSourceView>

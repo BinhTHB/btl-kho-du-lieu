@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37628.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D2ABAB84-BF74-430A-B69E-9DC6D40DDA17}") = "HocTapOLAP", "HocTapOLAP\HocTapOLAP.dwproj", "{E277B645-C35D-BFBC-A40A-40F497BCA979}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Development|Default = Development|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E277B645-C35D-BFBC-A40A-40F497BCA979}.Development|Default.ActiveCfg = Development
+		{E277B645-C35D-BFBC-A40A-40F497BCA979}.Development|Default.Build.0 = Development
+		{E277B645-C35D-BFBC-A40A-40F497BCA979}.Development|Default.Deploy.0 = Development
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {64D7C91D-6E6D-44F8-9B74-A5B0724E6203}
+	EndGlobalSection
+EndGlobal
