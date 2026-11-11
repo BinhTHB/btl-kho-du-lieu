@@ -3,4 +3,6 @@ __pycache__/
 *.pyc
 data/*.db
 data/*.db-*
+data/*.mdf
+data/*.ldf
 back-up-docx/

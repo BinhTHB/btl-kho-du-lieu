@@ -265,10 +265,20 @@ def _master():
 
 
 def _ensure_database(name: str) -> None:
+    data_dir = ROOT / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    mdf = str(data_dir / f"{name}.mdf")
+    ldf = str(data_dir / f"{name}_log.ldf")
     master = _master()
     try:
         master.cursor().execute(
-            f"IF DB_ID(N'{name}') IS NULL CREATE DATABASE [{name}] COLLATE Vietnamese_CI_AS"
+            f"""
+            IF DB_ID(N'{name}') IS NULL
+            CREATE DATABASE [{name}]
+            ON PRIMARY (NAME = [{name}], FILENAME = N'{mdf}')
+            LOG ON (NAME = [{name}_log], FILENAME = N'{ldf}')
+            COLLATE Vietnamese_CI_AS
+            """
         )
     finally:
         master.close()
