@@ -5,4 +5,5 @@ data/*.db
 data/*.db-*
 data/*.mdf
 data/*.ldf
+HocTapOLAP/.vs/
 back-up-docx/

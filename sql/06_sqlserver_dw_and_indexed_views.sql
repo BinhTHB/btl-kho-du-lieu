@@ -21,17 +21,8 @@ BEGIN
 END
 GO
 
--- Keep the files in the project data folder, not the Windows user profile.
-CREATE DATABASE OLTP_QuanLyHocTap
-ON PRIMARY (
-    NAME = OLTP_QuanLyHocTap,
-    FILENAME = N'E:\Hoc-Tap\Kho Dữ Liệu\BTL_KhoDL\data\OLTP_QuanLyHocTap.mdf'
-)
-LOG ON (
-    NAME = OLTP_QuanLyHocTap_log,
-    FILENAME = N'E:\Hoc-Tap\Kho Dữ Liệu\BTL_KhoDL\data\OLTP_QuanLyHocTap_log.ldf'
-)
-COLLATE Vietnamese_CI_AS;
+-- Use the instance data directory so this script runs on any machine.
+CREATE DATABASE OLTP_QuanLyHocTap COLLATE Vietnamese_CI_AS;
 GO
 
 USE OLTP_QuanLyHocTap;
@@ -131,17 +122,8 @@ BEGIN
 END
 GO
 
--- Keep the files in the project data folder, not the Windows user profile.
-CREATE DATABASE DW_QuanLyHocTap
-ON PRIMARY (
-    NAME = DW_QuanLyHocTap,
-    FILENAME = N'E:\Hoc-Tap\Kho Dữ Liệu\BTL_KhoDL\data\DW_QuanLyHocTap.mdf'
-)
-LOG ON (
-    NAME = DW_QuanLyHocTap_log,
-    FILENAME = N'E:\Hoc-Tap\Kho Dữ Liệu\BTL_KhoDL\data\DW_QuanLyHocTap_log.ldf'
-)
-COLLATE Vietnamese_CI_AS;
+-- Use the instance data directory so this script runs on any machine.
+CREATE DATABASE DW_QuanLyHocTap COLLATE Vietnamese_CI_AS;
 GO
 
 USE DW_QuanLyHocTap;

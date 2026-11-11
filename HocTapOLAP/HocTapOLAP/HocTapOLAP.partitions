@@ -9,9 +9,10 @@
           <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
           <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
           <State>Unprocessed</State>
-          <Source xsi:type="QueryBinding" dwd:design-time-name="48360a33-0465-4fe5-9318-f674bed4b34d">
+          <Source xsi:type="TableBinding" dwd:design-time-name="48360a33-0465-4fe5-9318-f674bed4b34d">
             <DataSourceID>DW_QuanLyHocTap</DataSourceID>
-            <QueryDefinition>SELECT * FROM [dbo].[fact_ket_qua_thi]</QueryDefinition>
+            <DbSchemaName>dbo</DbSchemaName>
+            <DbTableName>fact_ket_qua_thi</DbTableName>
           </Source>
           <StorageMode>Molap</StorageMode>
           <CurrentStorageMode>Molap</CurrentStorageMode>
@@ -34,9 +35,10 @@
           <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
           <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
           <State>Unprocessed</State>
-          <Source xsi:type="QueryBinding" dwd:design-time-name="7457de00-fc64-4a14-8935-4c19b7fb582a">
+          <Source xsi:type="TableBinding" dwd:design-time-name="7457de00-fc64-4a14-8935-4c19b7fb582a">
             <DataSourceID>DW_QuanLyHocTap</DataSourceID>
-            <QueryDefinition>SELECT * FROM [dbo].[fact_chuyen_can]</QueryDefinition>
+            <DbSchemaName>dbo</DbSchemaName>
+            <DbTableName>fact_chuyen_can</DbTableName>
           </Source>
           <StorageMode>Molap</StorageMode>
           <CurrentStorageMode>Molap</CurrentStorageMode>
