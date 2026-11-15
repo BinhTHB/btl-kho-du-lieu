@@ -1,47 +1,89 @@
-<mxfile host="app.diagrams.net" type="device">
-  <diagram id="kien-truc" name="Kiến trúc">
-    <mxGraphModel dx="1400" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="800" math="0" shadow="0">
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0" version="24.7.17">
+  <diagram id="kien-truc-monochrome" name="Kien truc he thong">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="760" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
-        <mxCell id="web" value="&lt;b&gt;Web Frontend&lt;/b&gt;&lt;br&gt;Streaming Simulator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=14;fontColor=#1C2430;align=center;" vertex="1" parent="1">
-          <mxGeometry x="40" y="80" width="220" height="90" as="geometry"/>
+
+        <mxCell id="box_web" value="&lt;b&gt;Web Frontend &amp;amp; Simulator&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- Cổng học sinh: làm bài, nộp bài&lt;br&gt;- Cổng học tập: xem video, bài giảng&lt;br&gt;- Cổng học vụ: chuyển lớp, bảo lưu&lt;br&gt;- Bộ sinh luồng giao dịch mô phỏng" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=13;fontColor=#000000;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="280" height="140" as="geometry"/>
         </mxCell>
-        <mxCell id="oltp" value="&lt;b&gt;OLTP&lt;/b&gt;&lt;br&gt;Nguồn tác nghiệp" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E8F0F6;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=14;fontColor=#1C2430;" vertex="1" parent="1">
-          <mxGeometry x="360" y="80" width="220" height="90" as="geometry"/>
+
+        <mxCell id="box_oltp" value="&lt;b&gt;CSDL Tác nghiệp (OLTP 3NF)&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;Database: OLTP_QuanLyHocTap&lt;br&gt;- 8 bảng quan hệ chuẩn hóa 3NF&lt;br&gt;- hoc_sinh, mon_hoc, de_thi, cau_hoi&lt;br&gt;- bai_hoc, lan_lam_bai, phien_hoc&lt;br&gt;- Tối ưu ghi giao dịch nhanh (ACID)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=13;fontColor=#000000;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="420" y="60" width="290" height="140" as="geometry"/>
         </mxCell>
-        <mxCell id="etl" value="&lt;b&gt;ETL&lt;/b&gt;&lt;br&gt;Cổng chất lượng&lt;br&gt;SCD Type 2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8F1DE;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=14;fontColor=#1C2430;" vertex="1" parent="1">
-          <mxGeometry x="680" y="70" width="220" height="110" as="geometry"/>
+
+        <mxCell id="box_etl" value="&lt;b&gt;Đường ống ETL &amp;amp; Cổng chất lượng&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;Module: app/etl.py&lt;br&gt;- Đọc tăng trưởng theo watermark&lt;br&gt;- Data Quality Gate: lọc 7 lỗi logic&lt;br&gt;- Xử lý biến đổi chiều SCD Type 2&lt;br&gt;- Đối soát dòng: Nguồn = Nạp + Loại" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=13;fontColor=#000000;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="810" y="60" width="300" height="140" as="geometry"/>
         </mxCell>
-        <mxCell id="dw" value="&lt;b&gt;Kho SQL Server&lt;/b&gt;&lt;br&gt;DW_QuanLyHocTap&lt;br&gt;Fact Constellation" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E7F0EA;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=14;fontColor=#1C2430;" vertex="1" parent="1">
-          <mxGeometry x="1000" y="70" width="240" height="110" as="geometry"/>
+
+        <mxCell id="box_dw" value="&lt;b&gt;Kho dữ liệu (Data Warehouse)&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;Database: DW_QuanLyHocTap&lt;br&gt;- Lược đồ hình chòm sao (2 Fact, 5 Dim)&lt;br&gt;- Fact: fact_ket_qua_thi, fact_chuyen_can&lt;br&gt;- Dim: thoi_gian, hoc_sinh (SCD2), mon_hoc&lt;br&gt;- Unknown Member (Key = -1)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2;fontFamily=Times New Roman;fontSize=13;fontColor=#000000;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="55" width="320" height="150" as="geometry"/>
         </mxCell>
-        <mxCell id="mv" value="&lt;b&gt;Tầng tổng hợp&lt;/b&gt;&lt;br&gt;Indexed view&lt;br&gt;iv_diem_theo_mon_thang&lt;br&gt;iv_chuyen_can_theo_lop_tuan" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;fontColor=#1C2430;" vertex="1" parent="1">
-          <mxGeometry x="80" y="360" width="280" height="130" as="geometry"/>
+
+        <mxCell id="box_mv" value="&lt;b&gt;Tầng tổng hợp (Summary Layer)&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- Indexed Views (SQL Server):&lt;br&gt;  + iv_diem_theo_mon_thang&lt;br&gt;  + iv_chuyen_can_theo_lop_tuan&lt;br&gt;- WITH SCHEMABINDING &amp;amp; Clustered Index&lt;br&gt;- Tối ưu I/O cho Dashboard" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=13;fontColor=#000000;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="80" y="380" width="340" height="150" as="geometry"/>
         </mxCell>
-        <mxCell id="ssas" value="&lt;b&gt;Khối SSAS&lt;/b&gt;&lt;br&gt;Hai measure group&lt;br&gt;Hierarchy thời gian,&lt;br&gt;học sinh, học thuật" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8F1DE;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;fontColor=#1C2430;" vertex="1" parent="1">
-          <mxGeometry x="500" y="360" width="280" height="130" as="geometry"/>
+
+        <mxCell id="box_ssas" value="&lt;b&gt;Khối phân tích đa chiều (SSAS Cube)&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;Visual Studio SSDT: HocTapOLAP&lt;br&gt;- 2 Measure Groups từ 2 bảng Fact&lt;br&gt;- Hierarchy: Thời gian, Học sinh, Học thuật&lt;br&gt;- Lưu trữ MOLAP &amp;amp; Proactive Caching&lt;br&gt;- Tự động xử lý phân vùng" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=13;fontColor=#000000;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="580" y="380" width="360" height="150" as="geometry"/>
         </mxCell>
-        <mxCell id="phan" value="&lt;b&gt;Phân tích&lt;/b&gt;&lt;br&gt;Dashboard web&lt;br&gt;Excel PivotTable" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E8F0F6;strokeColor=#1C2430;fontFamily=Times New Roman;fontSize=13;fontColor=#1C2430;" vertex="1" parent="1">
-          <mxGeometry x="920" y="360" width="280" height="130" as="geometry"/>
+
+        <mxCell id="box_bi" value="&lt;b&gt;Khai thác &amp;amp; Báo cáo (OLAP / BI)&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- Excel PivotTable: 5 thao tác OLAP&lt;br&gt;  (Roll-up, Drill-down, Slice, Dice, Pivot)&lt;br&gt;- Executive BI Dashboard trên Web&lt;br&gt;- Báo cáo đối soát 2 Fact (Drill-Across)&lt;br&gt;  WITH ... FULL OUTER JOIN" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=13;fontColor=#000000;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="380" width="370" height="150" as="geometry"/>
         </mxCell>
-        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1C2430;strokeWidth=1.5;fontFamily=Times New Roman;" edge="1" parent="1" source="web" target="oltp">
+
+        <mxCell id="flow_1" value="Ghi giao dịch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=12;fontColor=#000000;endArrow=classic;endFill=1;" edge="1" parent="1" source="box_web" target="box_oltp">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1C2430;strokeWidth=1.5;" edge="1" parent="1" source="oltp" target="etl">
+
+        <mxCell id="flow_2" value="Trích xuất" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=12;fontColor=#000000;endArrow=classic;endFill=1;" edge="1" parent="1" source="box_oltp" target="box_etl">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1C2430;strokeWidth=1.5;" edge="1" parent="1" source="etl" target="dw">
+
+        <mxCell id="flow_3" value="Làm sạch &amp;amp; nạp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=12;fontColor=#000000;endArrow=classic;endFill=1;" edge="1" parent="1" source="box_etl" target="box_dw">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.5;" edge="1" parent="1" source="dw" target="mv">
+
+        <mxCell id="flow_dw_mv" value="Đánh chỉ mục Indexed View" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=12;fontColor=#000000;endArrow=classic;endFill=1;exitX=0.15;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="box_dw" target="box_mv">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1258" y="280"/>
+              <mxPoint x="250" y="280"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="flow_dw_ssas" value="DSV &amp;amp; Process Cube" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=12;fontColor=#000000;endArrow=classic;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="box_dw" target="box_ssas">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1370" y="315"/>
+              <mxPoint x="760" y="315"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="flow_dw_bi" value="Truy vấn Drill-Across" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=12;fontColor=#000000;endArrow=classic;endFill=1;exitX=0.85;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="box_dw" target="box_bi">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1482" y="280"/>
+              <mxPoint x="1305" y="280"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="flow_ssas_excel" value="OLE DB / SSAS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.5;dashed=1;fontFamily=Times New Roman;fontSize=12;fontColor=#000000;endArrow=classic;endFill=1;" edge="1" parent="1" source="box_ssas" target="box_bi">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.5;" edge="1" parent="1" source="dw" target="ssas">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#1D6B4A;strokeWidth=1.5;" edge="1" parent="1" source="dw" target="phan">
-          <mxGeometry relative="1" as="geometry"/>
+
+        <mxCell id="flow_mv_web" value="Đọc nhanh WITH (NOEXPAND)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.5;dashed=1;fontFamily=Times New Roman;fontSize=12;fontColor=#000000;endArrow=classic;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="box_mv" target="box_bi">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="600"/>
+              <mxPoint x="1213" y="600"/>
+            </Array>
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>

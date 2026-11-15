@@ -404,6 +404,50 @@ LEFT JOIN dbo.dim_hoc_sinh AS cur
     ON cur.ma_hoc_sinh = COALESCE(d.ma_hoc_sinh, c.ma_hoc_sinh) AND cur.is_current = 1;
 GO
 
+CREATE TABLE dbo.etl_stage_exam (
+    stage_id INT IDENTITY(1,1) PRIMARY KEY,
+    batch_id INT NOT NULL,
+    lan_lam_id INT NOT NULL,
+    ma_hs NVARCHAR(30),
+    ma_de NVARCHAR(20),
+    nop_luc DATETIME2(0),
+    so_cau_dung INT,
+    so_cau_sai INT,
+    tong_so_cau INT,
+    diem DECIMAL(6,2),
+    ty_le_dung DECIMAL(8,4),
+    thoi_gian_giay INT,
+    is_valid TINYINT NOT NULL DEFAULT 1
+);
+GO
+
+CREATE TABLE dbo.etl_stage_session (
+    stage_id INT IDENTITY(1,1) PRIMARY KEY,
+    batch_id INT NOT NULL,
+    phien_hoc_id INT NOT NULL,
+    ma_hs NVARCHAR(30),
+    ma_bai NVARCHAR(20),
+    ket_thuc_luc DATETIME2(0),
+    thoi_luong_giay INT,
+    so_video INT,
+    so_tuong_tac INT,
+    diem_chuyen_can DECIMAL(6,2),
+    is_valid TINYINT NOT NULL DEFAULT 1
+);
+GO
+
+CREATE TABLE dbo.etl_stage_event (
+    stage_id INT IDENTITY(1,1) PRIMARY KEY,
+    batch_id INT NOT NULL,
+    event_id INT NOT NULL,
+    ma_hs NVARCHAR(30),
+    thoi_diem DATETIME2(0),
+    lop_moi NVARCHAR(20),
+    trang_thai_moi NVARCHAR(40),
+    ly_do NVARCHAR(40)
+);
+GO
+
 /* Đo sau khi đã chạy file nạp dữ liệu. Bỏ comment hai khối dưới trong SSMS. */
 /*
 SET STATISTICS IO ON;

@@ -572,3 +572,432 @@ def stop_etl() -> None:
     _stop.set()
     if _thread and _thread.is_alive() and threading.current_thread() is not _thread:
         _thread.join(timeout=8)
+
+
+# --- Airflow step functions (5-step ETL pipeline) ---
+
+
+def step_extract() -> dict:
+    with dw_lock:
+        dw = dw_conn()
+        try:
+            ensure_unknown(dw)
+            ensure_calendar(dw)
+            mark_exam = _watermark(dw, "lan_lam_bai")
+            mark_session = _watermark(dw, "phien_hoc")
+            mark_event = _watermark(dw, "su_kien_hoc_vu")
+            with oltp_lock:
+                oltp = oltp_conn()
+                try:
+                    subjects = rows(oltp, "SELECT * FROM mon_hoc")
+                    exams = rows(oltp, "SELECT * FROM de_thi")
+                    lessons = rows(oltp, "SELECT * FROM bai_hoc")
+                    exam_rows = rows(
+                        oltp,
+                        """
+                        SELECT * FROM lan_lam_bai
+                        WHERE id > ? AND trang_thai = 'DA_NOP'
+                        ORDER BY id
+                        """,
+                        (mark_exam,),
+                    )
+                    session_rows = rows(
+                        oltp,
+                        """
+                        SELECT * FROM phien_hoc
+                        WHERE id > ? AND trang_thai = 'HOAN_THANH'
+                        ORDER BY id
+                        """,
+                        (mark_session,),
+                    )
+                    events = rows(
+                        oltp,
+                        "SELECT * FROM su_kien_hoc_vu WHERE id > ? ORDER BY id",
+                        (mark_event,),
+                    )
+                finally:
+                    oltp.close()
+
+            if not exam_rows and not session_rows and not events:
+                dw.commit()
+                return {"has_data": False, "batch_id": None}
+
+            sync_dimensions(dw, subjects, exams, lessons)
+            cur = dw.execute(
+                "INSERT INTO etl_batch (trigger_name, started_at, status) VALUES (?, ?, 'DANG_CHAY')",
+                ("airflow", now_str()),
+            )
+            batch_id = cur.lastrowid
+
+            if exam_rows:
+                dw.executemany(
+                    """
+                    INSERT INTO etl_stage_exam (
+                        batch_id, lan_lam_id, ma_hs, ma_de, nop_luc, so_cau_dung,
+                        so_cau_sai, tong_so_cau, diem, ty_le_dung, thoi_gian_giay, is_valid
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+                    """,
+                    [
+                        (
+                            batch_id,
+                            r["id"],
+                            r.get("ma_hs"),
+                            r.get("ma_de"),
+                            r.get("nop_luc"),
+                            r.get("so_cau_dung"),
+                            r.get("so_cau_sai"),
+                            r.get("tong_so_cau"),
+                            r.get("diem"),
+                            r.get("ty_le_dung"),
+                            r.get("thoi_gian_giay"),
+                        )
+                        for r in exam_rows
+                    ],
+                )
+            if session_rows:
+                dw.executemany(
+                    """
+                    INSERT INTO etl_stage_session (
+                        batch_id, phien_hoc_id, ma_hs, ma_bai, ket_thuc_luc,
+                        thoi_luong_giay, so_video, so_tuong_tac, diem_chuyen_can, is_valid
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+                    """,
+                    [
+                        (
+                            batch_id,
+                            r["id"],
+                            r.get("ma_hs"),
+                            r.get("ma_bai"),
+                            r.get("ket_thuc_luc"),
+                            r.get("thoi_luong_giay"),
+                            r.get("so_video"),
+                            r.get("so_tuong_tac"),
+                            r.get("diem_chuyen_can"),
+                        )
+                        for r in session_rows
+                    ],
+                )
+            if events:
+                dw.executemany(
+                    """
+                    INSERT INTO etl_stage_event (
+                        batch_id, event_id, ma_hs, thoi_diem, lop_moi, trang_thai_moi, ly_do
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    [
+                        (
+                            batch_id,
+                            r["id"],
+                            r.get("ma_hs"),
+                            r.get("thoi_diem"),
+                            r.get("lop_moi"),
+                            r.get("trang_thai_moi"),
+                            r.get("ly_do"),
+                        )
+                        for r in events
+                    ],
+                )
+
+            max_exam = exam_rows[-1]["id"] if exam_rows else mark_exam
+            max_session = session_rows[-1]["id"] if session_rows else mark_session
+            max_event = events[-1]["id"] if events else mark_event
+            _set_watermark(dw, "lan_lam_bai", max_exam)
+            _set_watermark(dw, "phien_hoc", max_session)
+            _set_watermark(dw, "su_kien_hoc_vu", max_event)
+            dw.commit()
+            return {
+                "has_data": True,
+                "batch_id": batch_id,
+                "src_exam": len(exam_rows),
+                "src_session": len(session_rows),
+                "src_event": len(events),
+            }
+        except Exception:
+            dw.rollback()
+            raise
+        finally:
+            dw.close()
+
+
+def step_quality_gate(batch_id: int) -> dict:
+    with dw_lock:
+        dw = dw_conn()
+        try:
+            exam_rows = rows(
+                dw,
+                "SELECT * FROM etl_stage_exam WHERE batch_id = ? ORDER BY stage_id",
+                (batch_id,),
+            )
+            session_rows = rows(
+                dw,
+                "SELECT * FROM etl_stage_session WHERE batch_id = ? ORDER BY stage_id",
+                (batch_id,),
+            )
+            rejected_exam = 0
+            rejected_session = 0
+            for row in exam_rows:
+                reasons = validate_exam(row)
+                if reasons:
+                    dw.execute(
+                        "UPDATE etl_stage_exam SET is_valid = 0 WHERE stage_id = ?",
+                        (row["stage_id"],),
+                    )
+                    _reject(
+                        dw,
+                        batch_id,
+                        "lan_lam_bai",
+                        row["lan_lam_id"],
+                        "; ".join(reasons),
+                        row,
+                    )
+                    rejected_exam += 1
+            for row in session_rows:
+                reasons = validate_session(row)
+                if reasons:
+                    dw.execute(
+                        "UPDATE etl_stage_session SET is_valid = 0 WHERE stage_id = ?",
+                        (row["stage_id"],),
+                    )
+                    _reject(
+                        dw,
+                        batch_id,
+                        "phien_hoc",
+                        row["phien_hoc_id"],
+                        "; ".join(reasons),
+                        row,
+                    )
+                    rejected_session += 1
+            dw.commit()
+            return {"rejected_exam": rejected_exam, "rejected_session": rejected_session}
+        except Exception:
+            dw.rollback()
+            raise
+        finally:
+            dw.close()
+
+
+def step_scd2(batch_id: int) -> dict:
+    with dw_lock:
+        dw = dw_conn()
+        try:
+            events = rows(
+                dw,
+                "SELECT * FROM etl_stage_event WHERE batch_id = ? ORDER BY event_id",
+                (batch_id,),
+            )
+            with oltp_lock:
+                oltp = oltp_conn()
+                try:
+                    students = {r["ma_hs"]: r for r in rows(oltp, "SELECT * FROM hoc_sinh")}
+                finally:
+                    oltp.close()
+            scd_new = 0
+            for event in events:
+                if apply_scd(dw, event, students):
+                    scd_new += 1
+                else:
+                    if event.get("ma_hs") not in students:
+                        _reject(dw, batch_id, "su_kien_hoc_vu", event["event_id"], "Không thấy học sinh trong OLTP", event)
+            dw.commit()
+            return {"scd_new": scd_new}
+        except Exception:
+            dw.rollback()
+            raise
+        finally:
+            dw.close()
+
+
+def step_load_facts(batch_id: int) -> dict:
+    with dw_lock:
+        dw = dw_conn()
+        try:
+            de_map = {row["ma_de"]: row for row in rows(dw, "SELECT * FROM dim_de_thi")}
+            bai_map = {row["ma_bai"]: row for row in rows(dw, "SELECT * FROM dim_bai_hoc")}
+            mon_map = {row["ma_mon"]: row["mon_hoc_key"] for row in rows(dw, "SELECT ma_mon, mon_hoc_key FROM dim_mon_hoc")}
+            dates = {row["date_key"] for row in rows(dw, "SELECT date_key FROM dim_thoi_gian")}
+
+            exam_rows = rows(
+                dw,
+                "SELECT * FROM etl_stage_exam WHERE batch_id = ? AND is_valid = 1 ORDER BY stage_id",
+                (batch_id,),
+            )
+            session_rows = rows(
+                dw,
+                "SELECT * FROM etl_stage_session WHERE batch_id = ? AND is_valid = 1 ORDER BY stage_id",
+                (batch_id,),
+            )
+
+            loaded_exam = unknown_exam = rejected_exam = 0
+            for row in exam_rows:
+                hs_key = lookup_student(dw, row.get("ma_hs"), row.get("nop_luc"))
+                exam = de_map.get(row.get("ma_de"))
+                if exam is None:
+                    de_key, mon_key, loai = -1, -1, "KHONG_XAC_DINH"
+                else:
+                    de_key = exam["de_thi_key"]
+                    mon_key = mon_map.get(exam["ma_mon"], -1)
+                    loai = exam["loai"]
+                date_key = date_key_of(row.get("nop_luc"))
+                if date_key not in dates:
+                    date_key = -1
+                ok = _insert_or_reject(
+                    dw,
+                    """
+                    INSERT INTO fact_ket_qua_thi (
+                        lan_lam_id, hoc_sinh_key, date_key, mon_hoc_key, de_thi_key,
+                        diem_so, so_cau_dung, so_cau_sai, tong_so_cau, ty_le_dung,
+                        thoi_gian_lam_giay, loai_bai
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        row["lan_lam_id"],
+                        hs_key,
+                        date_key,
+                        mon_key,
+                        de_key,
+                        row.get("diem"),
+                        row.get("so_cau_dung"),
+                        row.get("so_cau_sai"),
+                        row.get("tong_so_cau"),
+                        row.get("ty_le_dung"),
+                        row.get("thoi_gian_giay"),
+                        loai,
+                    ),
+                    batch_id,
+                    "lan_lam_bai",
+                    row["lan_lam_id"],
+                    row,
+                )
+                if not ok:
+                    rejected_exam += 1
+                    continue
+                loaded_exam += 1
+                if hs_key == -1:
+                    unknown_exam += 1
+
+            loaded_session = unknown_session = rejected_session = 0
+            for row in session_rows:
+                hs_key = lookup_student(dw, row.get("ma_hs"), row.get("ket_thuc_luc"))
+                lesson = bai_map.get(row.get("ma_bai"))
+                if lesson is None:
+                    bai_key, mon_key, loai = -1, -1, "KHONG_XAC_DINH"
+                else:
+                    bai_key = lesson["bai_hoc_key"]
+                    mon_key = mon_map.get(lesson["ma_mon"], -1)
+                    loai = lesson["loai_noi_dung"]
+                date_key = date_key_of(row.get("ket_thuc_luc"))
+                if date_key not in dates:
+                    date_key = -1
+                ok = _insert_or_reject(
+                    dw,
+                    """
+                    INSERT INTO fact_chuyen_can (
+                        phien_hoc_id, hoc_sinh_key, date_key, mon_hoc_key, bai_hoc_key,
+                        thoi_luong_phut, so_video_da_xem, so_tuong_tac, diem_chuyen_can, loai_noi_dung
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        row["phien_hoc_id"],
+                        hs_key,
+                        date_key,
+                        mon_key,
+                        bai_key,
+                        round((row.get("thoi_luong_giay") or 0) / 60, 2),
+                        row.get("so_video"),
+                        row.get("so_tuong_tac"),
+                        row.get("diem_chuyen_can"),
+                        loai,
+                    ),
+                    batch_id,
+                    "phien_hoc",
+                    row["phien_hoc_id"],
+                    row,
+                )
+                if not ok:
+                    rejected_session += 1
+                    continue
+                loaded_session += 1
+                if hs_key == -1:
+                    unknown_session += 1
+
+            dw.commit()
+            return {
+                "loaded_exam": loaded_exam,
+                "unknown_exam": unknown_exam,
+                "rejected_exam_load": rejected_exam,
+                "loaded_session": loaded_session,
+                "unknown_session": unknown_session,
+                "rejected_session_load": rejected_session,
+            }
+        except Exception:
+            dw.rollback()
+            raise
+        finally:
+            dw.close()
+
+
+def step_audit(batch_id: int, stats: dict) -> dict:
+    with dw_lock:
+        dw = dw_conn()
+        try:
+            src_exam = stats.get("src_exam", 0) or 0
+            src_session = stats.get("src_session", 0) or 0
+            src_event = stats.get("src_event", 0) or 0
+            rejected_exam = (stats.get("rejected_exam", 0) or 0) + (stats.get("rejected_exam_load", 0) or 0)
+            rejected_session = (stats.get("rejected_session", 0) or 0) + (stats.get("rejected_session_load", 0) or 0)
+            loaded_exam = stats.get("loaded_exam", 0) or 0
+            loaded_session = stats.get("loaded_session", 0) or 0
+            unknown_exam = stats.get("unknown_exam", 0) or 0
+            unknown_session = stats.get("unknown_session", 0) or 0
+            scd_new = stats.get("scd_new", 0) or 0
+
+            dw.execute(
+                """
+                UPDATE etl_batch SET
+                    finished_at = ?, src_exam = ?, loaded_exam = ?,
+                    rejected_exam = ?, unknown_exam = ?, src_session = ?, loaded_session = ?,
+                    rejected_session = ?, unknown_session = ?, src_event = ?, scd_new = ?, status = 'XONG'
+                WHERE batch_id = ?
+                """,
+                (
+                    now_str(),
+                    src_exam,
+                    loaded_exam,
+                    rejected_exam,
+                    unknown_exam,
+                    src_session,
+                    loaded_session,
+                    rejected_session,
+                    unknown_session,
+                    src_event,
+                    scd_new,
+                    batch_id,
+                ),
+            )
+            dw.execute("DELETE FROM etl_stage_exam WHERE batch_id = ?", (batch_id,))
+            dw.execute("DELETE FROM etl_stage_session WHERE batch_id = ?", (batch_id,))
+            dw.execute("DELETE FROM etl_stage_event WHERE batch_id = ?", (batch_id,))
+            dw.commit()
+            out = {
+                "batch_id": batch_id,
+                "src_exam": src_exam,
+                "loaded_exam": loaded_exam,
+                "rejected_exam": rejected_exam,
+                "unknown_exam": unknown_exam,
+                "src_session": src_session,
+                "loaded_session": loaded_session,
+                "rejected_session": rejected_session,
+                "unknown_session": unknown_session,
+                "src_event": src_event,
+                "scd_new": scd_new,
+            }
+            print(
+                f"[AUDIT batch {batch_id}] exam: {src_exam}={loaded_exam}+{rejected_exam}, "
+                f"session: {src_session}={loaded_session}+{rejected_session}, scd_new={scd_new}"
+            )
+            return out
+        except Exception:
+            dw.rollback()
+            raise
+        finally:
+            dw.close()

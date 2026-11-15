@@ -52,7 +52,7 @@ aside {
   display: grid; place-items: center;
   background: var(--gold); color: #1c1915; font-weight: 700;
 }
-.brand strong { display: block; font-family: Georgia, serif; font-size: 22px; }
+.brand strong { display: block; font-family: 'Segoe UI', Roboto, Arial, sans-serif; font-size: 22px; }
 .brand small, .aside-foot { color: #b7c0cc; font-size: 13px; }
 nav { display: flex; flex-direction: column; gap: 6px; }
 nav button {
@@ -72,8 +72,8 @@ main { padding: 22px 26px 40px; }
 .page { display: none; }
 .page.active { display: block; }
 .page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 14px; }
-h1 { font-family: Georgia, serif; font-weight: 600; font-size: 32px; margin: 0; }
-h2 { font-size: 18px; margin: 0 0 8px; }
+h1 { font-family: 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600; font-size: 32px; margin: 0; }
+h2 { font-family: 'Segoe UI', Roboto, Arial, sans-serif; font-size: 18px; margin: 0 0 8px; }
 .kicker { margin: 0 0 4px; color: var(--clay); letter-spacing: 0.04em; text-transform: uppercase; font-size: 12px; }
 .hint { color: var(--muted); margin-top: 0; }
 .card {
@@ -91,11 +91,11 @@ h2 { font-size: 18px; margin: 0 0 8px; }
   padding: 10px 12px;
 }
 .pipe b { display: block; font-size: 13px; color: var(--muted); font-weight: 600; }
-.pipe strong { font-family: Georgia, serif; font-size: 26px; }
+.pipe strong { font-family: 'Segoe UI', Roboto, Arial, sans-serif; font-size: 26px; }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 8px; margin-bottom: 14px; }
 .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
 .kpi span { display: block; color: var(--muted); font-size: 13px; }
-.kpi b { font-family: Georgia, serif; font-size: 26px; }
+.kpi b { font-family: 'Segoe UI', Roboto, Arial, sans-serif; font-size: 26px; }
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
 main { min-width: 0; }
 .bars { display: flex; flex-direction: column; gap: 7px; }

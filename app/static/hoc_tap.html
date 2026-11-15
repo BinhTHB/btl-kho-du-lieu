@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LearnWH · Cổng Tác Nghiệp OLTP</title>
+  <link rel="stylesheet" href="/static/app.css?v=4">
+</head>
+<body>
+  <div id="toast" role="status"></div>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <span class="mark">DW</span>
+        <div>
+          <strong>LearnWH</strong>
+          <small>Cổng Tác Nghiệp · OLTP</small>
+        </div>
+      </div>
+      <nav>
+        <button data-page="hoc" class="active">Cổng học tập</button>
+        <button data-page="scd">Cập nhật học vụ</button>
+        <button data-page="stream">Bộ phát luồng</button>
+      </nav>
+      <div class="aside-foot">
+        <p>Nhóm 9 · D23CQKD02-B</p>
+        <p>GV: ThS. Nguyễn Thị Thu Hiên</p>
+        <p class="link-row"><span id="ws-dot"></span><span id="ws-text">Đang nối</span></p>
+        <p><a href="/bi" style="color:#e7e1d6;text-decoration:underline;">Mở Cổng Báo cáo BI →</a></p>
+      </div>
+    </aside>
+    <main>
+      <section id="page-hoc" class="page active">
+        <header class="page-head">
+          <div>
+            <p class="kicker">Nguồn OLTP</p>
+            <h1>Cổng học tập</h1>
+          </div>
+        </header>
+        <article class="card">
+          <label>Học sinh đang thao tác</label>
+          <div id="member-chips" class="chips"></div>
+          <select id="hs-select"></select>
+        </article>
+        <div class="grid-2">
+          <article class="card">
+            <h2>Làm đề</h2>
+            <select id="de-select"></select>
+            <div id="quiz"></div>
+          </article>
+          <article class="card">
+            <h2>Ghi phiên học</h2>
+            <select id="bai-select"></select>
+            <div id="lesson"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="page-scd" class="page">
+        <header class="page-head">
+          <div>
+            <p class="kicker">Tác nghiệp OLTP</p>
+            <h1>Cập nhật học vụ</h1>
+          </div>
+        </header>
+        <article class="card">
+          <p class="hint">Chọn học sinh, đổi lớp hoặc trạng thái học vụ để ghi sự kiện vào OLTP (Dagster sẽ xử lý SCD Type 2 trong DW).</p>
+          <div class="row-form">
+            <select id="scd-hs"></select>
+            <select id="scd-lop"></select>
+            <select id="scd-tt">
+              <option value="DANG_HOC">Đang học</option>
+              <option value="BAO_LUU">Bảo lưu</option>
+              <option value="CANH_BAO_HOC_VU">Cảnh báo học vụ</option>
+            </select>
+            <button id="btn-scd">Cập nhật và sinh phiên bản</button>
+          </div>
+          <div class="chips" id="scd-quick"></div>
+        </article>
+      </section>
+
+      <section id="page-stream" class="page">
+        <header class="page-head">
+          <div>
+            <p class="kicker">Streaming simulator</p>
+            <h1>Bộ phát luồng</h1>
+          </div>
+        </header>
+        <article class="card">
+          <div class="row-form">
+            <label>Học sinh mỗi nhịp <input id="sim-n" type="number" min="1" max="20" value="3"></label>
+            <label>Giãn cách (ms) <input id="sim-ms" type="number" min="200" max="5000" step="100" value="800"></label>
+            <label class="check"><input id="sim-bad" type="checkbox" checked> Sinh cả bản ghi bẩn và mã lạ</label>
+            <label class="check"><input id="sim-mem" type="checkbox"> Đụng 4 thành viên nhóm</label>
+            <button id="sim-start">Chạy dòng</button>
+            <button id="sim-stop" class="ghost">Dừng</button>
+          </div>
+          <div class="kpis compact" id="sim-kpis"></div>
+          <div class="row-form">
+            <button id="btn-e2e">Kịch bản nộp bài thi hợp lệ</button>
+            <button id="btn-bad" class="warn">Kịch bản kiểm thử bản ghi lỗi</button>
+          </div>
+          <p id="demo-note" class="hint"></p>
+        </article>
+        <article class="card">
+          <h2>Nhật ký trực tiếp</h2>
+          <ul id="log" class="log"></ul>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="/static/app.js?v=4"></script>
+</body>
+</html>

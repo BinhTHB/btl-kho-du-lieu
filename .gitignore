@@ -7,3 +7,6 @@ data/*.mdf
 data/*.ldf
 HocTapOLAP/.vs/
 back-up-docx/
+.env
+.dagster_home/
+

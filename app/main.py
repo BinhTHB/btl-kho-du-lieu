@@ -3,12 +3,11 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app.database import dw_conn, dw_lock, init_schemas, now_str, oltp_conn, oltp_lock, rows, wipe
-from app.etl import run_batch, start_etl, stop_etl
 from app.grading import diem_chuyen_can, grade
 from app.hub import bind_loop, clear as clear_hub, clients, publish, snapshot
 from app.ingest import insert_event, insert_exam
@@ -23,10 +22,8 @@ STATUSES = {"DANG_HOC", "BAO_LUU", "CANH_BAO_HOC_VU"}
 async def lifespan(_app: FastAPI):
     bind_loop(asyncio.get_running_loop())
     init_schemas()
-    start_etl()
     print("LearnWH dang chay: http://127.0.0.1:8000")
     yield
-    stop_etl()
     simulator.stop()
 
 
@@ -98,7 +95,17 @@ def _reason(old: dict, new_lop: str, new_status: str, given: str) -> str:
 
 @app.get("/")
 def home():
-    return FileResponse(STATIC / "index.html")
+    return RedirectResponse(url="/hoc-tap")
+
+
+@app.get("/hoc-tap")
+def hoc_tap():
+    return FileResponse(STATIC / "hoc_tap.html")
+
+
+@app.get("/bi")
+def bi():
+    return FileResponse(STATIC / "bi.html")
 
 
 @app.get("/api/health")
@@ -198,7 +205,6 @@ def submit_exam(body: NopBai):
             conn.commit()
         finally:
             conn.close()
-    stats = run_batch("nop_bai")
     publish(
         {
             "type": "oltp",
@@ -210,7 +216,11 @@ def submit_exam(body: NopBai):
             "luc": now_str(),
         }
     )
-    return {"lan_lam_id": exam_id, "ket_qua": result, "etl": stats}
+    return {
+        "lan_lam_id": exam_id,
+        "ket_qua": result,
+        "etl_status": "Cho Airflow chay theo lich hoac Trigger DAG",
+    }
 
 
 @app.post("/api/hoc-tap/phien")
@@ -239,7 +249,6 @@ def submit_session(body: PhienHoc):
             conn.commit()
         finally:
             conn.close()
-    stats = run_batch("phien_hoc")
     publish(
         {
             "type": "oltp",
@@ -251,7 +260,12 @@ def submit_session(body: PhienHoc):
             "luc": now_str(),
         }
     )
-    return {"phien_hoc_id": session_id, "diem_chuyen_can": score, "so_video": video, "etl": stats}
+    return {
+        "phien_hoc_id": session_id,
+        "diem_chuyen_can": score,
+        "so_video": video,
+        "etl_status": "Cho Airflow chay theo lich hoac Trigger DAG",
+    }
 
 
 @app.get("/api/hoc-sinh/{ma_hs}/scd")
@@ -299,7 +313,6 @@ def update_status(body: HocVu):
             conn.commit()
         finally:
             conn.close()
-    stats = run_batch("scd")
     publish({"type": "scd", "ma_hs": body.ma_hs, "lop": body.lop, "trang_thai": body.trang_thai, "ly_do": reason, "luc": stamp})
     with dw_lock:
         dw = dw_conn()
@@ -307,7 +320,7 @@ def update_status(body: HocVu):
             history = student_history(dw, body.ma_hs)
         finally:
             dw.close()
-    return {"etl": stats, "ly_do": reason, **history}
+    return {"etl_status": "Cho Airflow chay theo lich hoac Trigger DAG", "ly_do": reason, **history}
 
 
 @app.post("/api/simulator/start")
@@ -354,23 +367,12 @@ def demo_e2e():
             conn.commit()
         finally:
             conn.close()
-    stats = run_batch("e2e")
-    with dw_lock:
-        dw = dw_conn()
-        try:
-            fact = dw.execute(
-                """
-                SELECT f.diem_so, f.hoc_sinh_key, h.version_no, h.lop, h.ho_ten
-                FROM fact_ket_qua_thi f
-                JOIN dim_hoc_sinh h ON h.hoc_sinh_key = f.hoc_sinh_key
-                WHERE f.lan_lam_id = ?
-                """,
-                (exam_id,),
-            ).fetchone()
-        finally:
-            dw.close()
     publish({"type": "oltp", "nguon": "kich_ban", "su_kien": "e2e", "ma_hs": "B23DCKD008", "diem": 8, "luc": stamp})
-    return {"truoc": before, "lan_lam_id": exam_id, "etl": stats, "fact": dict(fact) if fact else None}
+    return {
+        "truoc": before,
+        "lan_lam_id": exam_id,
+        "etl_status": "Cho Airflow chay theo lich hoac Trigger DAG",
+    }
 
 
 @app.post("/api/demo/ban-ghi-ban")
@@ -396,19 +398,11 @@ def demo_bad():
             conn.commit()
         finally:
             conn.close()
-    stats = run_batch("ban_ghi_ban")
-    with dw_lock:
-        dw = dw_conn()
-        try:
-            reject = dw.execute(
-                "SELECT ly_do FROM etl_reject WHERE nguon = 'lan_lam_bai' AND nguon_id = ?",
-                (exam_id,),
-            ).fetchone()
-            loaded = dw.execute("SELECT COUNT(*) FROM fact_ket_qua_thi WHERE lan_lam_id = ?", (exam_id,)).fetchone()[0]
-        finally:
-            dw.close()
     publish({"type": "oltp", "nguon": "kich_ban", "su_kien": "bai_ban", "ma_hs": "B23DCKD014", "diem": 15, "luc": stamp})
-    return {"lan_lam_id": exam_id, "etl": stats, "ly_do": reject["ly_do"] if reject else "", "vao_fact": bool(loaded)}
+    return {
+        "lan_lam_id": exam_id,
+        "etl_status": "Cho Airflow chay theo lich hoac Trigger DAG",
+    }
 
 
 @app.post("/api/reset")
@@ -419,7 +413,6 @@ def reset(body: ResetBody):
 
     simulator.stop()
     clear_hub()
-    stop_etl()
     with oltp_lock:
         oltp = oltp_conn()
         try:
@@ -434,9 +427,7 @@ def reset(body: ResetBody):
             dw.close()
     init_schemas()
     seed_if_empty()
-    stats = run_batch("reset")
-    start_etl()
-    return stats
+    return {"status": "reset", "etl_status": "Cho Airflow chay theo lich hoac Trigger DAG"}
 
 
 @app.get("/api/chat-luong")

@@ -26,6 +26,9 @@ _OLTP_DELETE = [
     "mon_hoc",
 ]
 _DW_DELETE = [
+    "etl_stage_exam",
+    "etl_stage_session",
+    "etl_stage_event",
     "fact_ket_qua_thi",
     "fact_chuyen_can",
     "etl_reject",
@@ -211,7 +214,12 @@ def _translate(sql: str):
 
 
 def server_name() -> str:
-    return os.environ.get("MSSQL_SERVER", r"(localdb)\MSSQLLocalDB")
+    return os.environ.get("MSSQL_SERVER", "localhost")
+
+
+MSSQL_USER = os.environ.get("MSSQL_USER", "")
+MSSQL_PASSWORD = os.environ.get("MSSQL_PASSWORD", "")
+ODBC_DRIVER = os.environ.get("ODBC_DRIVER", "ODBC Driver 17 for SQL Server")
 
 
 def db_names() -> tuple[str, str]:
@@ -222,12 +230,23 @@ def db_names() -> tuple[str, str]:
 
 
 def _connection_string(database: str) -> str:
+    if MSSQL_USER and MSSQL_PASSWORD:
+        return (
+            f"DRIVER={{{ODBC_DRIVER}}};"
+            f"SERVER={server_name()};"
+            f"DATABASE={database};"
+            f"UID={MSSQL_USER};"
+            f"PWD={MSSQL_PASSWORD};"
+            "TrustServerCertificate=yes;"
+            "Encrypt=no;"
+        )
     return (
-        "DRIVER={ODBC Driver 17 for SQL Server};"
+        f"DRIVER={{{ODBC_DRIVER}}};"
         f"SERVER={server_name()};"
         f"DATABASE={database};"
         "Trusted_Connection=yes;"
         "TrustServerCertificate=yes;"
+        "Encrypt=no;"
     )
 
 
