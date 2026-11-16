@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -95,7 +95,7 @@ def _reason(old: dict, new_lop: str, new_status: str, given: str) -> str:
 
 @app.get("/")
 def home():
-    return RedirectResponse(url="/hoc-tap")
+    return FileResponse(STATIC / "index.html")
 
 
 @app.get("/hoc-tap")
