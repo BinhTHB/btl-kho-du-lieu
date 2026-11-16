@@ -108,6 +108,7 @@ def bi():
     return FileResponse(STATIC / "bi.html")
 
 
+@app.get("/health")
 @app.get("/api/health")
 def health():
     return {"ok": True}
