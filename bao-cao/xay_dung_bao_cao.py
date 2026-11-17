@@ -1,8 +1,19 @@
-"""Điền bản thảo BTL vào khung mẫu PTIT. Không tạo file Word trắng."""
+# -*- coding: utf-8 -*-
+"""Sinh báo cáo BTL Kho dữ liệu (Nhóm 9) từ khung mẫu PTIT.
+
+Nguyên tắc:
+- Không tạo file Word trắng: luôn sao chép ``Mẫu Tiểu luận_DW.docx`` rồi ghi nội dung.
+- Tự sao lưu bản cũ vào ``back-up-docx/`` trước khi ghi đè.
+- Toàn bộ nội dung thân bài được khai báo trong ``BLOCKS``; danh mục bảng/hình
+  được sinh ra từ cùng một nguồn dữ liệu đó (không hardcode danh mục).
+"""
+
+from __future__ import annotations
 
 import re
 import shutil
 import sys
+import zipfile
 from copy import deepcopy
 from pathlib import Path
 
@@ -13,106 +24,414 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
 from docx.text.paragraph import Paragraph
 
+ROOT = Path(__file__).resolve().parent.parent
 SKILL_SCRIPTS = Path(r"C:\Users\ADMIN\.agents\skills\ptit-academic-writing\scripts")
 sys.path.insert(0, str(SKILL_SCRIPTS))
 from docx_tools import backup_docx  # noqa: E402
 
 TEMPLATE = Path(r"E:\Hoc-Tap\Kho Dữ Liệu\Tài liệu học tập\Mẫu Tiểu luận_DW.docx")
-DEST = Path(r"E:\Hoc-Tap\Kho Dữ Liệu\BTL_KhoDL\Bao_cao_BTL_Kho_du_lieu_Nhom9.docx")
+DEST = ROOT / "Bao_cao_BTL_Kho_du_lieu_Nhom9.docx"
+HINH = Path(__file__).resolve().parent / "hinh"
 
-COVER = {
-    "[KHOA CHUYÊN NGÀNH]": "KHOA CÔNG NGHỆ THÔNG TIN 1",
-    "[BÁO CÁO BÀI TẬP LỚN / TIỂU LUẬN / ĐỒ ÁN / KHÓA LUẬN]": "BÁO CÁO BÀI TẬP LỚN",
-    "[TÊN HỌC PHẦN]": "KHO DỮ LIỆU",
-    "[TÊN ĐỀ TÀI BÁO CÁO HOẶC ĐỒ ÁN NGHIÊN CỨU]": "HỆ THỐNG QUẢN LÝ HỌC TẬP VÀ ÔN LUYỆN TRỰC TUYẾN",
-    "[HỌ VÀ TÊN GIẢNG VIÊN]": "ThS. Nguyễn Thị Thu Hiên",
-    "[HỌ VÀ TÊN SINH VIÊN]": "Nguyễn Quý Tường Anh, Tạ Hoà Bình, Nguyễn Tiến Đạt, Mai Quốc Hưng",
-    "[MÃ SINH VIÊN]": "B23DCKD004, B23DCKD008, B23DCKD014, B23DCKD030",
-    "[LỚP SINH VIÊN]": "D23CQKD02-B",
-    "[NHÓM MÔN HỌC]": "Nhóm 9 (lớp học phần Nhóm 2)",
-    "[NĂM]": "2026",
+# ---------------------------------------------------------------------------
+# Thông tin chung / bìa / phiếu phân công
+# ---------------------------------------------------------------------------
+GVHD = "ThS. Nguyễn Thị Thu Hiên"
+TEN_DE_TAI = "HỆ THỐNG QUẢN LÝ HỌC TẬP VÀ ÔN LUYỆN TRỰC TUYẾN"
+LOP = "D23CQKD02-B – Nhóm 9 (lớp học phần Nhóm 2)"
+THANH_VIEN = [
+    ("Nguyễn Quý Tường Anh", "B23DCKD004", "Kiến trúc kho, SCD và ETL",
+     "Thiết kế Fact Constellation, cài đặt SCD Type 2, xây dựng năm bước ETL và cổng chất lượng."),
+    ("Tạ Hoà Bình", "B23DCKD008", "SQL Server và SSAS",
+     "Triển khai hai CSDL trên SQL Server, indexed view, khối SSAS và hướng dẫn Excel PivotTable."),
+    ("Nguyễn Tiến Đạt", "B23DCKD014", "OLTP và giao diện",
+     "Tám bảng OLTP 3NF, bộ sinh dữ liệu mẫu và hai cổng web /hoc-tap, /bi."),
+    ("Mai Quốc Hưng", "B23DCKD030", "Tầng tổng hợp và báo cáo",
+     "Truy vấn đối soát drill-across, đo indexed view, kiểm thử và biên soạn báo cáo."),
+]
+DIEM_THANH_VIEN = ["Tường Anh", "Hoà Bình", "Tiến Đạt", "Quốc Hưng"]
+
+ABBREVIATIONS = [
+    ["OLTP", "Online Transaction Processing", "Xử lý giao dịch tác nghiệp"],
+    ["OLAP", "Online Analytical Processing", "Xử lý phân tích trực tuyến"],
+    ["ETL", "Extract, Transform, Load", "Trích xuất, biến đổi và nạp"],
+    ["DW", "Data Warehouse", "Kho dữ liệu"],
+    ["SCD", "Slowly Changing Dimension", "Chiều biến đổi chậm"],
+    ["3NF", "Third Normal Form", "Dạng chuẩn ba"],
+    ["SSMS", "SQL Server Management Studio", "Công cụ quản trị SQL Server"],
+    ["SSAS", "SQL Server Analysis Services", "Dịch vụ phân tích của SQL Server"],
+    ["SSDT", "SQL Server Data Tools", "Công cụ dự án đa chiều trong Visual Studio"],
+    ["DSV", "Data Source View", "Góc nhìn nguồn dữ liệu của khối SSAS"],
+]
+
+REFERENCES = [
+    "[1] W. H. Inmon, Building the Data Warehouse, 4th ed. Indianapolis, IN, USA: Wiley, 2005.",
+    "[2] R. Kimball and M. Ross, The Data Warehouse Toolkit: The Definitive Guide to Dimensional Modeling, 3rd ed. Indianapolis, IN, USA: Wiley, 2013.",
+    '[3] E. F. Codd, S. B. Codd, and C. T. Salley, "Providing OLAP to user-analysts: An IT mandate," E.F. Codd & Associates, 1993.',
+    "[4] R. Kimball and J. Caserta, The Data Warehouse ETL Toolkit. Indianapolis, IN, USA: Wiley, 2004.",
+    '[5] Microsoft, "Trusted connection and ODBC Driver for SQL Server," SQL Server documentation. [Online]. Available: https://learn.microsoft.com/en-us/sql/connect/odbc/windows/microsoft-odbc-driver-for-sql-server. (Truy cập: 16/11/2026).',
+    '[6] "Dagster – an orchestrator for data assets," Dagster documentation. [Online]. Available: https://docs.dagster.io/. (Truy cập: 16/11/2026).',
+    '[7] "FastAPI documentation," 2026. [Online]. Available: https://fastapi.tiangolo.com/. (Truy cập: 16/11/2026).',
+    '[8] Microsoft, "Create indexed views," SQL Server documentation. [Online]. Available: https://learn.microsoft.com/en-us/sql/relational-databases/views/create-indexed-views. (Truy cập: 16/11/2026).',
+    '[9] Microsoft, "Multidimensional model databases (SSAS)," Analysis Services documentation. [Online]. Available: https://learn.microsoft.com/en-us/analysis-services/multidimensional-models/multidimensional-model-databases-ssas. (Truy cập: 16/11/2026).',
+]
+
+# ---------------------------------------------------------------------------
+# Bảng: định nghĩa một lần, dùng cho cả thân bài lẫn danh mục
+# ---------------------------------------------------------------------------
+TABLES: dict[str, dict] = {
+    "abbr": {
+        "caption": "Bảng 0.1. Danh mục từ viết tắt",
+        "headers": ["Viết tắt", "Tiếng Anh", "Tiếng Việt"],
+        "rows": ABBREVIATIONS,
+    },
+    "phan_cong": {
+        "caption": "Bảng 0.2. Phân công nhiệm vụ bốn thành viên Nhóm 9",
+        "headers": ["STT", "Họ và tên", "MSSV", "Vai trò chính", "Công việc được giao"],
+        "rows": [[str(i + 1), n, m, v, c] for i, (n, m, v, c) in enumerate(THANH_VIEN)],
+    },
+    "diem": {
+        "caption": "Bảng 0.3. Đánh giá đóng góp cá nhân (trọng số 50% – 30% – 20%)",
+        "headers": ["Tiêu chí", "Trọng số"] + DIEM_THANH_VIEN,
+        "rows": [
+            ["Hoàn thành nhiệm vụ", "50%", "48", "48", "48", "48"],
+            ["Hợp tác, hỗ trợ nhóm", "30%", "28", "28", "28", "28"],
+            ["Trình bày, báo cáo", "20%", "19", "19", "19", "19"],
+            ["Tổng điểm cá nhân", "100%", "95", "95", "95", "95"],
+        ],
+    },
+    "dim": {
+        "caption": "Bảng 2.1. Danh sách năm chiều trong kho DW_QuanLyHocTap",
+        "headers": ["Chiều", "Khóa surrogate", "Thuộc tính tiêu biểu", "Kiểu thay đổi", "Gắn fact"],
+        "rows": [
+            ["dim_thoi_gian", "date_key", "ngày, thứ, tuần, tháng, quý, năm, học kỳ, năm học", "Type 1", "Cả hai"],
+            ["dim_hoc_sinh", "hoc_sinh_key", "ma_hoc_sinh, họ tên, lớp, trạng thái, start_date, end_date, is_current", "Type 2", "Cả hai"],
+            ["dim_mon_hoc", "mon_hoc_key", "ma_mon, ten_mon, so_tin_chi, khoa", "Type 1", "Cả hai"],
+            ["dim_de_thi", "de_thi_key", "ma_de, ten_de, loai, do_kho, so_cau", "Type 1", "Kết quả thi"],
+            ["dim_bai_hoc", "bai_hoc_key", "ma_bai, ten_bai, loai_noi_dung, thoi_luong_phut", "Type 1", "Chuyên cần"],
+        ],
+    },
+    "grain": {
+        "caption": "Bảng 2.2. Mức hạt, khóa và số đo của hai bảng fact",
+        "headers": ["Fact", "Một dòng là", "Khóa tự nhiên", "Khóa chiều", "Số đo chính", "Cách cuộn lên"],
+        "rows": [
+            ["fact_ket_qua_thi", "Một lần nộp đã chấm", "lan_lam_id", "hoc_sinh_key, date_key, mon_hoc_key, de_thi_key",
+             "diem_so, so_cau_dung, so_cau_sai, tong_so_cau, ty_le_dung, thoi_gian_lam_giay",
+             "Đếm lượt, trung bình điểm, tỷ lệ tính lại từ tổng câu"],
+            ["fact_chuyen_can", "Một phiên học hoàn thành", "phien_hoc_id", "hoc_sinh_key, date_key, mon_hoc_key, bai_hoc_key",
+             "thoi_luong_phut, so_video_da_xem, so_tuong_tac, diem_chuyen_can",
+             "Cộng phút và video, trung bình điểm chuyên cần"],
+        ],
+    },
+    "bus": {
+        "caption": "Bảng 2.3. Ma trận bus giữa hai fact và năm chiều",
+        "headers": ["Chiều", "fact_ket_qua_thi", "fact_chuyen_can", "Vai trò"],
+        "rows": [
+            ["Thời gian", "Có", "Có", "Dùng chung"],
+            ["Học sinh (SCD Type 2)", "Có", "Có", "Dùng chung"],
+            ["Môn học", "Có", "Có", "Dùng chung"],
+            ["Đề thi", "Có", "Không", "Riêng fact kết quả thi"],
+            ["Bài học", "Không", "Có", "Riêng fact chuyên cần"],
+        ],
+    },
+    "rules": {
+        "caption": "Bảng 2.4. Bảy luật của cổng chất lượng trước khi nạp fact",
+        "headers": ["Luật", "Nguồn", "Điều kiện loại", "Lý do"],
+        "rows": [
+            ["1", "Bài thi", "tong_so_cau ≤ 0", "Không tính được điểm và tỷ lệ"],
+            ["2", "Bài thi", "so_cau_dung hoặc so_cau_sai âm; đúng + sai ≠ tổng", "Số câu không khớp nhau"],
+            ["3", "Bài thi", "diem_so ∉ [0, 10] hoặc lệch quá 0,05 so với 10 × đúng / tổng", "Điểm không khớp đáp án"],
+            ["4", "Bài thi", "ty_le_dung lệch quá 0,02 so với đúng / tổng", "Tỷ lệ không khớp số câu"],
+            ["5", "Bài thi", "thoi_gian_giay ≤ 0 hoặc > 14 400", "Thời gian làm bài bất thường"],
+            ["6", "Phiên học", "thoi_luong_giay ≤ 0 hoặc > 28 800; so_video ∉ {0, 1}", "Thời lượng/video không hợp lệ"],
+            ["7", "Phiên học", "so_tuong_tac ∉ [0, 200] hoặc diem_chuyen_can ∉ [0, 10]", "Tương tác/điểm ngoài khoảng"],
+        ],
+    },
+    "dict": {
+        "caption": "Bảng 2.5. Từ điển dữ liệu (cột tiêu biểu)",
+        "headers": ["Bảng", "Cột", "Kiểu", "Ý nghĩa"],
+        "rows": [
+            ["hoc_sinh (OLTP)", "ma_hs / lop / trang_thai_hoc_vu", "NVARCHAR", "Mã, lớp và trạng thái hiện tại của học sinh"],
+            ["lan_lam_bai (OLTP)", "id / ma_hs / ma_de / diem / nop_luc", "INT, NVARCHAR, DECIMAL, DATETIME2", "Một lần nộp bài đã chấm"],
+            ["phien_hoc (OLTP)", "id / ma_bai / thoi_luong_giay / diem_chuyen_can", "INT, DECIMAL", "Một phiên học bài"],
+            ["su_kien_hoc_vu (OLTP)", "id / thoi_diem / lop_moi / ly_do", "INT, DATETIME2, NVARCHAR", "Nguồn phát sinh phiên bản SCD"],
+            ["dim_hoc_sinh", "hoc_sinh_key / start_date / end_date / is_current", "INT, DATETIME2, TINYINT", "Lịch sử học sinh theo SCD Type 2"],
+            ["fact_ket_qua_thi", "lan_lam_id / hoc_sinh_key / diem_so", "INT, DECIMAL", "Hạt một lần thi, trỏ đúng phiên bản học sinh"],
+            ["fact_chuyen_can", "phien_hoc_id / thoi_luong_phut", "INT, DECIMAL(10,2)", "Hạt một phiên học, phút = giây / 60"],
+            ["etl_batch / etl_reject", "src_*, loaded_*, rejected_* / nguon, ly_do", "INT, NVARCHAR", "Đối soát nguồn = nạp + loại và hàng bị loại"],
+        ],
+    },
+    "dagster": {
+        "caption": "Bảng 3.1. Năm asset Dagster và hàm ETL tương ứng",
+        "headers": ["Thứ tự", "Asset trong Dagster", "Hàm trong app/etl.py", "Việc làm"],
+        "rows": [
+            ["1", "oltp_extracted_batch", "step_extract", "Đọc theo watermark, ghi ba bảng etl_stage_*"],
+            ["2", "quality_gate_checked", "step_quality_gate", "Áp bảy luật, đánh dấu is_valid = 0 và ghi etl_reject"],
+            ["3", "dim_hoc_sinh_scd2", "step_scd2", "Đóng bản cũ, chèn bản mới cho chiều học sinh"],
+            ["4", "dw_fact_tables", "step_load_facts", "Tra chiều, xử lý unknown member -1, nạp hai fact"],
+            ["5", "dw_audit_and_summary", "step_audit", "Đối soát, cập nhật etl_batch, dọn staging"],
+        ],
+    },
+    "ports": {
+        "caption": "Bảng 3.2. Hai cổng web của hệ thống",
+        "headers": ["Cổng", "Đường dẫn", "Nhiệm vụ", "Nguồn dữ liệu"],
+        "rows": [
+            ["Tác nghiệp", "/hoc-tap", "Làm đề, nộp bài, bắt đầu phiên học, cập nhật học vụ", "Ghi thẳng OLTP_QuanLyHocTap"],
+            ["Phân tích", "/bi", "Dashboard, OLAP, drill-across, chất lượng", "Đọc DW_QuanLyHocTap (bất đồng bộ)"],
+        ],
+    },
+    "seed": {
+        "caption": "Bảng 4.1. Số đo sau mẻ nạp trên tập Seed 9",
+        "headers": ["Chỉ tiêu", "Giá trị"],
+        "rows": [
+            ["Học sinh / môn học ở OLTP", "48 / 6"],
+            ["Lần nộp ở OLTP và dòng fact_ket_qua_thi", "344 / 344"],
+            ["Phiên học ở OLTP và dòng fact_chuyen_can", "822 / 822"],
+            ["Sự kiện học vụ / phiên bản chiều học sinh", "51 / 51 (48 đang hiệu lực)"],
+            ["Bản ghi bị loại / unknown member", "0 / 0"],
+            ["Dòng iv_diem_theo_mon_thang", "109"],
+            ["Điểm thi trung bình", "6,72"],
+            ["Tổng phút học / điểm chuyên cần TB", "13 197 / 6,71"],
+            ["Cặp mã học sinh × môn ở vw_drill_across", "278 (186 cả hai, 15 chỉ điểm, 77 chỉ chuyên cần)"],
+            ["Ba cờ đối soát khop_bai, khop_phien, khop_summary", "Đúng cả ba"],
+        ],
+    },
+    "subject": {
+        "caption": "Bảng 4.2. Điểm trung bình theo môn trên Seed 9",
+        "headers": ["Môn học", "Số lượt", "Điểm TB"],
+        "rows": [
+            ["Xác suất thống kê", "56", "7,11"],
+            ["Tiếng Anh chuyên ngành", "54", "6,85"],
+            ["Mạng máy tính", "60", "6,77"],
+            ["Lập trình Python", "56", "6,64"],
+            ["Cơ sở dữ liệu", "66", "6,55"],
+            ["Kho dữ liệu", "52", "6,38"],
+            ["Tổng", "344", "6,72"],
+        ],
+    },
+    "scd": {
+        "caption": "Bảng 4.3. Lịch sử SCD Type 2 của học sinh B23DCKD004",
+        "headers": ["Phiên bản", "hoc_sinh_key", "Lớp", "Start_Date", "End_Date", "Is_Current"],
+        "rows": [
+            ["1", "1", "D23CQKD03", "05/09/2026 00:00", "12/10/2026 08:00", "0"],
+            ["2", "49", "D23CQCN01", "12/10/2026 08:00", "9999-12-31 23:59:59", "1"],
+        ],
+    },
+    "fanout": {
+        "caption": "Bảng 4.4. Đối chứng drill-across: B23DCKD004, môn Cơ sở dữ liệu",
+        "headers": ["Cách tính", "Số dòng", "Tổng điểm", "Tổng phút"],
+        "rows": [
+            ["Gộp từng fact rồi FULL OUTER JOIN", "5 bài và 7 phiên (7 dòng)", "26", "110,5"],
+            ["JOIN thẳng hai fact", "35 = 5 × 7", "182 = 26 × 7", "552,8 ≈ 110,5 × 5"],
+        ],
+    },
+    "perf": {
+        "caption": "Bảng 4.5. So sánh quét fact và đọc indexed view WITH (NOEXPAND)",
+        "headers": ["Cách đọc", "Số dòng đọc", "Thời gian 40 vòng", "Ghi chú"],
+        "rows": [
+            ["fact_ket_qua_thi rồi GROUP BY môn, lớp", "344", "309,6 ms", "Quét hạt nguyên tử"],
+            ["iv_diem_theo_mon_thang WITH (NOEXPAND)", "109", "109,2 ms", "Đọc bản đã tổng hợp, tự bảo trì"],
+        ],
+    },
 }
 
-BODY = {
-    "1. Tính cấp thiết của đề tài": [
-        "Học phần Kho dữ liệu yêu cầu nhóm không dừng ở bài tập truy vấn rời mà phải có một sản phẩm chạy được. Đề tài nhóm chọn là hệ thống học tập và ôn luyện trực tuyến: học sinh xem bài, làm đề, nộp bài; cán bộ học vụ đổi lớp, cho bảo lưu hoặc gắn cảnh báo. Những việc này phát sinh liên tục, không phải một file Excel nộp một lần.",
-        "Nếu chỉ để bảng tác nghiệp rồi viết báo cáo trực tiếp trên đó, câu hỏi phân tích dễ bị lẫn với giao dịch đang mở. Giảng viên hướng dẫn yêu cầu nhóm 9 có nguồn OLTP mô phỏng, hai fact độc lập, chiều học sinh kiểu SCD Type 2, tầng tổng hợp bằng indexed view và khối đa chiều SSAS. Bản thảo mô tả hệ thống trong thư mục BTL_KhoDL: cổng web nhận nghiệp vụ, ETL đưa dữ liệu vào kho SQL Server, khối SSAS và dashboard đọc trên kho đó.",
-    ],
-    "2. Mục tiêu nghiên cứu": [
-        "Mục tiêu của bài là dựng được kho hình chòm sao cho bài toán học và thi, rồi thao tác được trên giao diện khi bảo vệ trực tiếp. Nhóm không làm slide. Người nghe nhìn sản phẩm đang chạy.",
-        "Các đầu việc cụ thể là: nguồn OLTP có học sinh, môn, đề, câu hỏi, bài học, lần nộp và phiên học; fact kết quả thi và fact chuyên cần dùng chung thời gian, học sinh, môn; SCD Type 2 với start_date, end_date, is_current; cổng chất lượng và đối soát số dòng; bảng tổng hợp làm mới sau mỗi mẻ; năm thao tác Roll-up, Drill-down, Slice, Dice, Pivot cùng drill-across; bộ sinh dữ liệu và dashboard.",
-    ],
-    "3. Đối tượng và phạm vi nghiên cứu": [
-        "Đối tượng dữ liệu là học sinh đại học đang học, luyện đề và xem bài trên một hệ mô phỏng. Nhóm sinh 48 học sinh ở bốn lớp D23CQCN01, D23CQKT02, D23CQKD03 và D23CQVT04. Bốn thành viên nhóm có mặt trong danh mục học sinh, mã B23DCKD004, B23DCKD008, B23DCKD014 và B23DCKD030, để thao tác trên dữ liệu mẫu. Báo cáo này là sản phẩm bảo vệ chung của Nhóm 9.",
-        "Phạm vi thời gian của dữ liệu lịch sử là các ngày làm việc từ 08/09/2026 đến 03/11/2026, học kỳ HK1 năm học 2026-2027. Sáu môn là Cơ sở dữ liệu, Kho dữ liệu, Lập trình Python, Mạng máy tính, Xác suất thống kê và Tiếng Anh chuyên ngành. Mỗi môn có một đề luyện, một đề kiểm tra (năm câu) và ba bài học. Nguồn không nối vào cổng đào tạo thật của học viện. Kho phòng lab là database DW_QuanLyHocTap trên SQL Server. Khối đa chiều được dựng trong Visual Studio SSDT theo ssas/HUONG_DAN_SSAS_VA_EXCEL.md và được đọc bằng Excel PivotTable.",
-    ],
-    "4. Phương pháp tiếp cận và công cụ thực thi": [
-        "Nhóm thực hiện theo lộ trình giảng viên hướng dẫn: tách OLTP khỏi kho theo hướng Inmon, rồi thiết kế chiều theo bốn bước của Kimball. Cổng web dùng Python 3.12 và FastAPI. Hệ quản trị duy nhất là Microsoft SQL Server. OLTP_QuanLyHocTap giữ tám bảng tác nghiệp đã chuẩn hóa. DW_QuanLyHocTap là kho. Ứng dụng nối bằng pyodbc. Script mockup_generator/generate_sample_data.py nạp kỳ mẫu vào OLTP, ETL sau đó ghi sang kho.",
-        "ETL là một vòng lặp nền, khoảng 1,2 giây một lần, đọc bản ghi mới theo watermark. Khi biến môi trường MSSQL_CONN_STR được đặt, mỗi mẻ có dữ liệu mới được đẩy sang SQL Server. Giao diện web một trang gồm sáu màn: bảng điều khiển, cổng học tập, học vụ, dòng dữ liệu, OLAP và chất lượng. Kiểm tra logic nằm ở lệnh python -m app.selfcheck, không phụ thuộc trình duyệt.",
-    ],
-    "5. Bố cục của báo cáo": [
-        "Chương 1 chốt bài toán và các khái niệm được dùng: hạt fact, chiều dùng chung, SCD Type 2, cổng chất lượng, OLAP và drill-across. Chương 2 là thiết kế: kiến trúc web tới SQL Server và SSAS, ma trận bus, hai fact, luật loại bản ghi, unknown member. Chương 3 là cách cài ETL, streaming, đồng bộ SQL Server và giao diện. Chương 4 ghi số đo trên dữ liệu vừa sinh, gồm đối soát dòng, kịch bản kiểm thử biến động học vụ SCD Type 2, kịch bản nộp bài thi hợp lệ, kịch bản bản ghi lỗi và kịch bản đối soát drill-across. Kết luận nêu phần đã chạy và hướng làm mới khối sau mỗi mẻ.",
-    ],
-    "1.1 Khảo sát bài toán và bối cảnh thực tiễn": [
-        "Một buổi học trên hệ thống này có hai việc khác nhau. Việc thứ nhất là nộp bài: hệ thống chấm số câu đúng, quy điểm trên thang 10 và lưu thời gian làm. Việc thứ hai là học bài: học sinh mở video hoặc tài liệu, hệ thống cộng phút, số lần bấm và một điểm chuyên cần nội bộ. Hai việc không cùng mức chi tiết. Một học sinh có thể nộp hai bài Cơ sở dữ liệu nhưng xem bảy phiên bài giảng, hoặc chỉ học mà chưa thi.",
-        "Cán bộ học vụ còn sửa hồ sơ: chuyển lớp, bảo lưu, cảnh báo học vụ, rồi cho học tiếp. Nếu bảng học sinh chỉ giữ trạng thái mới nhất, bài thi tháng 9 sẽ bị gắn nhầm vào lớp tháng 10. Câu hỏi cần trả lời khi chấm là liệu fact cũ có bị viết lại hay không. Vì vậy chiều học sinh phải giữ lịch sử, còn fact chỉ trỏ tới phiên bản đúng tại thời điểm nộp.",
-        "Bài mẫu chuyển phát nhanh của nhóm 6 đi theo ba tầng: staging, lược đồ sao, rồi khối đa chiều. Nhóm 9 giữ unknown member khóa -1, cổng kiểm tra trước fact và đối soát số dòng. Nguồn web được đọc theo watermark, biến đổi rồi nạp vào kho SQL Server. Khối SSAS lấy data source từ database DW_QuanLyHocTap, không đọc bảng OLTP. Kịch bản bảo vệ vẫn là thêm một dòng ở nguồn, ETL chạy, kho và màn hình đổi số, sau đó process khối để Excel thấy dòng mới.",
-    ],
-    "1.2 Cơ sở lý thuyết nền tảng": [
-        "Inmon mô tả kho là dữ liệu tích hợp, gắn thời gian, ổn định và hướng chủ đề. Ông cũng tách hạt nguyên tử khỏi tầng tổng hợp: hạt nguyên tử giữ sự kiện gốc, tầng trên chỉ để hỏi cho nhanh [1]. Nhóm hiểu ổn định theo nghĩa không sửa điểm một bài đã nạp chỉ vì hôm sau học sinh đổi lớp. Bài đó vẫn là sự kiện của ngày nó xảy ra.",
-        "Kimball thiết kế kho từ quy trình nghiệp vụ và mức hạt, rồi mới chọn chiều và số đo. Các fact khác nhau được phép dùng chung một số chiều. Đó là kiến trúc bus. Khi có từ hai fact trở lên mà vẫn dùng chung chiều, lược đồ gọi là fact constellation [2]. Nhóm có đúng hai fact. Chiều dùng chung là thời gian, học sinh và môn. Đề thi chỉ gắn fact kết quả. Bài học chỉ gắn fact chuyên cần.",
-        "Cùng tài liệu đó chỉ ra SCD Type 2: khi thuộc tính cần lưu lịch sử thay đổi, đóng bản ghi cũ bằng ngày kết thúc và thêm một bản mới với khóa surrogate khác [2]. Nhóm áp dụng cho lớp và trạng thái học vụ. Họ tên coi như không đổi trong phạm vi bài. Kimball cũng khuyên không nối hai fact trực tiếp khi hạt lệch nhau, vì một bài thi sẽ lặp theo số phiên học và tổng điểm bị nhân lên. Cách làm trên lớp là gộp từng fact về cùng một hạt, rồi FULL OUTER JOIN.",
-        "Thuật ngữ OLAP gắn với bài của Codd, Codd và Salley năm 1993: phân tích xoay quanh nhiều chiều chứ không chỉ một câu hỏi tác nghiệp [3]. Năm thao tác nhóm làm trên giao diện là Roll-up (cuộn lên mức thô hơn), Drill-down (khoan xuống mức mịn hơn), Slice (cố định một chiều), Dice (cắt nhiều điều kiện cùng lúc) và Pivot (đổi hàng với cột). Drill-across là thao tác thêm, nối hai fact sau khi đã cùng hạt.",
-        "Bước ETL cần một cổng chất lượng trước fact. Kimball và Caserta mô tả việc đo số bản ghi đọc được, số bản ghi nạp và số bản ghi loại, để người vận hành biết dòng có bị rơi giữa đường hay không [4]. Unknown member là lối thoát khi mã học sinh hoặc mã đề không tra được chiều: fact vẫn vào kho với khóa -1, thay vì bị xóa im lặng. Nhóm tách hai việc này. Sai logic của số đo thì loại. Sai mã danh mục thì giữ, nhưng đánh dấu không xác định.",
-    ],
-    "2.1 Phân tích yêu cầu và kiến trúc hệ thống": [
-        "Yêu cầu chức năng bám góp ý của giảng viên hướng dẫn. Nguồn phải nhận bài nộp và phiên học từ form, không chỉ phát file CSV. Quản trị phải đổi được lớp và trạng thái để SCD sinh bản mới ngay trước mắt. Bộ sinh phải bắn nhiều học sinh trong một nhịp, có cả bản ghi bẩn. Dashboard đọc số từ kho, không đọc thẳng bảng OLTP để vẽ điểm trung bình. Trang OLAP trên web và PivotTable trên khối SSAS phải làm được Roll-up, Drill-down, Slice, Dice và Pivot.",
-        "Kiến trúc vận hành gồm cổng web, OLTP_QuanLyHocTap, ETL, kho DW_QuanLyHocTap và ba lối đọc. Cổng học sinh ghi bài nộp và phiên học thẳng vào OLTP. ETL kiểm tra số đo, tra chiều, áp dụng SCD Type 2 rồi nạp fact. Kho là fact constellation. Dashboard đọc indexed view, không đọc bảng tác nghiệp để vẽ điểm trung bình. Hình 2.1 mô tả lối đi này.",
-        "Nhóm không dựng thêm cơ sở staging vật lý. Watermark trên ba luồng lan_lam_bai, phien_hoc và su_kien_hoc_vu đóng vai trò mốc trích xuất. Bản ghi đã qua mẻ, kể cả bản bị loại, không bị đọc lại. Đây là một hạn chế: nếu sửa đúng dòng bẩn tại chỗ mà giữ nguyên id, kho sẽ không hút lại. Muốn nạp lại thì phải phát sinh id mới. Nhóm chấp nhận điểm này vì bài demo cần vòng lặp ổn định, không kẹt mãi ở một dòng lỗi.",
-    ],
-    "2.2 Thiết kế chi tiết và cấu trúc dữ liệu": [
-        "Nguồn tác nghiệp OLTP_QuanLyHocTap có tám bảng và dừng ở dạng chuẩn 3NF: học sinh, môn học, đề thi, câu hỏi, bài học, lần làm bài, phiên học và sự kiện học vụ. Mỗi thuộc tính phụ thuộc vào khóa của đúng bảng đó, không phụ thuộc bắc cầu. Mã học sinh cố ý không là khóa ngoại của lần nộp, vì nguồn được phép phát sinh mã lạ; kho mới quyết định đưa fact về unknown member. Phần sau của chương dùng tám bảng này làm nguồn cho lược đồ chòm sao.",
-        "Mức hạt fact kết quả là một lần nộp đã chấm, khóa tự nhiên là id bảng lan_lam_bai. Số đo gồm điểm, số câu đúng, số câu sai, tổng số câu, tỷ lệ đúng và thời gian làm tính bằng giây. Điểm và tỷ lệ là số đo không cộng được khi cuộn lên; báo cáo cuộn dùng trung bình điểm và tính lại tỷ lệ từ tổng câu đúng chia tổng câu. Mức hạt fact chuyên cần là một phiên học hoàn thành. Số đo là phút học, số video (0 hoặc 1), số tương tác và điểm chuyên cần. Hai hạt này cố ý không bằng nhau. Hình 2.2 đặt hai fact ở giữa, ba chiều dùng chung phía trên và hai chiều riêng phía dưới.",
-        "Chiều thời gian sinh sẵn từ 01/08/2026 đến 30/06/2027, khóa là số YYYYMMDD. Thuộc tính có thứ, tuần, tháng, quý, năm, học kỳ và năm học. Tháng 9 đến tháng 12 và tháng 1 thuộc HK1; tháng 2 đến tháng 6 thuộc HK2; tháng 7 là học hè. Chiều môn, đề và bài học là SCD Type 1: đổi tên thì cập nhật tại chỗ. Chiều học sinh là Type 2. Unknown member của mọi chiều dùng khóa -1, mã UNKNOWN, để khóa ngoại của fact không gãy.",
-        "Một dòng học sinh trong kho có hoc_sinh_key, mã, họ tên, lớp, trạng thái, lý do, start_date, end_date, is_current và version_no. View vw_dim_hoc_sinh_scd đổi tên cột thành Start_Date, End_Date và Is_Current để đúng chữ trong góp ý. Bản hiện tại có end_date bằng 9999-12-31 23:59:59. Khi có sự kiện mới, ETL đóng bản cũ tại đúng thời điểm sự kiện rồi chèn bản mới. Fact không lấy bản is_current. Fact dò bản có start_date nhỏ hơn hoặc bằng thời điểm phát sinh và end_date lớn hơn thời điểm đó.",
-        "Trong một mẻ, sự kiện học vụ được áp dụng hết trước, fact nạp sau. Nhờ vậy bài nộp cùng một nhịp với lần chuyển lớp vẫn tra được phiên bản mới. Bài cũ không bị cập nhật khóa. Kịch bản kiểm thử biến động học vụ SCD Type 2 dùng học sinh mã B23DCKD004: từ 05/09/2026 ở lớp D23CQKD03, từ 12/10/2026 08:00 chuyển sang D23CQCN01. Học sinh HS-BL01 chuyển sang bảo lưu cùng mốc. Học sinh HS-CB01 bị gắn cảnh báo học vụ. Học sinh HS-CC01 chỉ có phiên học, HS-THI01 chỉ có bài thi, để drill-across còn dòng trống một bên.",
-        "Cổng chất lượng của bài thi loại các trường hợp: tổng câu không dương, số câu âm, đúng cộng sai khác tổng, điểm ngoài đoạn 0 đến 10, điểm lệch quá 0,05 so với 10 nhân số câu đúng chia tổng câu, tỷ lệ lệch quá 0,02, thời gian không dương hoặc quá bốn giờ. Phiên học bị loại nếu thời lượng không dương hoặc quá tám giờ, số video khác 0 và 1, tương tác âm hoặc quá 200, điểm chuyên cần ngoài 0 đến 10. Mã học sinh không có trong chiều thì không bị loại. Fact nhận hoc_sinh_key = -1.",
-        "Tầng tổng hợp trên SQL Server là hai indexed view. iv_diem_theo_mon_thang gom fact thi theo năm, tháng, môn, lớp tại thời điểm thi và loại bài. iv_chuyen_can_theo_lop_tuan gom theo tuần. Cả hai dùng WITH SCHEMABINDING, COUNT_BIG và unique clustered index. Trung bình điểm lấy từ SUM chia số lượt vì indexed view không chứa AVG. Drill-across nằm ở vw_drill_across bằng WITH và FULL OUTER JOIN. View này không được đánh chỉ mục cụm, vì SQL Server không cho outer join trong indexed view. Trên LocalDB, dashboard đọc iv_diem_theo_mon_thang WITH (NOEXPAND) để lấy đúng bản đã tổng hợp.",
-        "Khóa ngoại của hai fact có nonclustered index: học sinh, ngày, môn, đề hoặc bài học. Cột loai_bai chỉ có THI và LUYEN_DE, loai_noi_dung chỉ có VIDEO và TAI_LIEU. Giáo trình gán bitmap index cho cột ít giá trị như vậy trên Oracle [5]. SQL Server của bài dùng ix_fact_exam_loai và ix_fact_cc_loai. Không gọi các index này là bitmap.",
-    ],
-    "3.1 Cài đặt và triển khai chức năng": [
-        "Mã nguồn chia theo việc. sql/app_oltp.sql và sql/app_dw.sql là lược đồ ứng dụng tạo trên SQL Server nếu chưa có. sql/06_sqlserver_dw_and_indexed_views.sql là bản dựng lại hai database trong SSMS. mockup_generator/generate_sample_data.py sinh kỳ mẫu với bộ sinh số cố định seed 9, nên mỗi lần chạy lại đều ra 344 bài và 822 phiên. app/etl.py là cổng chất lượng và mẻ ETL. app/olap.py đọc indexed view và fact. app/main.py là API. Hướng dẫn SSDT và Excel nằm ở ssas/HUONG_DAN_SSAS_VA_EXCEL.md.",
-        "FastAPI nhận bài nộp, chấm theo đáp án trong OLTP rồi mới ghi lần làm [6]. Form làm đề không gửi đáp án xuống trình duyệt trước khi nộp. Phiên học do server tính điểm: 70 phần trăm theo tỷ lệ thời lượng so với bài chuẩn, 30 phần trăm theo số tương tác nhưng không quá 10 lần bấm, trần là 10 điểm. Video chỉ được tính là đã xem khi bài đó là VIDEO và học sinh xem từ 60 phần trăm thời lượng chuẩn trở lên.",
-        "Indexed view được khai báo bằng WITH SCHEMABINDING và unique clustered index [7]. Khối trong SSDT có hai measure group trên hai fact, các hierarchy đã thiết kế, và Excel PivotTable nối vào khối [8].",
-        "Bộ sinh mỗi nhịp chọn vài học sinh không thuộc bốn mã B23, trừ khi bật ô đụng thành viên nhóm. Khoảng 40 phần trăm nhịp là nộp bài, còn lại là phiên học. Nếu bật dữ liệu bẩn, khoảng 10 phần trăm bài có điểm 15 và số câu lệch, khoảng 6 phần trăm dùng mã NGOAI_DS nhưng số đo vẫn đúng, và một ít phiên có thời lượng âm. Ba kiểu này cho thấy cùng lúc hàng bị loại và hàng unknown member.",
-        "Giao diện nghe WebSocket tại /ws/live. Mỗi lần OLTP phát sinh hoặc một mẻ ETL có việc, dòng nhật ký trên màn hình dòng dữ liệu thêm một dòng. Bảng điều khiển đọc /api/dashboard: điểm trung bình theo môn lấy từ iv_diem_theo_mon_thang, không quét fact. Hình 3.1 chụp bảng điều khiển sau mẻ khởi tạo. Hình 3.2 chụp cổng làm đề của kịch bản nộp bài thi hợp lệ. Trang học vụ vẽ đủ Start_Date, End_Date, Is_Current và liệt kê bài gần đây kèm khóa surrogate.",
-    ],
-    "3.2 Kết quả thực nghiệm và đánh giá": [
-        "Mẻ nạp kỳ mẫu trên SQL Server chạy trong 712 ms. Nguồn có 344 lần nộp và 822 phiên. Kho nhận đủ 344 và 822, loại 0, unknown member bằng 0. Sự kiện học vụ là 51: 48 lần nhập học và 3 lần đổi sau ngày 12/10. Số phiên bản chiều học sinh lớn hơn 0 cũng là 51, trong đó 48 bản đang hiệu lực. Indexed view iv_diem_theo_mon_thang còn 109 dòng, tổng so_luot bằng 344. Ba cờ đối soát khop_bai, khop_phien và khop_summary đều đúng.",
-        "Điểm trung bình toàn kho là 6,72. Tổng phút học là 13 197, điểm chuyên cần trung bình 6,71. Theo môn, xác suất thống kê cao nhất với 7,11 điểm trên 56 lượt; kho dữ liệu thấp nhất với 6,38 trên 52 lượt. Tổng lượt sáu môn là 56 + 54 + 60 + 56 + 66 + 52 = 344, khớp fact. Đây là dữ liệu giả lập có kiểm soát, không phải phổ điểm thật của lớp.",
-        "Kịch bản kiểm thử biến động học vụ SCD Type 2 cho ra hai phiên bản của học sinh mã B23DCKD004. Bản 1, khóa 1, lớp D23CQKD03, từ 05/09/2026 00:00 đến 12/10/2026 08:00, is_current = 0. Bản 2, khóa 49, lớp D23CQCN01, từ 12/10/2026 08:00, is_current = 1. Bài ngày 28/09 môn xác suất thống kê trỏ khóa 1 và lớp KD03. Bài ngày 20/10 môn cơ sở dữ liệu trỏ khóa 49 và lớp CN01. Hình 3.3 chụp màn hình tra cứu lịch sử này. Self-check đếm thêm: không có bài trước 12/10 gắn bản 2, và không có bài từ 12/10 gắn bản 1. Fact cũ không bị viết lại khi sinh bản mới.",
-        "Drill-across trên dữ liệu sạch cho 278 cặp mã học sinh với môn: 186 cặp có cả điểm lẫn phút, 15 cặp chỉ có điểm, 77 cặp chỉ có chuyên cần. FULL OUTER JOIN giữ 92 cặp mà inner join sẽ làm mất. Kịch bản đối soát dùng một học sinh với môn Cơ sở dữ liệu: 5 bài, tổng điểm 26; 7 phiên, tổng 110,5 phút. Nối thẳng hai fact ra 35 dòng, tổng điểm thành 182 và tổng phút thành 552,8. 35 bằng 5 nhân 7, 182 bằng 26 nhân 7. Đó là lý do không JOIN hai bảng fact.",
-        "Roll-up từ tháng lên học kỳ gom 3 dòng tháng thành 1 dòng HK1 2026-2027, vẫn 344 lượt, điểm trung bình 6,72, 1 155 câu đúng trên 1 720 câu, tỷ lệ 67,15 phần trăm. Slice môn Kho dữ liệu còn số theo tháng. Dice lớp D23CQKD03, môn Cơ sở dữ liệu, từ 01/09 đến 04/11 còn các tuần có bài. Pivot hàng là lớp, cột là sáu môn. Câu lọc fact_ket_qua_thi theo hoc_sinh_key đi qua nonclustered index ix_fact_exam_hs.",
-        "Đo 40 vòng trên cùng máy: đọc iv_diem_theo_mon_thang WITH (NOEXPAND) mất 14,2 ms, quét fact rồi nhóm theo môn và lớp mất 47,2 ms. Fact chỉ có 344 dòng nên chưa phải mức kho thật. Nhóm không viết là indexed view nhanh hơn hàng chục lần. Lợi ích nhìn thấy ngay là số dòng phải đọc giảm từ 344 xuống 109. Indexed view tự bảo trì khi fact thay đổi, dashboard không phải xóa rồi chèn lại một bảng tổng hợp.",
-    ],
-    "1. Các kết quả định lượng đạt được": [
-        "Bài chạy local được bằng run.bat hoặc uvicorn. Sau khi sinh dữ liệu, kho có hai fact, 51 phiên bản học sinh, đối soát dòng nguồn bằng dòng nạp cộng dòng loại, và dashboard đọc tầng tổng hợp. Kịch bản kiểm thử biến động học vụ thể hiện đúng lớp theo từng mốc. Kịch bản nộp bài thi hợp lệ đi từ form vào fact. Kịch bản bản ghi lỗi dừng ở etl_reject. Drill-across cho thấy cả phía bị mất nếu dùng inner join và phía bị nhân nếu nối fact với fact. Năm nút OLAP trả về câu SQL và bảng kết quả.",
-        "Self-check tự động phủ các ca cần đối chiếu khi bảo vệ: hạt hai fact, đóng và mở SCD, fact bám phiên bản theo thời gian, bản ghi điểm 15 không vào fact, mã lạ vào khóa -1, fact cũ không đổi khóa khi có bản mới, summary khớp số lượt, roll-up ít dòng hơn drill-down, dice và slice có số, pivot là ma trận chữ nhật.",
-    ],
-    "2. Hạn chế của đề tài": [
-        "Dữ liệu là mô phỏng, câu hỏi trắc nghiệm ngắn, chưa phải đề thi thật. Watermark không xử lý lại dòng đã loại nếu người dùng sửa cùng id. Chưa có đăng nhập, người bảo vệ chọn học sinh trên danh sách. Cột phân loại ít giá trị trên SQL Server dùng nonclustered index, không dùng bitmap của Oracle.",
-        "Với 344 dòng fact, chênh lệch thời gian giữa indexed view và quét fact còn nhỏ nếu xét kho hàng triệu dòng. Máy dùng để đo là laptop Windows, Python 3.12. Bộ sinh cố ý tạo dữ liệu bẩn nên không được bật nhầm lúc đang giữ số liệu sạch cho một câu hỏi cụ thể. Bốn thành viên mặc định được loại khỏi bộ sinh để hồ sơ lúc đang trình bày không bị dòng ngẫu nhiên đè lên.",
-    ],
-    "3. Hướng phát triển mở rộng": [
-        "Hướng tiếp theo trên lab là bật proactive caching cho partition MOLAP, khoảng im lặng 10 giây, để Excel Refresh thấy bài nộp mới sau khi ETL đã đẩy sang SQL Server. Hàng bị loại nên tách thành hàng đợi sửa và được nạp lại sau khi OLTP đã chỉnh. Lược đồ hai fact và chiều dùng chung đã cố định nên không phải thiết kế lại khối.",
-    ],
+# ---------------------------------------------------------------------------
+# Ảnh: chỉ dùng file có thật trong bao-cao/hinh
+# ---------------------------------------------------------------------------
+FIGURES: dict[str, dict] = {
+    "infra": {"file": "ssms_03_danh_sach_database.png", "caption": "Hình 3.1. Hai cơ sở dữ liệu OLTP và DW trong SSMS"},
+    "dashboard": {"file": "hinh_3_1_dashboard.png", "caption": "Hình 3.2. Bảng điều khiển trên cổng /bi"},
+    "lamde": {"file": "hinh_3_2_lam_de.png", "caption": "Hình 3.3. Cổng /hoc-tap – làm đề và nộp bài"},
+    "dsv": {"file": "vs_06_dsv_full.png", "caption": "Hình 3.4. Data Source View của khối HocTapOLAP trong SSDT"},
+    "dim": {"file": "vs_07_dim.png", "caption": "Hình 3.5. Chiều và hierarchy trong dự án SSDT"},
+    "scd": {"file": "hinh_3_3_scd.png", "caption": "Hình 4.1. Tra cứu lịch sử SCD Type 2 của B23DCKD004"},
+    "drill_ui": {"file": "hinh_4_1_drill_across.png", "caption": "Hình 4.2. Kết quả drill-across trên cổng /bi"},
+    "drill_ssms": {"file": "ssms_04_ket_qua_drill_across.png", "caption": "Hình 4.3. Kết quả vw_drill_across trên SSMS"},
+    "ssms_io": {"file": "hinh_4_2_ssms_query.png", "caption": "Hình 4.4. Truy vấn đối soát trên SSMS"},
+    "excel_roll": {"file": "excel_01_rollup.png", "caption": "Hình 4.5. Roll-up trên Excel PivotTable"},
+    "excel_pivot": {"file": "excel_05_pivot.png", "caption": "Hình 4.6. Pivot lớp và môn trên Excel PivotTable"},
 }
 
+MISSING_IMAGES = [
+    "Sơ đồ kiến trúc tổng thể (bao-cao/so-do/kien_truc.drawio chưa được xuất sang PNG)",
+    "Lược đồ hình chòm sao (bao-cao/so-do/chom_sao.drawio chưa được xuất sang PNG)",
+    "Ảnh chụp riêng Execution Plan và STATISTICS IO trên SSMS",
+]
 
-def set_run_font(run, size=13, bold=False):
+# ---------------------------------------------------------------------------
+# Nội dung thân bài – một nguồn dữ liệu cho cả danh mục lẫn văn bản
+# block: ("h1"|"h2", text, newpage?) | ("p", text) | ("table", key)
+#        | ("fig", key, width_cm) | ("ref",) | ("pagebreak",)
+# ---------------------------------------------------------------------------
+BLOCKS: list[tuple] = [
+    ("h1", "PHẦN MỞ ĐẦU", True),
+    ("h2", "1. Tính cấp thiết của đề tài"),
+    ("p", "Học phần Kho dữ liệu (DAE 1408) yêu cầu nhóm không dừng lại ở bài tập truy vấn rời mà phải dựng được một sản phẩm chạy được. Đề tài nhóm chọn là hệ thống quản lý học tập và ôn luyện trực tuyến: học sinh xem bài, làm đề, nộp bài; cán bộ học vụ đổi lớp, cho bảo lưu hoặc gắn cảnh báo. Những việc này phát sinh liên tục, không phải một file Excel nộp một lần."),
+    ("p", "Nếu phân tích trực tiếp trên bảng tác nghiệp, câu hỏi phân tích dễ bị lẫn với giao dịch đang mở. Theo yêu cầu của giảng viên hướng dẫn, nhóm 9 cần có nguồn OLTP mô phỏng, hai fact độc lập, chiều học sinh kiểu SCD Type 2, tầng tổng hợp bằng indexed view và khối đa chiều SSAS. Bản báo cáo này mô tả đúng những gì đang chạy trong thư mục BTL_KhoDL, không mô tả một thiết kế chỉ có trên giấy."),
+
+    ("h2", "2. Mục tiêu và phạm vi nghiên cứu"),
+    ("p", "Mục tiêu của bài là dựng được kho hình chòm sao cho bài toán học và thi, rồi thao tác được trên giao diện khi bảo vệ trực tiếp. Nhóm không làm slide; người nghe nhìn sản phẩm đang chạy và tự đặt câu hỏi trên dữ liệu thật."),
+    ("p", "Các đầu việc cụ thể gồm: nguồn OLTP có học sinh, môn, đề, câu hỏi, bài học, lần làm bài, phiên học và sự kiện học vụ; fact kết quả thi và fact chuyên cần dùng chung thời gian, học sinh, môn; SCD Type 2 với start_date, end_date, is_current; cổng chất lượng và đối soát số dòng; tầng tổng hợp; năm thao tác OLAP cộng thêm drill-across; bộ sinh dữ liệu mẫu; hai cổng web; khối SSAS và Excel PivotTable."),
+
+    ("h2", "3. Đối tượng và dữ liệu thử nghiệm"),
+    ("p", "Đối tượng dữ liệu là học sinh đại học đang học, luyện đề và xem bài trên một hệ mô phỏng. Nhóm sinh 48 học sinh ở bốn lớp D23CQCN01, D23CQKT02, D23CQKD03 và D23CQVT04. Bốn thành viên nhóm có mặt trong danh mục học sinh với mã B23DCKD004, B23DCKD008, B23DCKD014 và B23DCKD030, để thao tác trực tiếp trên dữ liệu mẫu. Báo cáo là sản phẩm bảo vệ chung của Nhóm 9."),
+    ("p", "Sáu môn gồm Cơ sở dữ liệu, Kho dữ liệu, Lập trình Python, Mạng máy tính, Xác suất thống kê và Tiếng Anh chuyên ngành. Mỗi môn có một đề luyện, một đề kiểm tra năm câu và ba bài học. Dữ liệu lịch sử nằm trong các ngày làm việc từ 08/09/2026 đến 03/11/2026, học kỳ HK1 năm học 2026-2027. Nguồn không nối vào cổng đào tạo thật của học viện. Máy dùng để đo là laptop Windows, Python 3.12, SQL Server cài local và ODBC Driver 17."),
+
+    ("h2", "4. Phương pháp tiếp cận và công cụ thực thi"),
+    ("p", "Nhóm đi theo lộ trình giảng viên hướng dẫn: tách OLTP khỏi kho theo hướng Inmon, rồi thiết kế chiều theo bốn bước của Kimball [1], [2]. Web app dùng Python 3.12 với FastAPI [7] và pyodbc. Hệ quản trị duy nhất là Microsoft SQL Server: OLTP_QuanLyHocTap giữ tám bảng tác nghiệp đã chuẩn hóa, DW_QuanLyHocTap là kho. Kết nối mặc định là localhost, Trusted_Connection=yes (Windows Authentication) kèm TrustServerCertificate=yes [5]. Mọi dữ liệu nghiệp vụ và dữ liệu phân tích đều nằm trên hệ quản trị này."),
+    ("p", "Bộ sinh mockup_generator/generate_sample_data.py nạp kỳ mẫu với bộ sinh số cố định seed 9. ETL chạy native trên Windows bằng Dagster [6] tại http://127.0.0.1:3000 theo lịch */2 * * * *, gọi lần lượt năm hàm step_* trong app/etl.py. Web app chỉ ghi OLTP và đọc DW; Dagster là nơi duy nhất điều phối các mẻ ETL. Kiểm tra logic nằm ở lệnh python -m app.selfcheck, hiện đạt 31 ca."),
+
+    ("h2", "5. Bố cục của báo cáo"),
+    ("p", "Chương 1 chốt bài toán và các khái niệm dùng xuyên suốt: hạt fact, chiều dùng chung, SCD Type 2, cổng chất lượng, OLAP và drill-across. Chương 2 là thiết kế: kiến trúc, ma trận bus, hai fact, bảy luật loại bản ghi, unknown member và từ điển dữ liệu. Chương 3 là cách cài đặt SQL Server, bộ sinh Seed 9, Dagster, hai cổng web, indexed view và khối SSDT. Chương 4 ghi số đo trên tập Seed 9 gồm đối soát dòng, SCD Type 2, drill-across chống fan-out và indexed view. Kết luận nêu phần đã chạy và hướng làm mới khối SSAS sau mỗi mẻ."),
+
+    ("h1", "CHƯƠNG 1. TỔNG QUAN BÀI TOÁN VÀ CƠ SỞ LÝ THUYẾT", True),
+    ("h2", "1.1. Bài toán và bối cảnh thực tiễn"),
+    ("p", "Một buổi học trên hệ thống này có hai việc khác nhau. Việc thứ nhất là nộp bài: hệ thống chấm số câu đúng, quy điểm trên thang 10 và lưu thời gian làm. Việc thứ hai là học bài: học sinh mở video hoặc tài liệu, hệ thống cộng phút, đếm số tương tác và tính một điểm chuyên cần nội bộ. Hai việc không cùng mức chi tiết. Một học sinh có thể nộp hai bài Cơ sở dữ liệu nhưng xem bảy phiên bài giảng, hoặc chỉ học mà chưa thi."),
+    ("p", "Cán bộ học vụ còn sửa hồ sơ: chuyển lớp, bảo lưu, cảnh báo học vụ, rồi cho học tiếp. Nếu bảng học sinh chỉ giữ trạng thái mới nhất, bài thi tháng 9 sẽ bị gắn nhầm vào lớp tháng 10. Câu hỏi cần trả lời khi chấm là liệu fact cũ có bị viết lại hay không. Vì vậy chiều học sinh phải giữ lịch sử, còn fact chỉ trỏ tới phiên bản đúng tại thời điểm phát sinh sự kiện."),
+    ("p", "Nhóm giữ unknown member khóa -1, đặt cổng kiểm tra trước khi nạp fact và đối soát số dòng ở cuối mẻ. Khối SSAS lấy nguồn từ DW_QuanLyHocTap, không đọc bảng OLTP. Kịch bản bảo vệ vẫn là thêm một dòng ở nguồn, chạy mẻ Dagster, kho và màn hình đổi số, sau đó process lại khối để Excel thấy dòng mới."),
+
+    ("h2", "1.2. Cơ sở lý thuyết nền tảng"),
+    ("p", "Inmon mô tả kho là dữ liệu tích hợp, gắn thời gian, ổn định và hướng chủ đề; ông cũng tách hạt nguyên tử khỏi tầng tổng hợp [1]. Nhóm hiểu ổn định theo nghĩa không sửa điểm một bài đã nạp chỉ vì hôm sau học sinh đổi lớp. Bài đó vẫn là sự kiện của ngày nó xảy ra."),
+    ("p", "Kimball thiết kế kho từ quy trình nghiệp vụ và mức hạt, rồi mới chọn chiều và số đo [2]. Các fact khác nhau được phép dùng chung một số chiều; đó là kiến trúc bus. Khi có từ hai fact trở lên mà vẫn dùng chung chiều, lược đồ gọi là fact constellation. Nhóm có đúng hai fact, dùng chung thời gian, học sinh và môn; đề thi chỉ gắn fact kết quả, bài học chỉ gắn fact chuyên cần."),
+    ("p", "Cùng tài liệu đó mô tả SCD Type 2: khi thuộc tính cần lưu lịch sử thay đổi, đóng bản ghi cũ bằng ngày kết thúc rồi thêm bản mới với khóa surrogate khác [2]. Nhóm áp dụng cho lớp và trạng thái học vụ, còn họ tên coi như không đổi trong phạm vi bài. Kimball cũng khuyên không nối hai fact trực tiếp khi hạt lệch nhau, vì một bài thi sẽ lặp theo số phiên học và tổng điểm bị nhân lên."),
+    ("p", "Thuật ngữ OLAP gắn với bài của Codd, Codd và Salley năm 1993: phân tích xoay quanh nhiều chiều chứ không chỉ một câu hỏi tác nghiệp [3]. Năm thao tác nhóm làm là Roll-up (cuộn lên mức thô hơn), Drill-down (khoan xuống mức mịn hơn), Slice (cố định một chiều), Dice (cắt nhiều điều kiện cùng lúc) và Pivot (đổi hàng với cột). Drill-across là thao tác thêm: gộp từng fact về cùng hạt rồi mới nối."),
+    ("p", "Trước fact cần một cổng chất lượng. Kimball và Caserta mô tả việc đo số bản ghi đọc được, nạp được và bị loại để người vận hành biết dòng có rơi giữa đường hay không [4]. Unknown member là lối thoát khi mã học sinh hoặc mã đề không tra được chiều: fact vẫn vào kho với khóa -1 thay vì bị xóa im lặng. Nhóm tách hai việc này: sai logic số đo thì loại, sai mã danh mục thì giữ nhưng đánh dấu không xác định."),
+
+    ("h2", "1.3. Công nghệ sử dụng"),
+    ("p", "Tầng lưu trữ gồm hai CSDL SQL Server tách biệt, tạo và khởi tạo tự động từ sql/app_oltp.sql và sql/app_dw.sql. Ứng dụng nối qua pyodbc với ODBC Driver 17; chuỗi kết nối dùng Windows Authentication theo mặc định và cho phép ghi đè bằng biến môi trường nếu cần [5]. Collation là Vietnamese_CI_AS để tiếng Việt không bị lỗi encoding."),
+    ("p", "Tầng điều phối là Dagster chạy native trên Windows, giao diện ở cổng 3000, thể hiện cây Assets Lineage và nút Materialize all [6]. Tầng web là FastAPI với hai trang tĩnh [7]. Tầng phân tích gồm indexed view trên SQL Server [8] và khối đa chiều dựng trong Visual Studio SSDT, đọc bằng Excel PivotTable [9]."),
+
+    ("h1", "CHƯƠNG 2. PHÂN TÍCH VÀ THIẾT KẾ KHO DỮ LIỆU", True),
+    ("h2", "2.1. Yêu cầu chức năng và kiến trúc hệ thống"),
+    ("p", "Yêu cầu chức năng bám sát góp ý của giảng viên hướng dẫn. Nguồn phải nhận bài nộp và phiên học từ form, không chỉ phát file CSV. Quản trị phải đổi được lớp và trạng thái để SCD sinh bản mới ngay trước mắt. Bộ sinh phải bắn nhiều học sinh trong một nhịp, có cả bản ghi bẩn. Dashboard đọc số từ kho, không đọc thẳng bảng OLTP để vẽ điểm trung bình. Trang OLAP trên web và PivotTable trên khối SSAS phải làm được Roll-up, Drill-down, Slice, Dice và Pivot."),
+    ("p", "Kiến trúc vận hành gồm cổng web, OLTP_QuanLyHocTap, Dagster, DW_QuanLyHocTap và ba lối đọc. Cổng /hoc-tap ghi bài nộp và phiên học thẳng vào OLTP. Năm asset Dagster kiểm tra số đo, tra chiều, áp dụng SCD Type 2 rồi nạp fact. Cổng /bi đọc indexed view và các view đối soát; Excel đọc khối SSAS. Hai CSDL được tạo sẵn trong SSMS như Hình 3.1."),
+    ("fig", "infra", 12.5),
+    ("p", "Nhóm không dựng thêm cơ sở staging vật lý riêng ngoài ba bảng etl_stage_exam, etl_stage_session và etl_stage_event nằm trong DW. Watermark trên ba luồng lan_lam_bai, phien_hoc và su_kien_hoc_vu đóng vai trò mốc trích xuất. Bản ghi đã qua mẻ, kể cả bản bị loại, không bị đọc lại. Đây là một hạn chế: nếu sửa đúng dòng bẩn tại chỗ mà giữ nguyên id, kho sẽ không hút lại; muốn nạp lại thì phải phát sinh id mới."),
+
+    ("h2", "2.2. Nguồn OLTP 3NF"),
+    ("p", "Nguồn tác nghiệp OLTP_QuanLyHocTap có tám bảng và dừng ở dạng chuẩn 3NF: hoc_sinh, mon_hoc, de_thi, cau_hoi, bai_hoc, lan_lam_bai, phien_hoc và su_kien_hoc_vu. Mỗi thuộc tính phụ thuộc vào khóa của đúng bảng đó, không phụ thuộc bắc cầu. Mã học sinh cố ý không làm khóa ngoại của lần nộp: nguồn được phép phát sinh mã lạ, còn kho mới quyết định đưa fact về unknown member."),
+    ("p", "Ba bảng sự kiện lan_lam_bai, phien_hoc và su_kien_hoc_vu dùng khóa IDENTITY làm khóa tự nhiên. Cột trang_thai của bài nộp và phiên học được dùng để lọc chỉ bản ghi đã hoàn tất. Các chỉ số nonclustered trên ma_hs phục vụ việc đọc theo watermark từng luồng."),
+
+    ("h2", "2.3. Thiết kế chòm sao và các chiều"),
+    ("p", "Kho DW_QuanLyHocTap là fact constellation gồm hai fact và năm chiều. Mọi chiều đều có bản ghi unknown với khóa -1 để khóa ngoại của fact không bị gãy. Bảng 2.1 liệt kê năm chiều, Bảng 2.2 nêu mức hạt cùng số đo, Bảng 2.3 là ma trận bus giữa hai fact và năm chiều."),
+    ("table", "dim"),
+    ("table", "grain"),
+    ("table", "bus"),
+    ("p", "Mức hạt của fact kết quả là một lần nộp đã chấm; số đo gồm điểm, số câu đúng, số câu sai, tổng số câu, tỷ lệ đúng và thời gian tính bằng giây. Điểm và tỷ lệ là số đo không cộng được khi cuộn lên: báo cáo cuộn dùng trung bình điểm và tính lại tỷ lệ từ tổng câu đúng chia tổng câu. Mức hạt của fact chuyên cần là một phiên học hoàn thành, số đo là phút học, số video (0 hoặc 1), số tương tác và điểm chuyên cần. Hai hạt này cố ý không bằng nhau."),
+    ("p", "Chiều thời gian sinh sẵn từ 01/08/2026 đến 30/06/2027, khóa là số YYYYMMDD. Tháng 9 đến tháng 12 và tháng 1 thuộc HK1; tháng 2 đến tháng 6 thuộc HK2; tháng 7 là học hè. Chiều môn, đề và bài học là SCD Type 1: đổi tên thì cập nhật tại chỗ. Khóa ngoại của hai fact đều có nonclustered index; cột loai_bai chỉ có THI và LUYEN_DE, cột loai_noi_dung chỉ có VIDEO và TAI_LIEU."),
+
+    ("h2", "2.4. SCD Type 2 và unknown member"),
+    ("p", "Một dòng trong dim_hoc_sinh có hoc_sinh_key, mã, họ tên, lớp, trạng thái, lý do, start_date, end_date, is_current và version_no. Bản hiện tại có end_date bằng 9999-12-31 23:59:59. Khi có sự kiện học vụ mới, ETL đóng bản cũ tại đúng thời điểm sự kiện rồi chèn bản mới với khóa surrogate lớn hơn. View vw_dim_hoc_sinh_scd đổi tên cột sang Start_Date, End_Date và Is_Current để thuận tiện khi đối chiếu trên SSMS."),
+    ("p", "Trong một mẻ, sự kiện học vụ được áp dụng hết trước, fact nạp sau. Nhờ vậy bài nộp cùng nhịp với lần chuyển lớp vẫn tra được phiên bản mới. Fact không lấy bản is_current; fact dò bản có start_date nhỏ hơn hoặc bằng thời điểm nộp và end_date lớn hơn thời điểm đó. Kết quả là bài cũ giữ nguyên khóa cũ dù hồ sơ hiện tại đã đổi."),
+    ("p", "Unknown member dùng khi mã học sinh hoặc mã đề không tra được chiều. Bài có mã lạ nhưng số đo hợp lệ vẫn vào fact với hoc_sinh_key = -1 và được đếm riêng ở cột unknown_exam của etl_batch. Cách này giữ được đẳng thức nguồn = nạp + loại mà không làm rơi dòng."),
+
+    ("h2", "2.5. Cổng chất lượng bảy luật"),
+    ("p", "Cổng chất lượng nằm ở bước step_quality_gate, trước khi nạp fact. Hàng vi phạm bị đánh dấu is_valid = 0 trong bảng staging, ghi lý do vào etl_reject và không được chèn vào fact. Bảng 2.4 gom các kiểm tra trong validate_exam và validate_session thành bảy luật dễ nhớ."),
+    ("table", "rules"),
+    ("p", "Luật 3 và luật 4 so sánh điểm và tỷ lệ với số câu đúng thay vì chỉ kiểm tra khoảng giá trị, nên một bài có điểm 10 nhưng chỉ đúng 3/5 câu vẫn bị loại. Ngược lại, mã học sinh không có trong chiều không bị loại: đó là unknown member, không phải lỗi số đo."),
+
+    ("h2", "2.6. Tầng tổng hợp và view đối soát"),
+    ("p", "Tầng tổng hợp trên SQL Server gồm hai indexed view. iv_diem_theo_mon_thang gom fact thi theo năm, tháng, môn, lớp tại thời điểm thi và loại bài. iv_chuyen_can_theo_lop_tuan gom theo tuần. Cả hai dùng WITH SCHEMABINDING, COUNT_BIG và một unique clustered index [8]. Trung bình điểm không nằm trong indexed view mà được tính ở view vw_diem_theo_mon_thang bằng SUM chia số lượt."),
+    ("p", "Drill-across nằm ở vw_drill_across dạng WITH rồi FULL OUTER JOIN giữa hai câu đã GROUP BY về hạt mã học sinh × môn. View này không được đánh chỉ mục cụm vì SQL Server không cho outer join trong indexed view. Dashboard đọc iv_diem_theo_mon_thang WITH (NOEXPAND) để chắc chắn dùng đúng bản đã tổng hợp."),
+    ("p", "Bảng etl_batch lưu số dòng nguồn, nạp, loại, unknown và số phiên bản SCD mới của từng mẻ. Bất biến được giữ ở bước audit là: với mỗi luồng, Nguồn = Nạp + Loại. Ba cờ khop_bai, khop_phien và khop_summary trong app/olap.py kiểm tra lại đẳng thức này cùng sự khớp giữa fact và summary."),
+
+    ("h2", "2.7. Từ điển dữ liệu"),
+    ("p", "Bảng 2.5 ghi nghĩa của các cột tiêu biểu ở hai CSDL. Đây là tài liệu đối chiếu khi thao tác trực tiếp trên SSMS, tránh nhầm giữa id của OLTP và khóa surrogate của kho."),
+    ("table", "dict"),
+
+    ("h1", "CHƯƠNG 3. HIỆN THỰC HÓA HỆ THỐNG", True),
+    ("h2", "3.1. Cấu trúc mã nguồn và hạ tầng SQL Server"),
+    ("p", "Mã nguồn chia theo việc. sql/app_oltp.sql và sql/app_dw.sql là lược đồ ứng dụng được app/database.py áp dụng khi khởi động nếu đối tượng chưa có. sql/06_sqlserver_dw_and_indexed_views.sql là bản dựng lại trong SSMS. mockup_generator/generate_sample_data.py sinh kỳ mẫu. app/etl.py chứa cổng chất lượng và năm bước ETL. app/olap.py đọc indexed view và fact. app/main.py là API web. orchestration/etl_assets.py là định nghĩa Dagster."),
+    ("p", "Hai CSDL được tạo với đường dẫn tệp trong thư mục data/, collation Vietnamese_CI_AS. Mọi kết nối đi qua pyodbc, chuỗi mặc định SERVER=localhost; Trusted_Connection=yes; TrustServerCertificate=yes; Encrypt=no [5]. Lớp SqlConn trong app/database.py dịch LIMIT sang TOP và INSERT OR IGNORE sang INSERT có kiểm tra trùng để cùng một mã nguồn chạy được trên SQL Server."),
+
+    ("h2", "3.2. Bộ sinh dữ liệu mẫu Seed 9"),
+    ("p", "mockup_generator/generate_sample_data.py dùng random.Random(9) nên mỗi lần sinh lại ra cùng một tập dữ liệu. Kết quả là 48 học sinh, sáu môn, 344 lần nộp, 822 phiên học và 51 sự kiện học vụ. Bốn mã B23DCKD004, B23DCKD008, B23DCKD014 và B23DCKD030 mặc định được giữ khỏi bộ sinh ngẫu nhiên để hồ sơ lúc trình bày không bị dòng ngẫu nhiên đè lên."),
+    ("p", "Bộ sinh cố ý tạo thêm các ca đặc biệt: một học sinh chỉ có phiên học, một học sinh chỉ có bài thi, một học sinh bảo lưu, một học sinh bị cảnh báo và một học sinh đổi lớp. Nhờ đó drill-across có dòng trống ở một bên, còn SCD Type 2 có sự kiện thay đổi thật để kiểm chứng."),
+
+    ("h2", "3.3. Điều phối ETL bằng Dagster"),
+    ("p", "orchestration/etl_assets.py định nghĩa năm @asset nối tiếp nhau theo dependency, chạy bởi job dw_quan_ly_hoc_tap_etl với lịch */2 * * * *. Mỗi asset gọi một hàm step_* trong app/etl.py và truyền kết quả xuống asset sau. Khi không có dữ liệu mới theo watermark, các asset sau bỏ qua và ghi nhận BO_QUA. Bảng 3.1 tóm tắt năm bước."),
+    ("table", "dagster"),
+    ("p", "Ba bảng etl_stage_exam, etl_stage_session và etl_stage_event nhận dữ liệu thô ở bước extract; cổng chất lượng chỉnh cờ is_valid; bước cuối xóa staging sau khi đã cập nhật etl_batch. Cách này giúp mỗi mẻ có thể đối soát độc lập và không để hàng bị loại lẫn vào fact."),
+    ("p", "Bước audit in ra đường đối soát dạng exam: 344=344+0 và session: 822=822+0. Nếu một trong hai vế lệch, selfcheck sẽ dừng ở ca tương ứng thay vì báo chung chung là ETL chạy xong."),
+
+    ("h2", "3.4. Hai cổng web"),
+    ("p", "Cổng /hoc-tap là nơi tác nghiệp. FastAPI nhận bài nộp, chấm theo đáp án trong OLTP rồi mới ghi lần làm; trình duyệt không nhận đáp án trước khi nộp [7]. Phiên học do server tính điểm: 70 phần trăm theo tỷ lệ thời lượng so với bài chuẩn, 30 phần trăm theo số tương tác nhưng không quá mười lần bấm, trần là 10 điểm."),
+    ("p", "Cổng /bi là nơi phân tích. Dashboard lấy điểm trung bình theo môn từ iv_diem_theo_mon_thang, các nút OLAP gọi app/olap.py để sinh SQL và bảng kết quả, trang chất lượng đọc etl_batch và etl_reject. Việc đọc kho diễn ra bất đồng bộ với việc ghi OLTP: web không khởi động ETL, Dagster mới là nơi điều phối."),
+    ("fig", "dashboard", 12.5),
+    ("fig", "lamde", 12.5),
+    ("table", "ports"),
+
+    ("h2", "3.5. Tối ưu bằng indexed view"),
+    ("p", "Hai indexed view được khai báo WITH SCHEMABINDING kèm unique clustered index, nên SQL Server tự bảo trì khi fact thay đổi [8]. Dashboard không phải xóa rồi chèn lại một bảng tổng hợp thủ công. Khi truy vấn, dùng WITH (NOEXPAND) để optimizer đọc trực tiếp chỉ mục của view thay vì mở rộng định nghĩa."),
+    ("p", "Với tập Seed 9, iv_diem_theo_mon_thang chỉ còn 109 dòng thay vì 344 dòng của fact. Con số này là lý do chính để dùng tầng tổng hợp; phần đo thời gian được ghi lại ở Chương 4 kèm lưu ý về cỡ dữ liệu còn nhỏ."),
+
+    ("h2", "3.6. Khối đa chiều SSAS và Excel PivotTable"),
+    ("p", "Dự án HocTapOLAP nằm trong Visual Studio SSDT. Data Source trỏ tới DW_QuanLyHocTap; DSV chọn đúng bảy bảng gồm hai fact và năm chiều, không kéo quan hệ giữa hai bảng fact [9]. Chiều học sinh dùng hoc_sinh_key làm khóa vì cùng một ma_hoc_sinh có nhiều dòng SCD."),
+    ("fig", "dsv", 12.5),
+    ("p", "Cube có hai measure group là Ket qua thi va Chuyen can. Ba chiều thời gian, học sinh, môn gắn cả hai nhóm đo; đề chỉ gắn kết quả thi, bài học chỉ gắn chuyên cần. Partition MOLAP có thể bật Proactive Caching với khoảng im lặng khoảng mười giây để Excel Refresh thấy dòng mới."),
+    ("p", "Excel PivotTable kết nối vào cube HocTapOLAP và thực hiện năm thao tác ở mục 4.5. Lưu ý quan trọng: sau khi DW có dữ liệu mới từ Dagster, khối SSAS cần được Process lại thì Excel mới thấy số liệu mới; web /bi thì đọc thẳng SQL Server nên không cần bước này."),
+
+    ("h1", "CHƯƠNG 4. THỰC NGHIỆM, KIỂM CHỨNG VÀ ĐÁNH GIÁ", True),
+    ("h2", "4.1. Tập đo và môi trường thực nghiệm"),
+    ("p", "Mọi số liệu trong chương này đo trên tập Seed 9 vừa sinh, chạy trên laptop Windows, Python 3.12, SQL Server cài local và pyodbc. Khi chạy python -m app.selfcheck, chương trình tạo CSDL có hậu tố _KiemTra, nạp Seed 9, chạy hai mẻ ETL rồi xóa CSDL đó, nên không làm đổi dữ liệu demo. Kết quả là 31 ca đều đạt."),
+    ("table", "seed"),
+    ("table", "subject"),
+    ("p", "Tổng lượt sáu môn là 56 + 54 + 60 + 56 + 66 + 52 = 344, khớp số dòng fact. Đây là dữ liệu giả lập có kiểm soát, không phải phổ điểm thật của lớp. Các con số 6,72 điểm thi trung bình và 13 197 phút học chỉ có nghĩa trong phạm vi Seed 9."),
+
+    ("h2", "4.2. Kiểm chứng SCD Type 2"),
+    ("p", "Học sinh B23DCKD004 có đúng hai phiên bản. Bản 1 khóa 1, lớp D23CQKD03, từ 05/09/2026 đến 12/10/2026 08:00, is_current = 0. Bản 2 khóa 49, lớp D23CQCN01, từ 12/10/2026 08:00 đến 9999-12-31, is_current = 1. End_Date của bản cũ trùng Start_Date của bản mới, đúng yêu cầu SCD Type 2."),
+    ("table", "scd"),
+    ("fig", "scd", 12.5),
+    ("p", "Câu kiểm chứng nằm trong selfcheck: không có bài trước 12/10 gắn bản 2 và không có bài từ 12/10 gắn bản 1. Bài ngày 28/09 môn Xác suất thống kê trỏ khóa 1 và lớp KD03; bài ngày 20/10 môn Cơ sở dữ liệu trỏ khóa 49 và lớp CN01. Khi phát sinh thêm sự kiện cảnh báo học vụ, bản 3 mở ra nhưng các bài tháng 9 và tháng 10 vẫn giữ khóa cũ."),
+
+    ("h2", "4.3. Drill-across chống fan-out"),
+    ("p", "Trên toàn tập, vw_drill_across trả 278 cặp mã học sinh × môn: 186 cặp có cả điểm lẫn phút, 15 cặp chỉ có điểm, 77 cặp chỉ có chuyên cần. FULL OUTER JOIN giữ lại 92 cặp mà inner join sẽ làm mất. Đây là mặt đúng của drill-across."),
+    ("p", "Mặt còn lại là chống nhân bản. Chọn B23DCKD004 và môn Cơ sở dữ liệu vì tích 5 nhân 7 đủ nhỏ để nhẩm. Học sinh này có 5 lượt thi, tổng 26 điểm và 7 phiên học, tổng 110,5 phút. Nối thẳng hai fact theo cùng học sinh và môn cho ra 35 dòng, tổng điểm thành 182 và tổng phút thành 552,8. Các con số 35 = 5 × 7 và 182 = 26 × 7 đúng là hệ quả của việc nhân hạt."),
+    ("table", "fanout"),
+    ("fig", "drill_ui", 12.5),
+    ("fig", "drill_ssms", 12.5),
+    ("p", "Cách sửa là gộp từng fact về hạt mã học sinh × môn trước, rồi FULL OUTER JOIN theo hai chiều dùng chung. Câu truy vấn nằm ở vw_drill_across trong app_dw.sql và app/olap.py. Bảng kết quả cuối cùng giữ đúng 5 bài, 26 điểm, 7 phiên và 110,5 phút, không bị nhân."),
+
+    ("h2", "4.4. Indexed view, Execution Plan và STATISTICS IO"),
+    ("p", "So sánh trực tiếp hai cách đọc: quét fact_ket_qua_thi rồi GROUP BY môn và lớp phải đọc 344 dòng, trong khi iv_diem_theo_mon_thang WITH (NOEXPAND) chỉ đọc 109 dòng. Trên SSMS, bật SET STATISTICS IO ON và SET STATISTICS TIME ON rồi chạy hai câu liên tiếp để thấy logical reads và thời gian của từng bên [8]."),
+    ("table", "perf"),
+    ("fig", "ssms_io", 12.5),
+    ("p", "Đo 40 vòng liên tiếp trên cùng máy cho kết quả 309,6 ms khi quét fact và 109,2 ms khi đọc indexed view. Con số này là thời gian đi qua pyodbc, không phải phép đo thuần trong SSMS. Với 344 dòng thì chênh lệch chưa lớn; nhóm không nói indexed view nhanh hơn hàng chục lần. Lợi ích nhìn thấy ngay là số dòng phải đọc giảm từ 344 xuống 109 và view tự cập nhật khi fact đổi."),
+    ("p", "Execution Plan trên SSMS cho thấy câu dùng WITH (NOEXPAND) đọc trực tiếp unique clustered index ux_iv_diem_theo_mon_thang, còn câu quét fact phải dùng nonclustered index rồi làm GROUP BY. Ảnh chụp riêng cho Execution Plan và STATISTICS IO hiện chưa có trong thư mục ảnh; nhóm liệt kê ở phần tổng kết để bổ sung trước khi bảo vệ."),
+
+    ("h2", "4.5. Năm thao tác OLAP trên Excel PivotTable"),
+    ("p", "Roll-up để hierarchy H_ThoiGian ở mức Năm học và Học kỳ gom các tháng thành một dòng HK1 2026-2027, vẫn 344 lượt và điểm trung bình 6,72. Drill-down mở dấu cộng tại học kỳ để xem ba tháng 9, 10, 11. Slice cố định môn Kho dữ liệu. Dice cắt thêm lớp D23CQKD03 và khoảng 01/09 đến 04/11. Pivot đưa lớp xuống hàng, môn sang cột rồi đổi chỗ để xoay cùng một khối."),
+    ("fig", "excel_roll", 12.5),
+    ("fig", "excel_pivot", 12.5),
+    ("p", "Trên cổng /bi, năm nút tương ứng trả về câu SQL vừa thực thi và bảng kết quả, nên có thể đối chiếu ngay với PivotTable. Không kéo đồng thời số lượt của hai measure group rồi nhân chúng; muốn so điểm và phút thì dùng vw_drill_across làm bản đối soát đúng hạt."),
+
+    ("h2", "4.6. Đánh giá kết quả và hạn chế"),
+    ("p", "Kết quả đạt được là hai CSDL SQL Server tách biệt, tám bảng OLTP 3NF, hai fact, năm chiều, unknown member -1, SCD Type 2, cổng chất lượng bảy luật, đối soát Nguồn = Nạp + Loại, hai cổng web, tầng tổng hợp và khối SSAS. Bộ sinh Seed 9 cho cùng một tập số liệu mỗi lần chạy, còn selfcheck phủ 31 ca cần đối chiếu khi bảo vệ."),
+    ("p", "Hạn chế thứ nhất là dữ liệu mô phỏng, câu hỏi trắc nghiệm ngắn và thời gian chỉ trải từ tháng 9 đến tháng 11. Hạn chế thứ hai là watermark không xử lý lại dòng đã loại nếu người dùng sửa cùng id. Hạn chế thứ ba là chưa có đăng nhập, người bảo vệ chọn học sinh trên danh sách. Với 344 dòng, chênh lệch thời gian giữa indexed view và quét fact chưa thể hiện lợi thế ở quy mô triệu dòng."),
+    ("p", "Hướng phát triển gần nhất là bật proactive caching cho partition MOLAP với khoảng im lặng mười giây để Excel Refresh thấy bài nộp mới sau khi Dagster đã đẩy sang SQL Server. Hàng bị loại nên tách thành hàng đợi sửa và được nạp lại sau khi OLTP chỉnh xong. Lược đồ hai fact và chiều dùng chung đã cố định nên không phải thiết kế lại khối."),
+
+    ("h1", "KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN", True),
+    ("p", "Nhóm đã hoàn thành hệ thống quản lý học tập và ôn luyện trực tuyến chạy hoàn toàn trên Microsoft SQL Server. Nguồn OLTP nhận nghiệp vụ thật từ cổng /hoc-tap, Dagster điều phối năm bước ETL sang DW_QuanLyHocTap, cổng /bi đọc tầng tổng hợp và khối HocTapOLAP phục vụ Excel PivotTable. Trên tập Seed 9, mọi đối soát đều khớp: 344 bài, 822 phiên, 51 phiên bản học sinh và 109 dòng indexed view."),
+    ("p", "Ba điểm nhấn kỹ thuật đã được kiểm chứng bằng số liệu: SCD Type 2 giữ đúng lớp tại thời điểm nộp cho B23DCKD004; vw_drill_across tránh nhân 5 bài với 7 phiên thành 35 dòng; iv_diem_theo_mon_thang giảm số dòng phải đọc từ 344 xuống 109. Selfcheck đạt 31/31."),
+    ("p", "Phần còn thiếu chủ yếu là ảnh chụp Execution Plan và STATISTICS IO, cùng bản xuất PNG của hai sơ đồ .drawio. Đây không làm sai số liệu nhưng cần bổ sung để hồ sơ bảo vệ đầy đủ. Khi DW có dữ liệu mới, nhớ process lại khối SSAS trước khi đọc trên Excel."),
+
+    ("h1", "TÀI LIỆU THAM KHẢO", True),
+    ("ref",),
+
+    ("h1", "PHỤ LỤC", True),
+    ("p", "Mã nguồn: https://github.com/BinhTHB/btl-kho-du-lieu.git (nhánh main)."),
+    ("p", "Chạy ứng dụng: python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 rồi mở http://127.0.0.1:8000; chạy Dagster tại http://127.0.0.1:3000. Sinh lại dữ liệu: python mockup_generator\\generate_sample_data.py. Kiểm tra: python -m app.selfcheck."),
+    ("p", "Tài liệu liên quan: ssas/HUONG_DAN_SSAS_VA_EXCEL.md, sql/04_truy_van_minh_hoa.sql, sql/06_sqlserver_dw_and_indexed_views.sql và ssas/HocTapOLAP_Excel.xlsx."),
+]
+
+# ---------------------------------------------------------------------------
+# Tiện ích DOCX
+# ---------------------------------------------------------------------------
+def set_run_font(run, size=13, bold=False, italic=False):
     run.font.name = "Times New Roman"
     run.font.size = Pt(size)
     run.font.bold = bold
+    run.font.italic = italic
     run.font.color.rgb = RGBColor(0, 0, 0)
     rpr = run._element.get_or_add_rPr()
     fonts = rpr.find(qn("w:rFonts"))
@@ -123,275 +442,67 @@ def set_run_font(run, size=13, bold=False):
         fonts.set(qn(attr), "Times New Roman")
 
 
-def format_paragraph(paragraph, *, indent=True, center=False, bold=False, size=13):
+def format_paragraph(paragraph, *, indent=True, center=False, bold=False, size=13, justify=True):
     fmt = paragraph.paragraph_format
     fmt.space_before = Pt(6)
     fmt.space_after = Pt(6)
     fmt.line_spacing = 1.3
-    fmt.first_line_indent = Cm(1 if indent and not bold else 0)
-    fmt.alignment = WD_ALIGN_PARAGRAPH.CENTER if center else WD_ALIGN_PARAGRAPH.JUSTIFY
-    if paragraph.runs:
-        paragraph.runs[0].text = paragraph.runs[0].text
-        set_run_font(paragraph.runs[0], size=size, bold=bold)
-        for extra in paragraph.runs[1:]:
-            set_run_font(extra, size=size, bold=bold)
+    fmt.first_line_indent = Cm(1 if indent and not bold and not center else 0)
+    if center:
+        fmt.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    elif justify:
+        fmt.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    for run in paragraph.runs:
+        set_run_font(run, size=size, bold=bold)
 
 
-def insert_after(paragraph, text, *, bold=False, indent=True, center=False, size=13):
+def insert_after(paragraph, text="", *, bold=False, indent=True, center=False, size=13):
     new_p = OxmlElement("w:p")
     paragraph._p.addnext(new_p)
-    new_para = Paragraph(new_p, paragraph._parent)
-    run = new_para.add_run(text)
-    set_run_font(run, size=size, bold=bold)
-    format_paragraph(new_para, indent=indent, center=center, bold=bold, size=size)
-    return new_para
-
-
-def delete_paragraph(paragraph):
-    element = paragraph._element
-    parent = element.getparent()
-    if parent is not None:
-        parent.remove(element)
-
-
-def replace_tokens(doc):
-    def handle(paragraph):
-        for run in paragraph.runs:
-            for old, new in COVER.items():
-                if old in run.text:
-                    run.text = run.text.replace(old, new)
-
-    for paragraph in doc.paragraphs:
-        handle(paragraph)
-    for table in doc.tables:
-        for row in table.rows:
-            for cell in row.cells:
-                for paragraph in cell.paragraphs:
-                    handle(paragraph)
-    for section in doc.sections:
-        for paragraph in section.header.paragraphs:
-            handle(paragraph)
-        for paragraph in section.footer.paragraphs:
-            handle(paragraph)
-
-
-def style_headings(doc):
-    for name, size in (("Heading 1", 14), ("Heading 2", 13)):
-        style = doc.styles[name]
-        style.font.name = "Times New Roman"
-        style.font.size = Pt(size)
-        style.font.bold = True
-        style.font.color.rgb = RGBColor(0, 0, 0)
-        style.paragraph_format.space_before = Pt(12)
-        style.paragraph_format.space_after = Pt(6)
-        style.paragraph_format.line_spacing = 1.3
-        style.paragraph_format.first_line_indent = Cm(0)
-
-
-def paint_cell(cell, text, bold=False):
-    paragraph = cell.paragraphs[0]
-    for run in paragraph.runs:
-        run.text = ""
-    run = paragraph.runs[0] if paragraph.runs else paragraph.add_run()
-    run.text = text
-    set_run_font(run, size=12, bold=bold)
-    paragraph.paragraph_format.first_line_indent = Cm(0)
-    paragraph.paragraph_format.space_before = Pt(2)
-    paragraph.paragraph_format.space_after = Pt(2)
-
-
-def fill_abbreviations(doc):
-    rows = [
-        ("OLTP", "Online Transaction Processing", "Xử lý giao dịch tác nghiệp"),
-        ("OLAP", "Online Analytical Processing", "Xử lý phân tích trực tuyến"),
-        ("ETL", "Extract, Transform, Load", "Trích xuất, biến đổi và nạp"),
-        ("SCD", "Slowly Changing Dimension", "Chiều biến đổi chậm"),
-        ("DW", "Data Warehouse", "Kho dữ liệu"),
-    ]
-    table = doc.tables[0]
-    for index, values in enumerate(rows, start=1):
-        for col, value in enumerate(values):
-            paint_cell(table.rows[index].cells[col], value, bold=False)
-
-
-def add_table_after(paragraph, caption, headers, data):
-    caption_p = insert_after(paragraph, caption, bold=True, indent=False, center=True, size=13)
-    table = paragraph.part.document.add_table(rows=1 + len(data), cols=len(headers))
-    try:
-        table.style = "Table Grid"
-    except KeyError:
-        pass
-    caption_p._p.addnext(table._tbl)
-    for col, header in enumerate(headers):
-        paint_cell(table.rows[0].cells[col], header, bold=True)
-    for row_index, row in enumerate(data):
-        for col, value in enumerate(row):
-            paint_cell(table.rows[row_index + 1].cells[col], str(value), bold=False)
-    tail = OxmlElement("w:p")
-    table._tbl.addnext(tail)
-    return Paragraph(tail, paragraph._parent)
-
-
-def insert_figure_after(paragraph, image_path, caption):
-    pic_p = OxmlElement("w:p")
-    paragraph._p.addnext(pic_p)
-    pic_para = Paragraph(pic_p, paragraph._parent)
-    pic_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    pic_para.paragraph_format.first_line_indent = Cm(0)
-    pic_para.paragraph_format.space_before = Pt(6)
-    pic_para.paragraph_format.space_after = Pt(2)
-    run = pic_para.add_run()
-    run.add_picture(str(image_path), width=Cm(14.8))
-    return insert_after(pic_para, caption, bold=True, indent=False, center=True, size=13)
-
-
-def chen_phieu(doc):
-    cover = next(p for p in doc.paragraphs if p.text.strip().startswith("HÀ NỘI"))
-    breaker = insert_after(cover, "", indent=False, center=True)
-    breaker.runs[0].add_break(WD_BREAK.PAGE)
-    title = insert_after(
-        breaker,
-        "PHIẾU PHÂN CÔNG NHIỆM VỤ & ĐÁNH GIÁ NHÓM",
-        bold=True,
-        indent=False,
-        center=True,
-        size=14,
-    )
-    title.style = doc.styles["Heading 1"]
-    title.paragraph_format.first_line_indent = Cm(0)
-    intro = insert_after(
-        title,
-        "Nhóm 9, lớp D23CQKD02-B, học phần Kho dữ liệu, lớp học phần Nhóm 2. Giảng viên hướng dẫn: ThS. Nguyễn Thị Thu Hiên.",
-        indent=False,
-    )
-    head = insert_after(intro, "1. Thông tin chung", bold=True, indent=False)
-    tail = add_table_after(
-        head,
-        "Bảng 1. Thông tin phân công bốn thành viên Nhóm 9",
-        ["STT", "Họ và tên", "MSSV", "Vai trò chính", "Công việc được giao"],
-        [
-            ["1", "Nguyễn Quý Tường Anh", "B23DCKD004", "Kiến trúc kho, SCD và ETL", "Thiết kế kiến trúc Kho dữ liệu Fact Constellation, cài đặt SCD Type 2, xây dựng luồng ETL và kiểm soát chất lượng dữ liệu."],
-            ["2", "Tạ Hoà Bình", "B23DCKD008", "SQL Server và SSAS", "Triển khai Kho dữ liệu trên SQL Server (SSMS), thiết kế khối đa chiều SSAS Data Cube, phân cấp Hierarchy và kết nối báo cáo OLAP."],
-            ["3", "Nguyễn Tiến Đạt", "B23DCKD014", "OLTP và giao diện", "Phát triển hệ thống nguồn OLTP, xây dựng bộ sinh dữ liệu Streaming Simulator và giao diện Web Frontend/Dashboard."],
-            ["4", "Mai Quốc Hưng", "B23DCKD030", "Tầng tổng hợp và báo cáo", "Thiết kế tầng tổng hợp (Materialized/Indexed Views), truy vấn đối soát Drill-Across, kiểm thử hiệu năng và biên soạn báo cáo."],
-        ],
-    )
-    head = insert_after(tail, "2. Đánh giá đóng góp cá nhân", bold=True, indent=False)
-    tail = add_table_after(
-        head,
-        "Bảng 2. Đánh giá đóng góp cá nhân",
-        ["Tiêu chí", "Trọng số", "Tường Anh", "Hoà Bình", "Tiến Đạt", "Quốc Hưng"],
-        [
-            ["Hoàn thành nhiệm vụ", "50%", "48", "48", "48", "48"],
-            ["Hợp tác, hỗ trợ nhóm", "30%", "28", "28", "28", "28"],
-            ["Trình bày, báo cáo", "20%", "19", "19", "19", "19"],
-            ["Tổng điểm cá nhân", "100%", "95", "95", "95", "95"],
-        ],
-    )
-    tail = insert_after(
-        tail,
-        "Điểm cá nhân = Điểm nhóm × 80% + Điểm cá nhân (từ bảng trên) × 20%.",
-        indent=False,
-    )
-    tail = insert_after(tail, "3. Nhận xét của nhóm trưởng", bold=True, indent=False)
-    tail = insert_after(
-        tail,
-        "Trong quá trình thực hiện bài tập lớn, các thành viên đã hoàn thành đúng phần việc được phân công: kiến trúc kho và SCD, triển khai SQL Server cùng khối SSAS, nguồn OLTP cùng giao diện, tầng tổng hợp và báo cáo. Mốc đối soát 344 lần nộp, 822 phiên học và 51 phiên bản học sinh được dùng chung cho bản thảo và kịch bản bảo vệ.",
-    )
-    tail = insert_after(tail, "Nhóm trưởng: Nguyễn Quý Tường Anh", indent=False)
-    tail = insert_after(tail, "4. Xác nhận của giảng viên", bold=True, indent=False)
-    tail = insert_after(tail, "Giảng viên hướng dẫn: ThS. Nguyễn Thị Thu Hiên", indent=False)
-    tail = insert_after(tail, "Điểm bài tập lớn: ............", indent=False)
-    tail = insert_after(tail, "Nhận xét: ................................................................", indent=False)
-    insert_after(tail, "(Ký tên và ghi điểm cuối cùng)", indent=False, center=True)
-
-
-HINH_DIR = Path(__file__).resolve().parent / "hinh"
-FIGURES = [
-    ("Hình 2.1 mô tả lối đi này.", ["hinh_2_1_kien_truc.png"], "Hình 2.1: Sơ đồ kiến trúc tổng thể hệ thống"),
-    ("Hình 2.2 đặt hai fact", ["hinh_2_2_chom_sao.png"], "Hình 2.2: Lược đồ hình chòm sao của hai fact và các chiều"),
-    ("Hình 3.1 chụp bảng điều khiển", ["hinh_3_1_dashboard.png"], "Hình 3.1: Bảng điều khiển pipeline và số liệu kho"),
-    ("Hình 3.2 chụp cổng làm đề", ["hinh_3_2_lam_de.png"], "Hình 3.2: Giao diện làm đề và nộp bài"),
-    ("Hình 3.3 chụp màn hình", ["hinh_3_3_scd.png"], "Hình 3.3: Kịch bản kiểm thử biến động học vụ SCD Type 2"),
-    ("Hình 4.1 chụp bảng drill-across", ["hinh_4_1_drill_across.png"], "Hình 4.1: Kịch bản đối soát drill-across trên giao diện"),
-    ("Hình 4.2 là kết quả câu", ["hinh_4_2_ssms_query.png", "hinh_4_1_ssms_query.png"], "Hình 4.2: Kết quả drill-across trên SQL Server"),
-    ("Hình 4.3 là Data Source View", ["hinh_4_3_ssas_dsv.png", "hinh_4_2_ssas_dsv.png"], "Hình 4.3: Data Source View và hierarchy của khối SSAS"),
-]
-
-
-def _anh_co_san(names):
-    for name in names:
-        path = HINH_DIR / name
-        if path.is_file() and path.stat().st_size > 0:
-            return path
-    return None
-
-
-def chen_hinh(doc):
-    inserted = []
-    missing = []
-    tail_of = {}
-    for needle, names, caption in FIGURES:
-        found = [p for p in doc.paragraphs if needle in p.text]
-        path = _anh_co_san(names)
-        if path is None:
-            missing.append(names[0])
-            continue
-        if not found:
-            missing.append(names[0] + " (không thấy chỗ chèn)")
-            continue
-        anchor = tail_of.get(found[0]._p, found[0])
-        cap = insert_figure_after(anchor, path, caption)
-        tail_of[found[0]._p] = insert_after(cap, "Nguồn: Nhóm thực hiện", indent=False, center=True, size=11)
-        inserted.append(caption)
-    if missing:
-        print("Chưa có ảnh, bỏ qua:", ", ".join(missing))
-    return inserted
-
-
-def apply_heading_styles(doc, body_start):
-    h1_prefixes = (
-        "PHẦN MỞ ĐẦU",
-        "CHƯƠNG ",
-        "KẾT LUẬN",
-        "TÀI LIỆU THAM KHẢO",
-        "DANH MỤC BẢNG",
-    )
-    for index, paragraph in enumerate(doc.paragraphs):
-        if index < body_start:
-            continue
-        text = paragraph.text.strip()
-        if text.startswith(h1_prefixes):
-            paragraph.style = doc.styles["Heading 1"]
-            paragraph.paragraph_format.first_line_indent = Cm(0)
-        elif re.match(r"^\d+(\.\d+)*\.?\s+\S", text) and not text.startswith("["):
-            paragraph.style = doc.styles["Heading 2"]
-            paragraph.paragraph_format.first_line_indent = Cm(0)
-
-
-def _dat_doan(paragraph, text):
-    if paragraph.runs:
-        paragraph.runs[0].text = text
-        for run in paragraph.runs[1:]:
-            run.text = ""
-        set_run_font(paragraph.runs[0], size=13, bold=paragraph.runs[0].bold)
-    else:
-        run = paragraph.add_run(text)
-        set_run_font(run, size=13, bold=False)
-
-
-def _chen_truoc(paragraph, text):
-    new_p = OxmlElement("w:p")
-    paragraph._p.addprevious(new_p)
     para = Paragraph(new_p, paragraph._parent)
-    run = para.add_run(text)
-    set_run_font(run, size=13, bold=True)
-    para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    para.paragraph_format.first_line_indent = Cm(0)
+    if text:
+        run = para.add_run(text)
+        set_run_font(run, size=size, bold=bold)
+    format_paragraph(para, indent=indent, center=center, bold=bold, size=size)
     return para
 
 
-def _them_cot(table):
+def set_paragraph_text(paragraph, text, *, bold=False, size=13, center=False):
+    if paragraph.runs:
+        paragraph.runs[0].text = text
+        for extra in paragraph.runs[1:]:
+            extra.text = ""
+        set_run_font(paragraph.runs[0], size=size, bold=bold)
+    else:
+        run = paragraph.add_run(text)
+        set_run_font(run, size=size, bold=bold)
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER if center else paragraph.alignment
+    paragraph.paragraph_format.first_line_indent = Cm(0)
+
+
+def paint_cell(cell, text, bold=False, size=11):
+    # Khung mẫu thường có nhiều đoạn trong một ô; xóa hết để không lẫn nội dung cũ
+    for extra in cell.paragraphs[1:]:
+        element = extra._element
+        element.getparent().remove(element)
+    paragraph = cell.paragraphs[0]
+    if paragraph.runs:
+        paragraph.runs[0].text = str(text)
+        for extra in paragraph.runs[1:]:
+            extra.text = ""
+        set_run_font(paragraph.runs[0], size=size, bold=bold)
+    else:
+        run = paragraph.add_run(str(text))
+        set_run_font(run, size=size, bold=bold)
+    paragraph.paragraph_format.first_line_indent = Cm(0)
+    paragraph.paragraph_format.space_before = Pt(2)
+    paragraph.paragraph_format.space_after = Pt(2)
+    paragraph.paragraph_format.line_spacing = 1.0
+    # Căn trái cho bảng dễ đọc; tiêu đề bảng được in đậm
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+
+def add_column(table):
     tbl = table._tbl
     grid = tbl.tblGrid
     cols = grid.findall(qn("w:gridCol"))
@@ -401,7 +512,100 @@ def _them_cot(table):
         row.append(deepcopy(cells[-1]))
 
 
-def _cat_tu(doc, start_text):
+def style_headings(doc):
+    for name, size in (("Heading 1", 14), ("Heading 2", 13), ("Heading 3", 13)):
+        style = doc.styles[name]
+        style.font.name = "Times New Roman"
+        style.font.size = Pt(size)
+        style.font.bold = True
+        style.font.color.rgb = RGBColor(0, 0, 0)
+        style.paragraph_format.space_before = Pt(12)
+        style.paragraph_format.space_after = Pt(6)
+        style.paragraph_format.line_spacing = 1.3
+        style.paragraph_format.first_line_indent = Cm(0)
+    for name in ("Normal", "List Paragraph"):
+        style = doc.styles[name]
+        style.font.name = "Times New Roman"
+        style.font.size = Pt(13)
+        style.paragraph_format.line_spacing = 1.3
+
+
+def enable_field_update(doc):
+    settings = doc.settings.element
+    for tag in ("w:updateFields",):
+        old = settings.find(qn(tag))
+        if old is not None:
+            settings.remove(old)
+    node = OxmlElement("w:updateFields")
+    node.set(qn("w:val"), "true")
+    settings.append(node)
+
+
+def insert_toc_field(doc, paragraph):
+    """Chèn trường TOC tự động ngay sau một đoạn."""
+    new_p = OxmlElement("w:p")
+    paragraph._p.addnext(new_p)
+    para = Paragraph(new_p, paragraph._parent)
+    para.paragraph_format.first_line_indent = Cm(0)
+    para.paragraph_format.space_before = Pt(0)
+    para.paragraph_format.space_after = Pt(6)
+
+    def field_run(kind, text=None):
+        run = para.add_run()
+        if text is not None:
+            run.text = text
+            set_run_font(run, size=11)
+        node = OxmlElement("w:fldChar")
+        node.set(qn("w:fldCharType"), kind)
+        run._r.append(node)
+        return run
+
+    field_run("begin")
+    run = para.add_run()
+    instr = OxmlElement("w:instrText")
+    instr.set(qn("xml:space"), "preserve")
+    instr.text = ' TOC \\o "1-3" \\h \\z \\u '
+    run._r.append(instr)
+    field_run("separate")
+    run = para.add_run("Nhấn F9 để cập nhật mục lục.")
+    set_run_font(run, size=11)
+    field_run("end")
+    return para
+
+
+def add_table_after(paragraph, spec):
+    caption = insert_after(paragraph, spec["caption"], bold=True, indent=False, center=True, size=12)
+    table = paragraph.part.document.add_table(rows=1 + len(spec["rows"]), cols=len(spec["headers"]))
+    try:
+        table.style = "Table Grid"
+    except KeyError:
+        pass
+    caption._p.addnext(table._tbl)
+    for col, header in enumerate(spec["headers"]):
+        paint_cell(table.rows[0].cells[col], header, bold=True, size=10)
+    for r, row in enumerate(spec["rows"]):
+        for c, value in enumerate(row):
+            paint_cell(table.rows[r + 1].cells[c], value, bold=False, size=10)
+    tail = OxmlElement("w:p")
+    table._tbl.addnext(tail)
+    return Paragraph(tail, paragraph._parent)
+
+
+def add_figure_after(paragraph, image_path, caption, width_cm=12.5):
+    pic_p = OxmlElement("w:p")
+    paragraph._p.addnext(pic_p)
+    pic_para = Paragraph(pic_p, paragraph._parent)
+    pic_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    pic_para.paragraph_format.first_line_indent = Cm(0)
+    pic_para.paragraph_format.space_before = Pt(6)
+    pic_para.paragraph_format.space_after = Pt(2)
+    run = pic_para.add_run()
+    run.add_picture(str(image_path), width=Cm(width_cm))
+    cap = insert_after(pic_para, caption, bold=True, indent=False, center=True, size=12)
+    return insert_after(cap, "Nguồn: Nhóm thực hiện", indent=False, center=True, size=10)
+
+
+def cut_after(doc, start_text):
     body = doc.element.body
     start = None
     for child in list(body):
@@ -412,7 +616,7 @@ def _cat_tu(doc, start_text):
             start = child
             break
     if start is None:
-        raise SystemExit(f"Không thấy mốc '{start_text}' trong file mẫu")
+        raise SystemExit(f"Không thấy mốc '{start_text}' trong khung mẫu")
     removing = False
     for child in list(body):
         if child is start:
@@ -421,14 +625,49 @@ def _cat_tu(doc, start_text):
             body.remove(child)
 
 
-def _tieu_de(anchor, text, level):
-    para = insert_after(anchor, text, bold=True, indent=False, size=14 if level == 1 else 13)
-    para.style = para.part.document.styles["Heading 1" if level == 1 else "Heading 2"]
+def heading(doc, text, level, newpage=False):
+    para = insert_after(doc._cursor, text, bold=True, indent=False,
+                        center=(level == 1), size=14 if level == 1 else 13)
+    para.style = doc.styles["Heading 1" if level == 1 else "Heading 2"]
     para.paragraph_format.first_line_indent = Cm(0)
-    para.alignment = WD_ALIGN_PARAGRAPH.CENTER if level == 1 else WD_ALIGN_PARAGRAPH.LEFT
+    if newpage:
+        para.paragraph_format.page_break_before = True
+    doc._cursor = para
     return para
 
 
+def emit_block(doc, block):
+    kind = block[0]
+    if kind == "h1":
+        heading(doc, block[1], 1, newpage=bool(block[2]) if len(block) > 2 else False)
+    elif kind == "h2":
+        heading(doc, block[1], 2)
+    elif kind == "p":
+        doc._cursor = insert_after(doc._cursor, block[1])
+    elif kind == "table":
+        doc._cursor = add_table_after(doc._cursor, TABLES[block[1]])
+    elif kind == "fig":
+        key, width = block[1], block[2]
+        info = FIGURES[key]
+        path = HINH / info["file"]
+        if path.is_file() and path.stat().st_size > 0:
+            doc._cursor = add_figure_after(doc._cursor, path, info["caption"], width)
+        else:
+            print("Không chèn ảnh (file không tồn tại):", path)
+    elif kind == "ref":
+        for text in REFERENCES:
+            doc._cursor = insert_after(doc._cursor, text, indent=False)
+    elif kind == "pagebreak":
+        para = insert_after(doc._cursor, "", indent=False)
+        para.runs and para.runs[0].add_break(WD_BREAK.PAGE)
+        doc._cursor = para
+    else:
+        raise ValueError(f"Block không rõ: {kind}")
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 def main():
     if not TEMPLATE.exists():
         raise SystemExit(f"Không thấy khung mẫu: {TEMPLATE}")
@@ -437,197 +676,111 @@ def main():
         backup_docx(DEST)
     shutil.copy2(TEMPLATE, DEST)
     doc = Document(str(DEST))
+    # Bỏ các đề mục rỗng có sẵn trong khung mẫu (chỉ là đoạn ngắt trang)
+    for para in list(doc.paragraphs):
+        if para.style.name.startswith("Heading") and not para.text.strip():
+            element = para._element
+            element.getparent().remove(element)
     style_headings(doc)
+    enable_field_update(doc)
 
+    # --- Bìa ---
     hoc_vien = next(p for p in doc.paragraphs if p.text.strip().startswith("HỌC VIỆN"))
     if not any(p.text.strip().startswith("BỘ THÔNG TIN") for p in doc.paragraphs):
-        _chen_truoc(hoc_vien, "BỘ THÔNG TIN VÀ TRUYỀN THÔNG")
+        new_p = OxmlElement("w:p")
+        hoc_vien._p.addprevious(new_p)
+        first = Paragraph(new_p, hoc_vien._parent)
+        run = first.add_run("BỘ THÔNG TIN VÀ TRUYỀN THÔNG")
+        set_run_font(run, size=13, bold=True)
+        first.alignment = WD_ALIGN_PARAGRAPH.CENTER
     for paragraph in doc.paragraphs:
         text = paragraph.text.strip()
-        if text.startswith("ĐỀ TÀI"):
-            _dat_doan(paragraph, "ĐỀ TÀI: HỆ THỐNG QUẢN LÝ HỌC TẬP VÀ ÔN LUYỆN TRỰC TUYẾN")
-            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        if text.startswith("TIỂU LUẬN"):
+            set_paragraph_text(paragraph, "BÁO CÁO BÀI TẬP LỚN", bold=True, size=16, center=True)
+        elif text.startswith("ĐỀ TÀI"):
+            set_paragraph_text(paragraph, "ĐỀ TÀI: " + TEN_DE_TAI, bold=True, size=14, center=True)
         elif text.startswith("Hà Nội"):
-            _dat_doan(paragraph, "Hà Nội, tháng 11 năm 2026")
-            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            set_paragraph_text(paragraph, "Hà Nội, tháng 11 năm 2026", bold=True, size=13, center=True)
 
     bia = doc.tables[0]
-    paint_cell(bia.rows[0].cells[2], "ThS. Nguyễn Thị Thu Hiên", bold=False)
-    paint_cell(bia.rows[1].cells[2], "Hệ thống quản lý học tập và ôn luyện trực tuyến", bold=False)
-    paint_cell(bia.rows[2].cells[2], "Nhóm 9, lớp D23CQKD02-B", bold=False)
-    thanh_vien = [
-        "Nguyễn Quý Tường Anh – B23DCKD004",
-        "Tạ Hoà Bình – B23DCKD008",
-        "Nguyễn Tiến Đạt – B23DCKD014",
-        "Mai Quốc Hưng – B23DCKD030",
-    ]
+    paint_cell(bia.rows[0].cells[2], GVHD, size=11)
+    paint_cell(bia.rows[1].cells[2], "Nhóm 9 – Hệ thống Quản lý Học tập và Ôn luyện Trực tuyến", size=11)
+    paint_cell(bia.rows[2].cells[2], LOP, size=11)
     if len(bia.rows) < 7:
         bia.add_row()
-    for index, name in enumerate(thanh_vien):
-        paint_cell(bia.rows[3 + index].cells[2], name, bold=False)
+    for i, (name, mssv, _role, _work) in enumerate(THANH_VIEN):
+        paint_cell(bia.rows[3 + i].cells[2], f"{name} – {mssv}", size=11)
 
+    # --- Phiếu phân công & đánh giá (dùng bảng có sẵn của template) ---
     viec = doc.tables[1]
-    cong_viec = [
-        ["1", "Nguyễn Quý Tường Anh", "B23DCKD004", "Kiến trúc kho, SCD và ETL", "Thiết kế fact constellation, SCD Type 2, luồng ETL và cổng chất lượng."],
-        ["2", "Tạ Hoà Bình", "B23DCKD008", "SQL Server và SSAS", "Lược đồ SQL Server, indexed view, khối SSAS và hướng dẫn Excel."],
-        ["3", "Nguyễn Tiến Đạt", "B23DCKD014", "OLTP và giao diện", "Tám bảng OLTP 3NF, cổng nộp bài và dashboard."],
-        ["4", "Mai Quốc Hưng", "B23DCKD030", "Tổng hợp và báo cáo", "Đối soát drill-across, đo indexed view và biên soạn báo cáo."],
-    ]
-    while len(viec.rows) < 5:
+    while len(viec.rows) < 1 + len(THANH_VIEN):
         viec.add_row()
-    for row_index, values in enumerate(cong_viec, start=1):
-        for col, value in enumerate(values):
-            paint_cell(viec.rows[row_index].cells[col], value, bold=False)
+    # Hàng 0 là tiêu đề có sẵn của khung mẫu, giữ nguyên
+    for r, values in enumerate(TABLES["phan_cong"]["rows"], start=1):
+        for c, value in enumerate(values):
+            paint_cell(viec.rows[r].cells[c], value, bold=False, size=9)
 
     diem = doc.tables[2]
     if len(diem.columns) < 6:
-        _them_cot(diem)
-    bang_diem = [
-        ["Tiêu chí", "Trọng số", "Tường Anh", "Hoà Bình", "Tiến Đạt", "Quốc Hưng"],
-        ["Hoàn thành nhiệm vụ", "50%", "48", "48", "48", "48"],
-        ["Hợp tác, hỗ trợ nhóm", "30%", "28", "28", "28", "28"],
-        ["Trình bày, báo cáo", "20%", "19", "19", "19", "19"],
-        ["Tổng điểm cá nhân", "100%", "95", "95", "95", "95"],
-    ]
-    for row_index, values in enumerate(bang_diem):
-        for col, value in enumerate(values):
-            paint_cell(diem.rows[row_index].cells[col], value, bold=row_index == 0)
+        add_column(diem)
+    for r, values in enumerate(TABLES["diem"]["rows"]):
+        for c, value in enumerate(values):
+            paint_cell(diem.rows[r].cells[c], value, bold=(r == 0), size=10)
+    for r in range(len(TABLES["diem"]["rows"]), len(diem.rows)):
+        tr = diem.rows[r]._tr
+        tr.getparent().remove(tr)
 
     for paragraph in doc.paragraphs:
         if paragraph.text.strip().startswith("Trong quá trình thực hiện"):
-            _dat_doan(
+            set_paragraph_text(
                 paragraph,
-                "Trong quá trình thực hiện tiểu luận, các thành viên hoàn thành phần việc đã phân công: kiến trúc kho và SCD, SQL Server cùng khối SSAS, nguồn OLTP cùng giao diện, tầng tổng hợp và báo cáo. Mốc đối soát dùng chung là 344 lần nộp, 822 phiên học và 51 phiên bản học sinh. Nhóm trưởng xác nhận bảng điểm 48, 28 và 19 theo trọng số 50%, 30% và 20%.",
+                "Trong quá trình thực hiện bài tập lớn, các thành viên hoàn thành đúng phần việc đã phân công: "
+                "kiến trúc kho và SCD, triển khai SQL Server cùng khối SSAS, nguồn OLTP cùng hai cổng web, "
+                "tầng tổng hợp và báo cáo. Mốc đối soát dùng chung là 344 lần nộp, 822 phiên học và 51 phiên bản học sinh. "
+                "Nhóm trưởng xác nhận bảng điểm theo trọng số 50%, 30% và 20%.",
             )
 
-    _cat_tu(doc, "DANH MỤC THUẬT NGỮ")
+    # --- Xóa thân bài cũ của khung mẫu ---
+    cut_after(doc, "DANH MỤC THUẬT NGỮ")
     anchor = next(p for p in doc.paragraphs if "Ký tên" in p.text)
-    anchor = _tieu_de(anchor, "DANH MỤC THUẬT NGỮ VIẾT TẮT", 1)
-    anchor = add_table_after(
-        anchor,
-        "Bảng 0.1. Thuật ngữ dùng trong báo cáo",
-        ["Viết tắt", "Tiếng Anh", "Tiếng Việt"],
-        [
-            ["OLTP", "Online Transaction Processing", "Xử lý giao dịch tác nghiệp"],
-            ["OLAP", "Online Analytical Processing", "Xử lý phân tích trực tuyến"],
-            ["ETL", "Extract, Transform, Load", "Trích xuất, biến đổi và nạp"],
-            ["SCD", "Slowly Changing Dimension", "Chiều biến đổi chậm"],
-            ["3NF", "Third Normal Form", "Dạng chuẩn ba"],
-            ["SSAS", "SQL Server Analysis Services", "Dịch vụ phân tích của SQL Server"],
-        ],
-    )
-    anchor = _tieu_de(anchor, "DANH MỤC BẢNG", 1)
-    for line in [
-        "Bảng 2.1. Ma trận bus của hai fact",
-        "Bảng 2.2. Mức hạt và số đo",
-        "Bảng 4.1. Số đo sau mẻ nạp kỳ mẫu",
-        "Bảng 4.2. Đối chứng drill-across và join thẳng hai fact",
-    ]:
-        anchor = insert_after(anchor, line, indent=False)
-    hinh_moc = _tieu_de(anchor, "DANH MỤC HÌNH VẼ", 1)
+    # Đoạn TOC Heading rỗng của khung mẫu bị đẩy xuống cuối sau khi cắt; xóa đi
+    for para in list(doc.paragraphs):
+        if para.style.name.startswith("TOC") and not para.text.strip():
+            element = para._element
+            element.getparent().remove(element)
+    doc._cursor = anchor
 
-    truoc_khoa = {
-        "1. Tính cấp thiết của đề tài": "LỜI NÓI ĐẦU",
-        "1.1 Khảo sát bài toán và bối cảnh thực tiễn": "CHƯƠNG 1. TỔNG QUAN BÀI TOÁN VÀ CƠ SỞ LÝ THUYẾT",
-        "2.1 Phân tích yêu cầu và kiến trúc hệ thống": "CHƯƠNG 2. NGUỒN OLTP 3NF VÀ THIẾT KẾ KHO DỮ LIỆU",
-        "3.1 Cài đặt và triển khai chức năng": "CHƯƠNG 3. HIỆN THỰC HÓA ETL, INDEXED VIEW VÀ GIAO DIỆN",
-    }
-    anchor = hinh_moc
-    for key, paragraphs in BODY.items():
-        if key in truoc_khoa:
-            anchor = _tieu_de(anchor, truoc_khoa[key], 1)
-        if key == "1. Các kết quả định lượng đạt được":
-            for text, level in _CHUONG_4:
-                if level:
-                    anchor = _tieu_de(anchor, text, level)
-                else:
-                    anchor = insert_after(anchor, text)
-        anchor = _tieu_de(anchor, key, 2)
-        for text in paragraphs:
-            anchor = insert_after(anchor, text)
-    anchor = _tieu_de(anchor, "TÀI LIỆU THAM KHẢO", 1)
-    for text in _TAI_LIEU:
-        anchor = insert_after(anchor, text, indent=False)
+    # --- Mục lục tự động ---
+    toc_title = insert_after(anchor, "MỤC LỤC", bold=True, indent=False, center=True, size=14)
+    toc_title.style = doc.styles["Heading 1"]
+    toc_title.paragraph_format.page_break_before = True
+    doc._cursor = insert_toc_field(doc, toc_title)
 
-    hinh_da_chen = chen_hinh(doc)
-    moc = hinh_moc
-    for line in hinh_da_chen:
-        moc = insert_after(moc, line, indent=False)
+    # --- Danh mục từ viết tắt / bảng / hình (sinh từ chính dữ liệu) ---
+    heading(doc, "DANH MỤC TỰ VIẾT TẮT", 1)
+    doc._cursor = add_table_after(doc._cursor, TABLES["abbr"])
 
-    end_22 = next(p for p in doc.paragraphs if p.text.startswith("Khóa ngoại của hai fact"))
-    end_22 = add_table_after(
-        end_22,
-        "Bảng 2.1. Ma trận bus của hai fact",
-        ["Chiều", "Fact kết quả thi", "Fact chuyên cần", "Vai trò"],
-        [
-            ["Thời gian", "Có", "Có", "Dùng chung"],
-            ["Học sinh (SCD Type 2)", "Có", "Có", "Dùng chung"],
-            ["Môn học", "Có", "Có", "Dùng chung"],
-            ["Đề thi", "Có", "Không", "Riêng fact thi"],
-            ["Bài học", "Không", "Có", "Riêng fact chuyên cần"],
-        ],
-    )
-    add_table_after(
-        end_22,
-        "Bảng 2.2. Mức hạt và số đo",
-        ["Fact", "Một dòng là", "Số đo chính", "Cách cuộn lên"],
-        [
-            ["fact_ket_qua_thi", "Một lần nộp đã chấm", "Điểm, câu đúng, tỷ lệ, giây", "Đếm lượt, trung bình điểm, tỷ lệ tính lại từ tổng câu"],
-            ["fact_chuyen_can", "Một phiên học xong", "Phút, video, tương tác, điểm CC", "Cộng phút và video, trung bình điểm CC"],
-        ],
-    )
-    tail = next(p for p in doc.paragraphs if p.text.startswith("Chỉ số 14,2 ms"))
-    tail = add_table_after(
-        tail,
-        "Bảng 4.1. Số đo sau mẻ nạp kỳ mẫu",
-        ["Chỉ tiêu", "Giá trị"],
-        [
-            ["Lần nộp ở OLTP và trong fact", "344"],
-            ["Phiên học ở OLTP và trong fact", "822"],
-            ["Bản ghi bị loại / unknown member", "0 / 0"],
-            ["Phiên bản SCD / bản đang hiệu lực", "51 / 48"],
-            ["Dòng iv_diem_theo_mon_thang", "109"],
-            ["Điểm thi trung bình", "6,72"],
-            ["Tổng phút học / điểm chuyên cần TB", "13 197 / 6,71"],
-            ["Thời gian mẻ nạp kỳ mẫu", "712 ms"],
-            ["40 vòng đọc indexed view / quét fact", "14,2 ms / 47,2 ms"],
-        ],
-    )
-    add_table_after(
-        tail,
-        "Bảng 4.2. Kịch bản đối soát drill-across: một học sinh và môn Cơ sở dữ liệu",
-        ["Cách tính", "Số dòng", "Tổng điểm", "Tổng phút"],
-        [
-            ["Gộp từng fact rồi mới nối", "5 bài và 7 phiên", "26", "110,5"],
-            ["JOIN thẳng hai fact", "35 = 5 × 7", "182 = 26 × 7", "552,8 ≈ 110,5 × 5"],
-        ],
-    )
+    heading(doc, "DANH MỤC BẢNG", 1)
+    danh_muc_bang = ["phan_cong", "diem"]
+    danh_muc_bang += [b[1] for b in BLOCKS if b[0] == "table"]
+    for key in danh_muc_bang:
+        doc._cursor = insert_after(doc._cursor, TABLES[key]["caption"], indent=False)
+
+    heading(doc, "DANH MỤC HÌNH VẼ", 1)
+    for block in BLOCKS:
+        if block[0] == "fig":
+            info = FIGURES[block[1]]
+            path = HINH / info["file"]
+            if path.is_file() and path.stat().st_size > 0:
+                doc._cursor = insert_after(doc._cursor, info["caption"], indent=False)
+
+    # --- Thân bài ---
+    for block in BLOCKS:
+        emit_block(doc, block)
+
     doc.save(str(DEST))
-    print(f"Đã ghi {DEST}")
-
-
-_CHUONG_4 = [
-    ("CHƯƠNG 4. THỰC NGHIỆM OLAP, SCD VÀ ĐỐI SOÁT", 1),
-    ("4.1 Kịch bản kiểm tra từ nguồn tới kho", 2),
-    ("Nhóm kiểm tra theo đúng thứ tự sẽ nói khi bảo vệ. Trước hết mở bảng điều khiển lúc dữ liệu vừa sinh, chưa bật bộ sinh. Các số phải là 344 bài, 822 phiên, 0 bản ghi loại, 109 dòng indexed view, 51 phiên bản SCD và 48 học sinh hiện tại. Nếu lệch, chạy lại mockup_generator/generate_sample_data.py và đợi mẻ ETL.", 0),
-    ("Kịch bản kiểm thử biến động học vụ SCD Type 2 mở trang học vụ với học sinh mã B23DCKD004. Phải thấy hai dòng: End_Date của bản 1 trùng Start_Date của bản 2, chỉ một dòng Is_Current bằng 1. Bảng bài gần đây phải có cả khóa 1 lẫn khóa 49. Tiếp theo chạy kịch bản cảnh báo học vụ. Bản 3 mở ra, các bài tháng 9 và tháng 10 vẫn nằm ở khóa cũ.", 0),
-    ("Kịch bản nộp bài thi hợp lệ gửi một bài luyện Cơ sở dữ liệu điểm 8,0. API trả về khóa học sinh và số phiên bản đang gắn với bài đó. Kịch bản kiểm thử bản ghi lỗi tạo điểm 15, số câu lệch và thời gian âm. Hàng này nằm trong etl_reject, không có trong fact_ket_qua_thi. Trang chất lượng phải vẫn đúng đẳng thức nguồn = nạp + loại.", 0),
-    ("4.2 Đọc kết quả phân tích và chỗ số liệu dễ bị nhân", 2),
-    ("Trên trang OLAP, Roll-up đang để mức học kỳ cho ra một dòng HK1 2026-2027. Drill-down cùng học kỳ đó trả ba tháng 9, 10 và 11. Slice cố định môn Kho dữ liệu. Dice cắt thêm lớp D23CQKD03 và khoảng ngày. Pivot xoay lớp với môn. Mỗi lần bấm, ô SQL phía dưới là câu vừa thực thi.", 0),
-    ("Kịch bản đối soát drill-across dùng học sinh B23DCKD004 và môn Cơ sở dữ liệu vì tích 5 nhân 7 đủ nhỏ để nhẩm trên bảng. Câu là WITH rồi FULL OUTER JOIN, không nối hai fact. Hình 4.1 chụp bảng drill-across trên giao diện. Hình 4.2 là kết quả câu drill-across trên SSMS. Hình 4.3 là Data Source View trong SSDT. Một dòng đã gộp giữ tổng điểm 26 và 110,5 phút; nối thẳng hai fact thành 35 dòng.", 0),
-    ("Chỉ số 14,2 ms và 47,2 ms là 40 vòng đo liên tiếp trên kho 344 dòng, không phải trung bình của nhiều máy. Số được ghi lại để khỏi phóng đại. Nonclustered index ix_fact_exam_hs phục vụ lọc theo học sinh. Bitmap thuộc về đối chiếu giáo trình Oracle [5]. SQL Server của bài không tạo bitmap index.", 0),
-]
-
-_TAI_LIEU = [
-    "[1] W. H. Inmon, Building the Data Warehouse, 4th ed. Indianapolis, IN, USA: Wiley, 2005.",
-    "[2] R. Kimball and M. Ross, The Data Warehouse Toolkit: The Definitive Guide to Dimensional Modeling, 3rd ed. Indianapolis, IN, USA: Wiley, 2013.",
-    '[3] E. F. Codd, S. B. Codd, and C. T. Salley, "Providing OLAP to user-analysts: An IT mandate," E.F. Codd & Associates, 1993.',
-    "[4] R. Kimball and J. Caserta, The Data Warehouse ETL Toolkit. Indianapolis, IN, USA: Wiley, 2004.",
-    '[5] Oracle, "Indexes and index-organized tables," Oracle Database Concepts, 19c. [Online]. Available: https://docs.oracle.com/en/database/oracle/oracle-database/19/cncpt/indexes-and-index-organized-tables.html. (Truy cập: 04/11/2026).',
-    '[6] S. Ramírez, "FastAPI documentation," 2026. [Online]. Available: https://fastapi.tiangolo.com/. (Truy cập: 04/11/2026).',
-    '[7] Microsoft, "Create indexed views," SQL Server documentation. [Online]. Available: https://learn.microsoft.com/en-us/sql/relational-databases/views/create-indexed-views. (Truy cập: 05/11/2026).',
-    '[8] Microsoft, "Multidimensional model databases (SSAS)," Analysis Services documentation. [Online]. Available: https://learn.microsoft.com/en-us/analysis-services/multidimensional-models/multidimensional-model-databases-ssas. (Truy cập: 05/11/2026).',
-]
+    print("Đã ghi", DEST)
+    print("Tổng block:", len(BLOCKS))
 
 
 if __name__ == "__main__":
