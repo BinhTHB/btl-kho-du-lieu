@@ -32,6 +32,7 @@ from docx_tools import backup_docx  # noqa: E402
 TEMPLATE = Path(r"E:\Hoc-Tap\Kho Dữ Liệu\Tài liệu học tập\Mẫu Tiểu luận_DW.docx")
 DEST = ROOT / "Bao_cao_BTL_Kho_du_lieu_Nhom9.docx"
 HINH = Path(__file__).resolve().parent / "hinh"
+SO_DO = Path(__file__).resolve().parent / "so-do"
 
 # ---------------------------------------------------------------------------
 # Thông tin chung / bìa / phiếu phân công
@@ -74,6 +75,7 @@ REFERENCES = [
     '[7] "FastAPI documentation," 2026. [Online]. Available: https://fastapi.tiangolo.com/. (Truy cập: 16/11/2026).',
     '[8] Microsoft, "Create indexed views," SQL Server documentation. [Online]. Available: https://learn.microsoft.com/en-us/sql/relational-databases/views/create-indexed-views. (Truy cập: 16/11/2026).',
     '[9] Microsoft, "Multidimensional model databases (SSAS)," Analysis Services documentation. [Online]. Available: https://learn.microsoft.com/en-us/analysis-services/multidimensional-models/multidimensional-model-databases-ssas. (Truy cập: 16/11/2026).',
+    '[10] Nhóm 5, Báo cáo bài tập lớn môn Kho dữ liệu: Kho dữ liệu sàn thương mại điện tử. Hà Nội: Khoa Viễn thông I, Học viện Công nghệ Bưu chính Viễn thông, 11/2026.',
 ]
 
 # ---------------------------------------------------------------------------
@@ -239,6 +241,9 @@ TABLES: dict[str, dict] = {
 # Ảnh: chỉ dùng file có thật trong bao-cao/hinh
 # ---------------------------------------------------------------------------
 FIGURES: dict[str, dict] = {
+    "kien_truc": {"file": "kien-truc-tong-va-luong-du-lieu.png", "folder": "so-do", "caption": "Hình 2.1. Kiến trúc tổng thể và luồng dữ liệu của hệ thống"},
+    "erd": {"file": "erd-oltp.png", "folder": "so-do", "caption": "Hình 2.2. Sơ đồ thực thể liên kết của CSDL OLTP_QuanLyHocTap"},
+    "fact_dim": {"file": "so-do-fact-dim.png", "folder": "so-do", "caption": "Hình 2.3. Sơ đồ Fact – Dimension của kho DW_QuanLyHocTap"},
     "infra": {"file": "ssms_03_danh_sach_database.png", "caption": "Hình 3.1. Hai cơ sở dữ liệu OLTP và DW trong SSMS"},
     "dashboard": {"file": "hinh_3_1_dashboard.png", "caption": "Hình 3.2. Bảng điều khiển trên cổng /bi"},
     "lamde": {"file": "hinh_3_2_lam_de.png", "caption": "Hình 3.3. Cổng /hoc-tap – làm đề và nộp bài"},
@@ -253,8 +258,6 @@ FIGURES: dict[str, dict] = {
 }
 
 MISSING_IMAGES = [
-    "Sơ đồ kiến trúc tổng thể (bao-cao/so-do/kien_truc.drawio chưa được xuất sang PNG)",
-    "Lược đồ hình chòm sao (bao-cao/so-do/chom_sao.drawio chưa được xuất sang PNG)",
     "Ảnh chụp riêng Execution Plan và STATISTICS IO trên SSMS",
 ]
 
@@ -304,16 +307,19 @@ BLOCKS: list[tuple] = [
     ("h1", "CHƯƠNG 2. PHÂN TÍCH VÀ THIẾT KẾ KHO DỮ LIỆU", True),
     ("h2", "2.1. Yêu cầu chức năng và kiến trúc hệ thống"),
     ("p", "Yêu cầu chức năng bám sát góp ý của giảng viên hướng dẫn. Nguồn phải nhận bài nộp và phiên học từ form, không chỉ phát file CSV. Quản trị phải đổi được lớp và trạng thái để SCD sinh bản mới ngay trước mắt. Bộ sinh phải bắn nhiều học sinh trong một nhịp, có cả bản ghi bẩn. Dashboard đọc số từ kho, không đọc thẳng bảng OLTP để vẽ điểm trung bình. Trang OLAP trên web và PivotTable trên khối SSAS phải làm được Roll-up, Drill-down, Slice, Dice và Pivot."),
-    ("p", "Kiến trúc vận hành gồm cổng web, OLTP_QuanLyHocTap, Dagster, DW_QuanLyHocTap và ba lối đọc. Cổng /hoc-tap ghi bài nộp và phiên học thẳng vào OLTP. Năm asset Dagster kiểm tra số đo, tra chiều, áp dụng SCD Type 2 rồi nạp fact. Cổng /bi đọc indexed view và các view đối soát; Excel đọc khối SSAS. Hai CSDL được tạo sẵn trong SSMS như Hình 3.1."),
+    ("p", "Kiến trúc vận hành gồm cổng web, OLTP_QuanLyHocTap, Dagster, DW_QuanLyHocTap và ba lối đọc. Cổng /hoc-tap ghi bài nộp và phiên học thẳng vào OLTP. Năm asset Dagster kiểm tra số đo, tra chiều, áp dụng SCD Type 2 rồi nạp fact. Cổng /bi đọc indexed view và các view đối soát; Excel đọc khối SSAS. Hình 2.1 tóm tắt luồng đi của dữ liệu; hai CSDL được tạo sẵn trong SSMS như Hình 3.1. Cách trình bày sơ đồ kiến trúc và luồng dữ liệu ở đây có tham khảo báo cáo của Nhóm 5 [10]."),
+    ("fig", "kien_truc", 12.5),
     ("fig", "infra", 12.5),
     ("p", "Nhóm không dựng thêm cơ sở staging vật lý riêng ngoài ba bảng etl_stage_exam, etl_stage_session và etl_stage_event nằm trong DW. Watermark trên ba luồng lan_lam_bai, phien_hoc và su_kien_hoc_vu đóng vai trò mốc trích xuất. Bản ghi đã qua mẻ, kể cả bản bị loại, không bị đọc lại. Đây là một hạn chế: nếu sửa đúng dòng bẩn tại chỗ mà giữ nguyên id, kho sẽ không hút lại; muốn nạp lại thì phải phát sinh id mới."),
 
     ("h2", "2.2. Nguồn OLTP 3NF"),
     ("p", "Nguồn tác nghiệp OLTP_QuanLyHocTap có tám bảng và dừng ở dạng chuẩn 3NF: hoc_sinh, mon_hoc, de_thi, cau_hoi, bai_hoc, lan_lam_bai, phien_hoc và su_kien_hoc_vu. Mỗi thuộc tính phụ thuộc vào khóa của đúng bảng đó, không phụ thuộc bắc cầu. Mã học sinh cố ý không làm khóa ngoại của lần nộp: nguồn được phép phát sinh mã lạ, còn kho mới quyết định đưa fact về unknown member."),
-    ("p", "Ba bảng sự kiện lan_lam_bai, phien_hoc và su_kien_hoc_vu dùng khóa IDENTITY làm khóa tự nhiên. Cột trang_thai của bài nộp và phiên học được dùng để lọc chỉ bản ghi đã hoàn tất. Các chỉ số nonclustered trên ma_hs phục vụ việc đọc theo watermark từng luồng."),
+    ("p", "Ba bảng sự kiện lan_lam_bai, phien_hoc và su_kien_hoc_vu dùng khóa IDENTITY làm khóa tự nhiên. Cột trang_thai của bài nộp và phiên học được dùng để lọc chỉ bản ghi đã hoàn tất. Các chỉ số nonclustered trên ma_hs phục vụ việc đọc theo watermark từng luồng. Hình 2.2 là sơ đồ thực thể liên kết của tám bảng nguồn."),
+    ("fig", "erd", 12.5),
 
     ("h2", "2.3. Thiết kế chòm sao và các chiều"),
-    ("p", "Kho DW_QuanLyHocTap là fact constellation gồm hai fact và năm chiều. Mọi chiều đều có bản ghi unknown với khóa -1 để khóa ngoại của fact không bị gãy. Bảng 2.1 liệt kê năm chiều, Bảng 2.2 nêu mức hạt cùng số đo, Bảng 2.3 là ma trận bus giữa hai fact và năm chiều."),
+    ("p", "Kho DW_QuanLyHocTap là fact constellation gồm hai fact và năm chiều. Mọi chiều đều có bản ghi unknown với khóa -1 để khóa ngoại của fact không bị gãy. Hình 2.3 mô tả quan hệ Fact – Dimension; cách thể hiện sơ đồ này tham khảo từ báo cáo của Nhóm 5 [10]. Bảng 2.1 liệt kê năm chiều, Bảng 2.2 nêu mức hạt cùng số đo, Bảng 2.3 là ma trận bus giữa hai fact và năm chiều."),
+    ("fig", "fact_dim", 12.5),
     ("table", "dim"),
     ("table", "grain"),
     ("table", "bus"),
@@ -367,7 +373,6 @@ BLOCKS: list[tuple] = [
 
     ("h2", "3.6. Khối đa chiều SSAS và Excel PivotTable"),
     ("p", "Dự án HocTapOLAP nằm trong Visual Studio SSDT. Data Source trỏ tới DW_QuanLyHocTap; DSV chọn đúng bảy bảng gồm hai fact và năm chiều, không kéo quan hệ giữa hai bảng fact [9]. Chiều học sinh dùng hoc_sinh_key làm khóa vì cùng một ma_hoc_sinh có nhiều dòng SCD."),
-    ("fig", "dsv", 12.5),
     ("p", "Cube có hai measure group là Ket qua thi va Chuyen can. Ba chiều thời gian, học sinh, môn gắn cả hai nhóm đo; đề chỉ gắn kết quả thi, bài học chỉ gắn chuyên cần. Partition MOLAP có thể bật Proactive Caching với khoảng im lặng khoảng mười giây để Excel Refresh thấy dòng mới."),
     ("p", "Excel PivotTable kết nối vào cube HocTapOLAP và thực hiện năm thao tác ở mục 4.5. Lưu ý quan trọng: sau khi DW có dữ liệu mới từ Dagster, khối SSAS cần được Process lại thì Excel mới thấy số liệu mới; web /bi thì đọc thẳng SQL Server nên không cần bước này."),
 
@@ -422,6 +427,7 @@ BLOCKS: list[tuple] = [
     ("p", "Mã nguồn: https://github.com/BinhTHB/btl-kho-du-lieu.git (nhánh main)."),
     ("p", "Chạy ứng dụng: python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 rồi mở http://127.0.0.1:8000; chạy Dagster tại http://127.0.0.1:3000. Sinh lại dữ liệu: python mockup_generator\\generate_sample_data.py. Kiểm tra: python -m app.selfcheck."),
     ("p", "Tài liệu liên quan: ssas/HUONG_DAN_SSAS_VA_EXCEL.md, sql/04_truy_van_minh_hoa.sql, sql/06_sqlserver_dw_and_indexed_views.sql và ssas/HocTapOLAP_Excel.xlsx."),
+    ("p", "Báo cáo có tham khảo cách tổng hợp bảng biểu và trình bày sơ đồ kiến trúc, ERD, Fact – Dimension trong BTL Kho dữ liệu của Nhóm 5 cùng học phần (xem tài liệu tham khảo [10]). Số liệu và thiết kế trong báo cáo này vẫn là của Nhóm 9 trên tập Seed 9."),
 ]
 
 # ---------------------------------------------------------------------------
@@ -444,8 +450,8 @@ def set_run_font(run, size=13, bold=False, italic=False):
 
 def format_paragraph(paragraph, *, indent=True, center=False, bold=False, size=13, justify=True):
     fmt = paragraph.paragraph_format
-    fmt.space_before = Pt(6)
-    fmt.space_after = Pt(6)
+    fmt.space_before = Pt(3)
+    fmt.space_after = Pt(4)
     fmt.line_spacing = 1.3
     fmt.first_line_indent = Cm(1 if indent and not bold and not center else 0)
     if center:
@@ -625,9 +631,28 @@ def cut_after(doc, start_text):
             body.remove(child)
 
 
-def heading(doc, text, level, newpage=False):
-    para = insert_after(doc._cursor, text, bold=True, indent=False,
-                        center=(level == 1), size=14 if level == 1 else 13)
+def find_figure_file(info):
+    folders = [SO_DO, HINH] if info.get("folder") == "so-do" else [HINH, SO_DO]
+    for folder in folders:
+        path = folder / info["file"]
+        if path.is_file() and path.stat().st_size > 0:
+            return path
+    return None
+
+
+def heading(doc, text, level, newpage=False, after_element=None):
+    if after_element is None:
+        para = insert_after(doc._cursor, text, bold=True, indent=False,
+                            center=(level == 1), size=14 if level == 1 else 13)
+    else:
+        # Chèn heading ngay sau một phần tử bảng (bỏ đoạn rỗng tail đi kèm).
+        new_p = OxmlElement("w:p")
+        after_element.addnext(new_p)
+        para = Paragraph(new_p, doc._cursor._parent)
+        run = para.add_run(text)
+        set_run_font(run, size=14 if level == 1 else 13, bold=True)
+        format_paragraph(para, indent=False, center=(level == 1), bold=True,
+                         size=14 if level == 1 else 13)
     para.style = doc.styles["Heading 1" if level == 1 else "Heading 2"]
     para.paragraph_format.first_line_indent = Cm(0)
     if newpage:
@@ -639,7 +664,23 @@ def heading(doc, text, level, newpage=False):
 def emit_block(doc, block):
     kind = block[0]
     if kind == "h1":
-        heading(doc, block[1], 1, newpage=bool(block[2]) if len(block) > 2 else False)
+        newpage = bool(block[2]) if len(block) > 2 else False
+        after_el = None
+        if newpage:
+            cur_el = doc._cursor._p
+            prev_el = cur_el.getprevious()
+            # Một bảng sinh ra đoạn rỗng "tail" ngay sau nó. Nếu heading có
+            # page_break_before đứng ngay sau tail đó, tail bị đẩy sang trang mới
+            # và để lại một trang trắng. Bỏ tail, đặt heading thẳng sau bảng.
+            if (cur_el.tag == qn('w:p') and not ''.join(cur_el.itertext()).strip()
+                    and prev_el is not None and prev_el.tag == qn('w:tbl')):
+                after_el = prev_el
+        para = heading(doc, block[1], 1, newpage=newpage, after_element=after_el)
+        if after_el is not None:
+            tail_el = para._p.getnext()
+            if (tail_el is not None and tail_el.tag == qn('w:p')
+                    and not ''.join(tail_el.itertext()).strip()):
+                tail_el.getparent().remove(tail_el)
     elif kind == "h2":
         heading(doc, block[1], 2)
     elif kind == "p":
@@ -649,11 +690,11 @@ def emit_block(doc, block):
     elif kind == "fig":
         key, width = block[1], block[2]
         info = FIGURES[key]
-        path = HINH / info["file"]
-        if path.is_file() and path.stat().st_size > 0:
+        path = find_figure_file(info)
+        if path is not None:
             doc._cursor = add_figure_after(doc._cursor, path, info["caption"], width)
         else:
-            print("Không chèn ảnh (file không tồn tại):", path)
+            print("Không chèn ảnh (file không tồn tại):", info["file"])
     elif kind == "ref":
         for text in REFERENCES:
             doc._cursor = insert_after(doc._cursor, text, indent=False)
@@ -743,11 +784,18 @@ def main():
     # --- Xóa thân bài cũ của khung mẫu ---
     cut_after(doc, "DANH MỤC THUẬT NGỮ")
     anchor = next(p for p in doc.paragraphs if "Ký tên" in p.text)
-    # Đoạn TOC Heading rỗng của khung mẫu bị đẩy xuống cuối sau khi cắt; xóa đi
+    # Khung mẫu còn một bản Mục lục cũ (có cả cached entries) bị đẩy xuống cuối;
+    # xóa mọi đoạn mang kiểu TOC trước khi chèn bản Mục lục mới.
     for para in list(doc.paragraphs):
-        if para.style.name.startswith("TOC") and not para.text.strip():
+        if para.style.name.startswith("TOC"):
             element = para._element
             element.getparent().remove(element)
+    # Bản Mục lục cũ của khung mẫu nằm trong một khung nội dung (w:sdt)
+    body = doc.element.body
+    for sdt in list(body.findall(qn("w:sdt"))):
+        instr = sdt.findall(".//" + qn("w:instrText"))
+        if any("TOC" in (node.text or "") for node in instr):
+            body.remove(sdt)
     doc._cursor = anchor
 
     # --- Mục lục tự động ---
@@ -770,8 +818,7 @@ def main():
     for block in BLOCKS:
         if block[0] == "fig":
             info = FIGURES[block[1]]
-            path = HINH / info["file"]
-            if path.is_file() and path.stat().st_size > 0:
+            if find_figure_file(info) is not None:
                 doc._cursor = insert_after(doc._cursor, info["caption"], indent=False)
 
     # --- Thân bài ---
