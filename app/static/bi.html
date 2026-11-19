@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LearnWH · Trung Tâm Báo Cáo & Phân Tích BI</title>
-  <link rel="stylesheet" href="/static/app.css?v=5">
+  <link rel="stylesheet" href="/static/app.css?v=6">
 </head>
 <body class="bi-body">
   <div id="toast" role="status"></div>
 
   <div class="bi-layout">
-    <!-- Sidebar bên trái -->
+    <!-- Sidebar điều hướng bên trái -->
     <aside class="bi-sidebar">
       <div class="bi-brand">
         <div class="brand-icon">📊</div>
@@ -64,22 +64,42 @@
         <!-- Thẻ KPI chính -->
         <div class="kpi-grid" id="kpis"></div>
 
-        <!-- Biểu đồ từ Indexed View -->
-        <div class="chart-grid">
+        <!-- 4 Khung dữ liệu thật của Dashboard -->
+        <div class="dashboard-quad-grid">
+          <!-- Khung 1: Thống kê theo Lớp -->
           <article class="data-card">
             <div class="card-head">
-              <h3>Điểm trung bình theo môn học</h3>
+              <h3>Điểm trung bình & Lượt thi theo Lớp</h3>
               <span class="badge badge-info">Indexed View (NOEXPAND)</span>
             </div>
-            <div id="bars-mon" class="bars-container"></div>
+            <div id="c-lop" class="bars-container"></div>
           </article>
 
+          <!-- Khung 2: Thống kê theo Môn -->
           <article class="data-card">
             <div class="card-head">
-              <h3>Phân bố lượt nộp bài theo ngày</h3>
-              <span class="badge badge-muted">Fact kết quả thi</span>
+              <h3>Điểm trung bình theo Môn học</h3>
+              <span class="badge badge-info">Indexed View (NOEXPAND)</span>
             </div>
-            <div id="bars-ngay" class="bars-container"></div>
+            <div id="c-mon" class="bars-container"></div>
+          </article>
+
+          <!-- Khung 3: Bảng Top sinh viên tiêu biểu -->
+          <article class="data-card">
+            <div class="card-head">
+              <h3>Top 5 Sinh viên có kết quả cao nhất</h3>
+              <span class="badge badge-success">Thành tích cao</span>
+            </div>
+            <div id="t-top" class="table-container"></div>
+          </article>
+
+          <!-- Khung 4: Bảng Sinh viên cần lưu ý/nguy cơ -->
+          <article class="data-card">
+            <div class="card-head">
+              <h3>Sinh viên cần theo dõi & Cảnh báo học vụ</h3>
+              <span class="badge badge-warning">Nguy cơ học vụ / Điểm thấp</span>
+            </div>
+            <div id="t-risk" class="table-container"></div>
           </article>
         </div>
       </section>
@@ -93,72 +113,82 @@
           </div>
         </header>
 
-        <!-- Các preset 5 thao tác nhanh -->
+        <!-- 5 Thẻ thao tác OLAP -->
         <article class="data-card">
           <div class="preset-group">
-            <span class="preset-label">Thao tác nhanh:</span>
-            <div class="preset-buttons">
-              <button type="button" class="btn-preset" data-preset="roll-up">Roll-up (Cuộn)</button>
-              <button type="button" class="btn-preset" data-preset="drill-down">Drill-down (Khoan sâu)</button>
-              <button type="button" class="btn-preset" data-preset="slice">Slice (Cắt lát)</button>
-              <button type="button" class="btn-preset" data-preset="dice">Dice (Cắt khối)</button>
-              <button type="button" class="btn-preset" data-preset="pivot">Pivot (Xoay chiều)</button>
+            <span class="preset-label">Chọn thao tác OLAP:</span>
+            <div class="op-card-grid">
+              <div class="op-card active" data-op="roll-up">
+                <span class="op-icon">⬆️</span>
+                <strong>Roll-up</strong>
+                <small>Cuộn lên mức tổng hợp cao hơn</small>
+              </div>
+              <div class="op-card" data-op="drill-down">
+                <span class="op-icon">⬇️</span>
+                <strong>Drill-down</strong>
+                <small>Khoan sâu xuống chi tiết</small>
+              </div>
+              <div class="op-card" data-op="slice">
+                <span class="op-icon">🔪</span>
+                <strong>Slice</strong>
+                <small>Cắt lát theo 1 chiều cố định</small>
+              </div>
+              <div class="op-card" data-op="dice">
+                <span class="op-icon">🎲</span>
+                <strong>Dice</strong>
+                <small>Cắt khối theo nhiều chiều</small>
+              </div>
+              <div class="op-card" data-op="pivot">
+                <span class="op-icon">🔄</span>
+                <strong>Pivot</strong>
+                <small>Xoay trục ma trận đa chiều</small>
+              </div>
             </div>
           </div>
 
-          <!-- Bộ lọc chi tiết -->
+          <!-- Bộ lọc OLAP: #f-nam, #f-hk, #f-lop, #f-mon, #f-chude -->
           <div class="olap-filter-bar">
             <div class="filter-col">
-              <label>Nguồn Fact:</label>
-              <select id="f-nguon" class="select-sm">
-                <option value="ket_qua">Fact kết quả thi</option>
-                <option value="chuyen_can">Fact chuyên cần</option>
+              <label for="f-nam">Năm học:</label>
+              <select id="f-nam" class="select-sm">
+                <option value="">Tất cả năm học</option>
+                <option value="2026-2027" selected>2026-2027</option>
               </select>
             </div>
 
             <div class="filter-col">
-              <label>Cấp độ thời gian:</label>
-              <select id="f-muc" class="select-sm">
-                <option value="ngay">Ngày</option>
-                <option value="tuan">Tuần</option>
-                <option value="thang" selected>Tháng</option>
-                <option value="hoc_ky">Học kỳ</option>
-                <option value="nam">Năm học</option>
+              <label for="f-hk">Học kỳ:</label>
+              <select id="f-hk" class="select-sm">
+                <option value="">Tất cả học kỳ</option>
+                <option value="HK1" selected>Học kỳ 1</option>
+                <option value="HK2">Học kỳ 2</option>
               </select>
             </div>
 
             <div class="filter-col">
-              <label>Môn học:</label>
-              <select id="f-mon" class="select-sm"><option value="">Mọi môn</option></select>
-            </div>
-
-            <div class="filter-col">
-              <label>Lớp:</label>
+              <label for="f-lop">Lớp học:</label>
               <select id="f-lop" class="select-sm"><option value="">Mọi lớp</option></select>
             </div>
 
             <div class="filter-col">
-              <label>Từ ngày:</label>
-              <input id="f-tu" type="date" value="2026-09-01" class="input-sm">
+              <label for="f-mon">Môn học:</label>
+              <select id="f-mon" class="select-sm"><option value="">Mọi môn</option></select>
             </div>
 
             <div class="filter-col">
-              <label>Đến ngày:</label>
-              <input id="f-den" type="date" value="2026-11-04" class="input-sm">
+              <label for="f-chude">Chủ đề / Loại bài:</label>
+              <select id="f-chude" class="select-sm">
+                <option value="">Tất cả loại bài</option>
+                <option value="THI">Bài thi chính thức</option>
+                <option value="LUYEN_DE">Luyện đề</option>
+              </select>
             </div>
           </div>
 
-          <!-- Nhóm nút hành động tuỳ biến -->
-          <div class="olap-action-bar">
-            <div class="custom-buttons">
-              <button type="button" id="btn-rollup" class="btn-action">Roll-up thêm</button>
-              <button type="button" id="btn-drill" class="btn-action">Drill-down thêm</button>
-              <button type="button" id="btn-slice" class="btn-action">Slice theo môn</button>
-              <button type="button" id="btn-dice" class="btn-action">Dice kết hợp</button>
-            </div>
-
+          <!-- Khu vực chọn trục Pivot (hiển thị khi chọn thao tác Pivot) -->
+          <div id="pivot-axis-box" class="pivot-axis-container" style="display: none;">
             <div class="pivot-controls">
-              <label>Hàng:
+              <label>Trục Hàng:
                 <select id="p-hang" class="select-xs">
                   <option value="lop">Lớp</option>
                   <option value="mon">Môn</option>
@@ -166,7 +196,7 @@
                   <option value="trang_thai">Trạng thái</option>
                 </select>
               </label>
-              <label>Cột:
+              <label>Trục Cột:
                 <select id="p-cot" class="select-xs">
                   <option value="mon">Môn</option>
                   <option value="lop">Lớp</option>
@@ -174,13 +204,19 @@
                   <option value="trang_thai">Trạng thái</option>
                 </select>
               </label>
-              <button type="button" id="btn-pivot" class="btn-primary-sm">Chạy Pivot</button>
-              <button type="button" id="btn-swap" class="btn-secondary-sm">Đảo trục</button>
+              <button type="button" id="btn-swap" class="btn-secondary-sm">⇄ Đảo trục</button>
             </div>
+          </div>
+
+          <!-- Nút kích hoạt thực thi OLAP -->
+          <div class="olap-run-bar">
+            <button type="button" id="btn-run-olap" class="btn-primary">
+              ▶ Chạy phân tích OLAP
+            </button>
           </div>
         </article>
 
-        <!-- Kết quả OLAP và câu SQL -->
+        <!-- Kết quả phân tích OLAP và câu lệnh SQL -->
         <article class="data-card">
           <div class="card-head">
             <h3 id="olap-title">Kết quả phân tích</h3>
@@ -208,7 +244,7 @@
           <div class="card-head-row">
             <div>
               <h3>Tra cứu lịch sử phiên bản sinh viên (SCD Type 2)</h3>
-              <p class="card-subtext">Quan sát sự chuyển biến của khóa thay thế (Surrogate Key), ngày hiệu lực và lớp học qua các thời kỳ.</p>
+              <p class="card-subtext">Quan sát sự chuyển biến của Surrogate Key, ngày hiệu lực và lớp học qua các thời kỳ.</p>
             </div>
             <div class="picker-box">
               <label for="scd-hs">Chọn sinh viên:</label>
@@ -289,6 +325,6 @@
     </main>
   </div>
 
-  <script src="/static/app.js?v=5"></script>
+  <script src="/static/app.js?v=6"></script>
 </body>
 </html>

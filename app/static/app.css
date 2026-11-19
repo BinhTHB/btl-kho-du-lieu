@@ -740,24 +740,54 @@ button {
   font-weight: 600;
 }
 
-/* OLAP Controls */
-.preset-group {
-  display: flex;
-  align-items: center;
+/* 4 Khung Dashboard Quad Grid */
+.dashboard-quad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+  gap: 20px;
+}
+
+/* OLAP Op Cards */
+.op-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-color);
+  width: 100%;
 }
-.preset-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-.preset-buttons {
+.op-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+}
+.op-card:hover {
+  border-color: var(--color-primary-light);
+  background-color: #f8fafc;
+}
+.op-card.active {
+  border-color: var(--color-primary-light);
+  background-color: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+.op-icon { font-size: 20px; margin-bottom: 4px; }
+.op-card strong { font-size: 14px; color: var(--color-primary); }
+.op-card small { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.pivot-axis-container {
+  background-color: var(--bg-subtle);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.olap-run-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
 }
 .olap-filter-bar {
   display: flex;

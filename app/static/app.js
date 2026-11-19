@@ -10,6 +10,7 @@ const state = {
   questions: [],
   started: 0,
   tuongTac: 1,
+  currentOp: "roll-up",
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -64,19 +65,22 @@ function table(columns, rows, rowClass) {
   return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
 }
 
-function bars(el, rows, labelKey, valueKey) {
+function bars(el, rows, labelKey, valueKey, subLabelKey) {
   if (!el) return;
   const safeRows = rows || [];
   const max = Math.max(...safeRows.map((row) => Number(row[valueKey]) || 0), 1);
-  el.innerHTML = safeRows.map((row) => `
-    <div class="bar-row">
-      <span class="bar-label" title="${esc(row[labelKey])}">${esc(row[labelKey])}</span>
-      <div class="bar-track">
-        <div class="bar-fill" style="width:${(Number(row[valueKey]) || 0) / max * 100}%"></div>
+  el.innerHTML = safeRows.map((row) => {
+    const extra = subLabelKey && row[subLabelKey] !== undefined ? ` (${row[subLabelKey]} bài)` : "";
+    return `
+      <div class="bar-row">
+        <span class="bar-label" title="${esc(row[labelKey])}">${esc(row[labelKey])}${extra}</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${(Number(row[valueKey]) || 0) / max * 100}%"></div>
+        </div>
+        <b class="bar-val">${num(row[valueKey])}</b>
       </div>
-      <b class="bar-val">${num(row[valueKey])}</b>
-    </div>
-  `).join("") || "<p class='empty-state'>Chưa có số liệu thống kê.</p>";
+    `;
+  }).join("") || "<p class='empty-state'>Chưa có số liệu thống kê.</p>";
 }
 
 function fillSelect(el, items, valueKey, labelFn, first) {
@@ -109,11 +113,14 @@ function updateExamSummary() {
 function bindMeta(meta) {
   state.meta = meta;
   const labelHs = (row) => `${row.ma_hs} – ${row.ho_ten} (${row.lop})`;
-  
+
+  // LMS selectors
   fillSelect($("#hs-select"), meta.hoc_sinh, "ma_hs", labelHs);
   fillSelect($("#scd-hs"), meta.hoc_sinh, "ma_hs", labelHs);
   fillSelect($("#de-select"), meta.de_thi, "ma_de", (row) => `${row.ten_de} [${row.ma_de}]`);
   fillSelect($("#bai-select"), meta.bai_hoc, "ma_bai", (row) => `${row.ten_bai} (${row.thoi_luong_phut} phút)`);
+
+  // BI OLAP selectors
   fillSelect($("#f-mon"), meta.mon_hoc, "ma_mon", (row) => row.ten_mon, "Mọi môn học");
   fillSelect($("#ax-mon"), meta.mon_hoc, "ma_mon", (row) => row.ten_mon, "Mọi môn học");
 
@@ -131,6 +138,7 @@ function bindMeta(meta) {
   updateExamSummary();
 }
 
+// 1. CẬP NHẬT RENDER DASHBOARD ĐỔ DỮ LIỆU THẬT VÀO 4 KHUNG: #c-lop, #c-mon, #t-top, #t-risk
 function renderDashboard(data) {
   const kpis = $("#kpis");
   if (kpis) {
@@ -151,8 +159,54 @@ function renderDashboard(data) {
       </div>
     `).join("");
   }
-  bars($("#bars-mon"), data.theo_mon, "ten_mon", "diem_tb");
-  bars($("#bars-ngay"), data.theo_ngay, "ngay", "so_luot");
+
+  // Khung 1: Thống kê điểm trung bình theo Lớp (#c-lop)
+  const cLop = $("#c-lop");
+  if (cLop) {
+    bars(cLop, data.theo_lop || [], "lop", "diem_tb", "so_luot");
+  }
+
+  // Khung 2: Thống kê điểm trung bình theo Môn học (#c-mon)
+  const cMon = $("#c-mon");
+  if (cMon) {
+    bars(cMon, data.theo_mon || [], "ten_mon", "diem_tb", "so_luot");
+  }
+
+  // Khung 3: Bảng Top sinh viên tiêu biểu (#t-top)
+  const tTop = $("#t-top");
+  if (tTop) {
+    const topList = (data.top_sinh_vien || []).map((r) => [
+      r.ma_hoc_sinh, r.ho_ten, r.lop, r.so_bai, r.diem_tb,
+    ]);
+    tTop.innerHTML = table(
+      ["Mã SV", "Họ tên", "Lớp", "Số bài thi", "Điểm TB"],
+      topList,
+      () => "current"
+    );
+  }
+
+  // Khung 4: Bảng Sinh viên cần lưu ý/nguy cơ (#t-risk)
+  const tRisk = $("#t-risk");
+  if (tRisk) {
+    const riskList = (data.sinh_vien_nguy_co || []).map((r) => [
+      r.ma_hoc_sinh, r.ho_ten, r.lop, r.trang_thai_hoc_vu, r.diem_tb, r.so_bai,
+    ]);
+    tRisk.innerHTML = table(
+      ["Mã SV", "Họ tên", "Lớp", "Trạng thái học vụ", "Điểm TB", "Số bài thi"],
+      riskList
+    );
+  }
+}
+
+// 2. HÀM ĐỌC BỘ LỌC KHỚP VỚI CÁC ID: #f-nam, #f-hk, #f-lop, #f-mon, #f-chude
+function filters() {
+  return {
+    nam_hoc: $("#f-nam") ? $("#f-nam").value : "",
+    hoc_ky: $("#f-hk") ? $("#f-hk").value : "",
+    lop: $("#f-lop") ? $("#f-lop").value : "",
+    ma_mon: $("#f-mon") ? $("#f-mon").value : "",
+    loai: $("#f-chude") ? $("#f-chude").value : "",
+  };
 }
 
 function renderOlap(data) {
@@ -174,6 +228,103 @@ function renderOlap(data) {
     return;
   }
   result.innerHTML = table(data.cot || [], data.dong || []);
+}
+
+// Chạy phân tích OLAP theo thao tác và bộ lọc
+async function runOlap(op) {
+  const operation = op || state.currentOp || "roll-up";
+  state.currentOp = operation;
+
+  // Cập nhật trạng thái active trên các op-card
+  $$(".op-card[data-op]").forEach((card) => {
+    card.classList.toggle("active", card.dataset.op === operation);
+  });
+
+  // Hiển thị/ẩn trục Pivot
+  const pivotBox = $("#pivot-axis-box");
+  if (pivotBox) {
+    pivotBox.style.display = operation === "pivot" ? "block" : "none";
+  }
+
+  const f = filters();
+
+  try {
+    let result;
+    if (operation === "roll-up") {
+      result = await api("/api/olap/tuy-chinh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          thao_tac: "Roll-up",
+          muc: f.hoc_ky ? "hoc_ky" : "nam",
+          kieu: "bang",
+          ...f,
+        }),
+      });
+    } else if (operation === "drill-down") {
+      result = await api("/api/olap/tuy-chinh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          thao_tac: "Drill-down",
+          muc: "ngay",
+          kieu: "bang",
+          ...f,
+        }),
+      });
+    } else if (operation === "slice") {
+      const maMon = f.ma_mon || "CSDL";
+      result = await api("/api/olap/tuy-chinh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          thao_tac: "Slice",
+          muc: "thang",
+          kieu: "bang",
+          ma_mon: maMon,
+          lop: "",
+          nam_hoc: f.nam_hoc,
+          hoc_ky: f.hoc_ky,
+        }),
+      });
+    } else if (operation === "dice") {
+      result = await api("/api/olap/tuy-chinh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          thao_tac: "Dice",
+          muc: "thang",
+          kieu: "bang",
+          ma_mon: f.ma_mon || "CSDL",
+          lop: f.lop || "D23CQCN01",
+          nam_hoc: f.nam_hoc,
+          hoc_ky: f.hoc_ky,
+          loai: f.loai,
+        }),
+      });
+    } else if (operation === "pivot") {
+      const hang = $("#p-hang") ? $("#p-hang").value : "lop";
+      const cot = $("#p-cot") ? $("#p-cot").value : "mon";
+      result = await api("/api/olap/tuy-chinh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          thao_tac: "Pivot",
+          kieu: "pivot",
+          hang,
+          cot,
+          ...f,
+        }),
+      });
+    }
+
+    if (result) {
+      renderOlap(result);
+      toast(`Đã thực thi thao tác OLAP: ${operation.toUpperCase()}`);
+    }
+  } catch (err) {
+    toast(`Lỗi chạy OLAP: ${err.message}`, false);
+  }
 }
 
 function renderFanout(sample, summary) {
@@ -286,7 +437,7 @@ async function loadScd() {
 
   const scdTable = $("#scd-table");
   const scdFacts = $("#scd-facts");
-  if (!scdTable && !scdFacts) return; // Nếu đang ở cổng LMS thì không có bảng BI
+  if (!scdTable && !scdFacts) return;
   try {
     const data = await api(`/api/hoc-sinh/${ma}/scd`);
     if (scdTable) {
@@ -355,51 +506,53 @@ async function loadQuality() {
   }
 }
 
-function filters() {
-  return {
-    nguon: $("#f-nguon") ? $("#f-nguon").value : "ket_qua",
-    muc: $("#f-muc") ? $("#f-muc").value : "thang",
-    ma_mon: $("#f-mon") ? $("#f-mon").value : "",
-    lop: $("#f-lop") ? $("#f-lop").value : "",
-    tu_ngay: $("#f-tu") ? $("#f-tu").value : "",
-    den_ngay: $("#f-den") ? $("#f-den").value : "",
-  };
-}
-
-function shiftMuc(step) {
-  const fMuc = $("#f-muc");
-  if (!fMuc) return "thang";
-  const levels = ["ngay", "tuan", "thang", "hoc_ky", "nam"];
-  const index = Math.min(levels.length - 1, Math.max(0, levels.indexOf(fMuc.value) + step));
-  fMuc.value = levels[index];
-  return levels[index];
-}
-
+// 3. KIỂM TRA NULL-SAFETY CHO #ws-dot VÀ #ws-text TRONG connect()
 function connect() {
   const dot = $("#ws-dot");
   const text = $("#ws-text");
-  if (!dot && !text) return;
-  const proto = location.protocol === "https:" ? "wss" : "ws";
-  const socket = new WebSocket(`${proto}://${location.host}/ws/live`);
-  socket.onopen = () => {
-    if (dot) dot.classList.add("on");
-    if (text) text.textContent = "Kho đang kết nối trực tiếp";
-    socket.send("ping");
-  };
-  socket.onmessage = (message) => {
-    try {
-      const event = JSON.parse(message.data);
-      if (event.type === "etl") {
-        if ($("#page-dash") && $("#page-dash").classList.contains("active")) loadDashboard().catch(() => {});
-        if ($("#page-chat") && $("#page-chat").classList.contains("active")) loadQuality().catch(() => {});
-      }
-    } catch (_e) {}
-  };
-  socket.onclose = () => {
-    if (dot) dot.classList.remove("on");
-    if (text) text.textContent = "Mất kết nối kho";
-    setTimeout(connect, 2000);
-  };
+  if (!dot && !text) return; // Nếu không có element trên DOM thì bỏ qua hoàn toàn
+
+  try {
+    const proto = location.protocol === "https:" ? "wss" : "ws";
+    const socket = new WebSocket(`${proto}://${location.host}/ws/live`);
+    
+    socket.onopen = () => {
+      const curDot = $("#ws-dot");
+      const curText = $("#ws-text");
+      if (curDot) curDot.classList.add("on");
+      if (curText) curText.textContent = "Kho đang kết nối trực tiếp";
+      try { socket.send("ping"); } catch (_e) {}
+    };
+
+    socket.onmessage = (message) => {
+      try {
+        const event = JSON.parse(message.data);
+        if (event && event.type === "etl") {
+          const pageDash = $("#page-dash");
+          if (pageDash && pageDash.classList.contains("active")) loadDashboard().catch(() => {});
+          const pageChat = $("#page-chat");
+          if (pageChat && pageChat.classList.contains("active")) loadQuality().catch(() => {});
+        }
+      } catch (_e) {}
+    };
+
+    socket.onclose = () => {
+      const curDot = $("#ws-dot");
+      const curText = $("#ws-text");
+      if (curDot) curDot.classList.remove("on");
+      if (curText) curText.textContent = "Mất kết nối kho";
+      setTimeout(connect, 3000);
+    };
+
+    socket.onerror = () => {
+      const curDot = $("#ws-dot");
+      const curText = $("#ws-text");
+      if (curDot) curDot.classList.remove("on");
+      if (curText) curText.textContent = "Lỗi kết nối kho";
+    };
+  } catch (_e) {
+    // Không làm sập ứng dụng nếu WebSocket không khả dụng
+  }
 }
 
 // Chuyển trang BI
@@ -413,11 +566,11 @@ function showBiPage(page) {
   if (page === "dash") loadDashboard().catch((err) => toast(err.message, false));
   if (page === "scd") {
     loadScd().catch((err) => toast(err.message, false));
-    if ($("#btn-across")) $("#btn-across").click();
+    const btnAcross = $("#btn-across");
+    if (btnAcross) btnAcross.click();
   }
   if (page === "olap") {
-    const defaultPreset = document.querySelector(".btn-preset[data-preset='roll-up']");
-    if (defaultPreset && !$("#olap-result").hasChildNodes()) defaultPreset.click();
+    runOlap(state.currentOp || "roll-up");
   }
   if (page === "chat") loadQuality().catch((err) => toast(err.message, false));
 }
@@ -439,6 +592,7 @@ function showLmsTab(tab) {
   }
 }
 
+// GẮN SỰ KIỆN CLICK TOÀN CỤC
 document.addEventListener("click", async (event) => {
   // Navigation LMS Tabs
   const lmsTabBtn = event.target.closest(".lms-nav-btn[data-tab]");
@@ -454,13 +608,29 @@ document.addEventListener("click", async (event) => {
     return;
   }
 
-  // Preset OLAP buttons
-  const presetBtn = event.target.closest("[data-preset]");
-  if (presetBtn) {
-    try {
-      renderOlap(await api(`/api/olap/preset/${presetBtn.dataset.preset}`));
-    } catch (err) {
-      toast(err.message, false);
+  // 2. GẮN SỰ KIỆN CHO .op-card[data-op]
+  const opCard = event.target.closest(".op-card[data-op]");
+  if (opCard) {
+    const op = opCard.dataset.op;
+    runOlap(op);
+    return;
+  }
+
+  // 2. GẮN SỰ KIỆN CHO #btn-run-olap
+  if (event.target.id === "btn-run-olap") {
+    runOlap(state.currentOp || "roll-up");
+    return;
+  }
+
+  // Nút đảo trục Pivot
+  if (event.target.id === "btn-swap") {
+    const pHang = $("#p-hang");
+    const pCot = $("#p-cot");
+    if (pHang && pCot) {
+      const tmp = pHang.value;
+      pHang.value = pCot.value;
+      pCot.value = tmp;
+      runOlap("pivot");
     }
     return;
   }
@@ -571,55 +741,6 @@ document.addEventListener("click", async (event) => {
     return;
   }
 
-  // Thao tác OLAP tùy chỉnh
-  if (["btn-rollup", "btn-drill", "btn-slice", "btn-dice", "btn-pivot", "btn-swap"].includes(event.target.id)) {
-    try {
-      if (event.target.id === "btn-rollup") shiftMuc(1);
-      if (event.target.id === "btn-drill") shiftMuc(-1);
-      if (event.target.id === "btn-swap" && $("#p-hang") && $("#p-cot")) {
-        const hang = $("#p-hang").value;
-        $("#p-hang").value = $("#p-cot").value;
-        $("#p-cot").value = hang;
-      }
-      let thao = "Tuy chinh";
-      if (event.target.id === "btn-rollup") thao = "Roll-up";
-      if (event.target.id === "btn-drill") thao = "Drill-down";
-      if (event.target.id === "btn-slice") thao = "Slice";
-      if (event.target.id === "btn-dice") thao = "Dice";
-      if (event.target.id === "btn-pivot" || event.target.id === "btn-swap") thao = "Pivot";
-
-      const body = {
-        ...filters(),
-        thao_tac: thao,
-        kieu: thao === "Pivot" ? "pivot" : "bang",
-        hang: $("#p-hang") ? $("#p-hang").value : "lop",
-        cot: $("#p-cot") ? $("#p-cot").value : "mon",
-      };
-
-      if (thao === "Slice") {
-        body.lop = "";
-        body.tu_ngay = "";
-        body.den_ngay = "";
-        if (!body.ma_mon) body.ma_mon = "KDL";
-      }
-      if (thao === "Dice") {
-        const used = [body.ma_mon, body.lop, body.tu_ngay && body.den_ngay].filter(Boolean).length;
-        if (used < 2) {
-          toast("Dice cần ít nhất hai điều kiện (ví dụ môn và lớp).", false);
-          return;
-        }
-      }
-      renderOlap(await api("/api/olap/tuy-chinh", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      }));
-    } catch (err) {
-      toast(err.message, false);
-    }
-    return;
-  }
-
   // Chạy Drill-Across
   if (event.target.id === "btn-across") {
     try {
@@ -654,6 +775,12 @@ function bindStaticEvents() {
 
   const scdHs = $("#scd-hs");
   if (scdHs) scdHs.addEventListener("change", () => loadScd().catch((err) => toast(err.message, false)));
+
+  // Bắt sự kiện thay đổi trục Pivot
+  const pHang = $("#p-hang");
+  if (pHang) pHang.addEventListener("change", () => { if (state.currentOp === "pivot") runOlap("pivot"); });
+  const pCot = $("#p-cot");
+  if (pCot) pCot.addEventListener("change", () => { if (state.currentOp === "pivot") runOlap("pivot"); });
 }
 
 async function boot() {
@@ -670,6 +797,7 @@ async function boot() {
 
     // Nếu ở cổng BI (/bi)
     if ($("#page-dash")) await loadDashboard();
+    if ($("#page-olap") && $("#page-olap").classList.contains("active")) await runOlap("roll-up");
     if ($("#page-scd") && $("#scd-table")) await loadScd().catch(() => {});
 
     connect();

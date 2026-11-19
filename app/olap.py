@@ -465,6 +465,52 @@ def dashboard(oltp, dw) -> dict:
             """
         )
     ]
+    by_class = [
+        dict(row)
+        for row in dw.execute(
+            """
+            SELECT lop, SUM(so_luot) AS so_luot,
+                   ROUND(SUM(tong_diem) / SUM(so_luot), 2) AS diem_tb
+            FROM iv_diem_theo_mon_thang WITH (NOEXPAND)
+            GROUP BY lop
+            ORDER BY diem_tb DESC
+            """
+        )
+    ]
+    top_students = [
+        dict(row)
+        for row in dw.execute(
+            """
+            SELECT h.ma_hoc_sinh, h.ho_ten, h.lop,
+                   COUNT(*) AS so_bai,
+                   ROUND(AVG(f.diem_so), 2) AS diem_tb
+            FROM fact_ket_qua_thi f
+            JOIN dim_hoc_sinh h ON h.hoc_sinh_key = f.hoc_sinh_key
+            WHERE h.hoc_sinh_key > 0
+            GROUP BY h.ma_hoc_sinh, h.ho_ten, h.lop
+            HAVING COUNT(*) >= 2
+            ORDER BY diem_tb DESC
+            LIMIT 5
+            """
+        )
+    ]
+    risk_students = [
+        dict(row)
+        for row in dw.execute(
+            """
+            SELECT h.ma_hoc_sinh, h.ho_ten, h.lop, h.trang_thai_hoc_vu,
+                   ROUND(AVG(f.diem_so), 2) AS diem_tb,
+                   COUNT(f.fact_id) AS so_bai
+            FROM dim_hoc_sinh h
+            LEFT JOIN fact_ket_qua_thi f ON f.hoc_sinh_key = h.hoc_sinh_key
+            WHERE h.is_current = 1 AND h.hoc_sinh_key > 0
+              AND (h.trang_thai_hoc_vu IN (N'CANH_BAO_HOC_VU', N'BAO_LUU') OR f.diem_so < 5.0)
+            GROUP BY h.ma_hoc_sinh, h.ho_ten, h.lop, h.trang_thai_hoc_vu
+            ORDER BY diem_tb ASC
+            LIMIT 5
+            """
+        )
+    ]
     by_day = [
         dict(row)
         for row in dw.execute(
@@ -502,6 +548,9 @@ def dashboard(oltp, dw) -> dict:
             "dong_summary": summary_rows,
         },
         "theo_mon": by_subject,
+        "theo_lop": by_class,
+        "top_sinh_vien": top_students,
+        "sinh_vien_nguy_co": risk_students,
         "theo_ngay": by_day,
         "me_gan_nhat": dict(last_batch) if last_batch else None,
     }
