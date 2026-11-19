@@ -21,7 +21,7 @@ Bài tập lớn môn Kho dữ liệu (DAE1408), Nhóm 9, lớp D23CQKD02-B. H�
    - **Command Prompt (cmd):**
      ```bat
      if not exist .dagster_home mkdir .dagster_home
-     set DAGSTER_HOME=%CD%\.dagster_home && dagster dev -f orchestration/etl_assets.py -p 3000
+     set "DAGSTER_HOME=%CD%\.dagster_home" && dagster dev -f orchestration/etl_assets.py -p 3000
      ```
    - **PowerShell:**
      ```powershell

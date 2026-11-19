@@ -3,31 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LearnWH · Chọn cổng</title>
-  <link rel="stylesheet" href="/static/app.css?v=4">
-  <style>
-    .chooser { max-width: 720px; margin: 60px auto; padding: 0 16px; }
-    .chooser h1 { margin-bottom: 8px; }
-    .chooser .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 20px; }
-    .chooser a.card { display: block; text-decoration: none; color: inherit; }
-    .chooser a.card:hover { border-color: var(--pine); }
-  </style>
+  <title>LearnWH · Hệ Thống Quản Lý & Phân Tích Học Tập</title>
+  <link rel="stylesheet" href="/static/app.css?v=5">
 </head>
-<body>
-  <div class="chooser">
-    <p class="kicker">LearnWH · Kho dữ liệu DAE1408</p>
-    <h1>Chọn cổng giao diện</h1>
-    <p class="hint">Hệ thống tách hai cổng: tác nghiệp OLTP và phân tích DW/BI.</p>
-    <div class="cards">
-      <a class="card" href="/hoc-tap">
-        <h2>Cổng Học tập OLTP</h2>
-        <p>Ghi dữ liệu tác nghiệp: làm đề, nộp bài, phiên học, cập nhật học vụ, bộ phát luồng.</p>
+<body class="index-body">
+  <div class="index-container">
+    <div class="index-header">
+      <span class="index-tag">Hệ Thống Kho Dữ Liệu · DAE1408</span>
+      <h1>LearnWH Platform</h1>
+      <p class="index-desc">Kiến trúc tách biệt giữa Hệ thống Tác nghiệp (OLTP) và Kho dữ liệu Phân tích (DW/BI).</p>
+    </div>
+
+    <div class="portal-grid">
+      <a class="portal-card lms-portal-card" href="/hoc-tap">
+        <div class="portal-icon">🎓</div>
+        <div class="portal-body">
+          <h2>Cổng Học Tập & Thi Trực Tuyến</h2>
+          <span class="portal-badge badge-oltp">Hệ Tác Nghiệp · OLTP</span>
+          <p>Dành cho sinh viên: Làm bài thi trắc nghiệm, theo dõi phiên tự học LMS và đăng ký điều chỉnh hồ sơ học vụ.</p>
+        </div>
+        <span class="portal-link">Truy cập Cổng Học Tập →</span>
       </a>
-      <a class="card" href="/bi">
-        <h2>Cổng Báo cáo DW/BI</h2>
-        <p>Đọc dữ liệu phân tích: dashboard, lịch sử SCD Type 2, OLAP, chất lượng ETL.</p>
+
+      <a class="portal-card bi-portal-card" href="/bi">
+        <div class="portal-icon">📊</div>
+        <div class="portal-body">
+          <h2>Trung Tâm Báo Cáo & Phân Tích BI</h2>
+          <span class="portal-badge badge-dw">Kho Dữ Liệu · DW / BI</span>
+          <p>Dành cho quản lý: Theo dõi KPI tổng quan, phân tích đa chiều OLAP, lịch sử SCD Type 2, Drill-Across và kiểm soát ETL.</p>
+        </div>
+        <span class="portal-link">Truy cập Cổng Phân Tích →</span>
       </a>
     </div>
+
+    <footer class="index-footer">
+      <p>Bài tập lớn môn Kho Dữ Liệu · Nhóm 9 (Lớp D23CQKD02-B) · Giảng viên hướng dẫn: ThS. Nguyễn Thị Thu Hiên</p>
+    </footer>
   </div>
 </body>
 </html>

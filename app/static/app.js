@@ -4,7 +4,13 @@ const TT = {
   CANH_BAO_HOC_VU: "Cảnh báo học vụ",
   KHONG_XAC_DINH: "Không xác định",
 };
-const state = { meta: null, muc: "thang", questions: [], started: 0, tuongTac: 1 };
+
+const state = {
+  meta: null,
+  questions: [],
+  started: 0,
+  tuongTac: 1,
+};
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
@@ -26,7 +32,7 @@ function cell(value, header) {
   if (value === null || value === undefined || value === "") return "–";
   if (typeof value === "number" && String(header).includes("Tỷ lệ")) return `${(value * 100).toFixed(1)}%`;
   if (typeof value === "number") return num(value);
-  if (header === "Is_Current" || header === "Hiệu lực") return value ? "1" : "0";
+  if (header === "Is_Current" || header === "Hiệu lực") return value ? "1 (Hiện thời)" : "0 (Lịch sử)";
   if (TT[value]) return esc(TT[value]);
   return esc(value);
 }
@@ -48,7 +54,7 @@ async function api(path, options) {
 }
 
 function table(columns, rows, rowClass) {
-  if (!rows || !rows.length) return "<p class='hint'>Chưa có dòng nào.</p>";
+  if (!rows || !rows.length) return "<p class='empty-state'>Không có dữ liệu phù hợp.</p>";
   const head = columns.map((col) => `<th>${esc(col)}</th>`).join("");
   const body = rows.map((row, index) => {
     const cls = rowClass ? rowClass(row, index) : "";
@@ -64,39 +70,13 @@ function bars(el, rows, labelKey, valueKey) {
   const max = Math.max(...safeRows.map((row) => Number(row[valueKey]) || 0), 1);
   el.innerHTML = safeRows.map((row) => `
     <div class="bar-row">
-      <span>${esc(row[labelKey])}</span>
-      <div class="track"><div style="width:${(Number(row[valueKey]) || 0) / max * 100}%"></div></div>
-      <b>${num(row[valueKey])}</b>
+      <span class="bar-label" title="${esc(row[labelKey])}">${esc(row[labelKey])}</span>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${(Number(row[valueKey]) || 0) / max * 100}%"></div>
+      </div>
+      <b class="bar-val">${num(row[valueKey])}</b>
     </div>
-  `).join("") || "<p class='hint'>Chưa có số liệu.</p>";
-}
-
-function renderDashboard(data) {
-  const pipe = $("#pipe");
-  const kpis = $("#kpis");
-  if (pipe) {
-    const p = data.pipeline || {};
-    const k = data.kpi || {};
-    pipe.innerHTML = [
-      ["OLTP bài / phiên", `${num(p.oltp_bai)} / ${num(p.oltp_phien)}`],
-      ["Bị loại", num(p.bi_loai)],
-      ["Fact bài / phiên", `${num(p.fact_bai)} / ${num(p.fact_phien)}`],
-      ["Dòng summary", num(p.dong_summary)],
-      ["Mã lạ giữ lại", num(k.unknown_member)],
-    ].map(([name, value]) => `<li><b>${name}</b><strong>${value}</strong></li>`).join("");
-  }
-  if (kpis) {
-    const k = data.kpi || {};
-    const cards = [
-      ["Điểm trung bình", k.diem_tb],
-      ["Tổng phút học", k.tong_phut],
-      ["Phiên bản SCD", k.phien_ban_scd],
-      ["Học sinh hiện tại", k.hoc_sinh_hien_tai],
-    ];
-    kpis.innerHTML = cards.map(([name, value]) => `<div class="kpi"><span>${name}</span><b>${num(value)}</b></div>`).join("");
-  }
-  bars($("#bars-mon"), data.theo_mon, "ten_mon", "diem_tb");
-  bars($("#bars-ngay"), data.theo_ngay, "ngay", "so_luot");
+  `).join("") || "<p class='empty-state'>Chưa có số liệu thống kê.</p>";
 }
 
 function fillSelect(el, items, valueKey, labelFn, first) {
@@ -109,40 +89,70 @@ function fillSelect(el, items, valueKey, labelFn, first) {
   if ([...el.options].some((opt) => opt.value === current)) el.value = current;
 }
 
+function updateExamSummary() {
+  const deSel = $("#de-select");
+  const summaryEl = $("#exam-summary");
+  if (!deSel || !summaryEl || !state.meta) return;
+  const exam = (state.meta.de_thi || []).find((e) => e.ma_de === deSel.value);
+  if (!exam) {
+    summaryEl.innerHTML = "";
+    return;
+  }
+  summaryEl.innerHTML = `
+    <strong>Hình thức:</strong> ${esc(exam.loai)} &nbsp;|&nbsp;
+    <strong>Độ khó:</strong> ${esc(exam.do_kho)} &nbsp;|&nbsp;
+    <strong>Quy mô:</strong> ${exam.so_cau} câu &nbsp;|&nbsp;
+    <strong>Thời gian:</strong> ${exam.thoi_gian_phut} phút
+  `;
+}
+
 function bindMeta(meta) {
   state.meta = meta;
-  const labelHs = (row) => `${row.ho_ten} · ${row.ma_hs} · ${row.lop}`;
+  const labelHs = (row) => `${row.ma_hs} – ${row.ho_ten} (${row.lop})`;
+  
   fillSelect($("#hs-select"), meta.hoc_sinh, "ma_hs", labelHs);
   fillSelect($("#scd-hs"), meta.hoc_sinh, "ma_hs", labelHs);
-  fillSelect($("#de-select"), meta.de_thi, "ma_de", (row) => `${row.ten_de} (${row.loai})`);
-  fillSelect($("#bai-select"), meta.bai_hoc, "ma_bai", (row) => `${row.ten_bai} · ${row.thoi_luong_phut} phút`);
-  fillSelect($("#f-mon"), meta.mon_hoc, "ma_mon", (row) => row.ten_mon, "Mọi môn");
-  fillSelect($("#ax-mon"), meta.mon_hoc, "ma_mon", (row) => row.ten_mon, "Mọi môn");
+  fillSelect($("#de-select"), meta.de_thi, "ma_de", (row) => `${row.ten_de} [${row.ma_de}]`);
+  fillSelect($("#bai-select"), meta.bai_hoc, "ma_bai", (row) => `${row.ten_bai} (${row.thoi_luong_phut} phút)`);
+  fillSelect($("#f-mon"), meta.mon_hoc, "ma_mon", (row) => row.ten_mon, "Mọi môn học");
+  fillSelect($("#ax-mon"), meta.mon_hoc, "ma_mon", (row) => row.ten_mon, "Mọi môn học");
+
   const lops = (meta.lop || []).map((lop) => ({ lop }));
   fillSelect($("#f-lop"), lops, "lop", (row) => row.lop, "Mọi lớp");
   fillSelect($("#ax-lop"), lops, "lop", (row) => row.lop, "Mọi lớp hiện tại");
   fillSelect($("#scd-lop"), lops, "lop", (row) => row.lop);
 
-  const members = (meta.hoc_sinh || []).filter((row) => row.vai_tro === "thanh_vien");
-  const memberChips = $("#member-chips");
-  if (memberChips) {
-    memberChips.innerHTML = members.map((row) => `<button type="button" class="ghost" data-hs="${esc(row.ma_hs)}">${esc(row.ho_ten)}</button>`).join("");
-  }
-
+  // Mặc định chọn B23DCKD004 (Nguyễn Quý Tường Anh) để kiểm chứng SCD Type 2
   const hsSel = $("#hs-select");
   const scdHs = $("#scd-hs");
   if (hsSel && [...hsSel.options].some((opt) => opt.value === "B23DCKD004")) hsSel.value = "B23DCKD004";
   if (scdHs && [...scdHs.options].some((opt) => opt.value === "B23DCKD004")) scdHs.value = "B23DCKD004";
 
-  const scdQuick = $("#scd-quick");
-  if (scdQuick) {
-    scdQuick.innerHTML = [
-      ["B23DCKD004", "D23CQKD03", "DANG_HOC", "Kịch bản chuyển lớp"],
-      ["B23DCKD004", "D23CQCN01", "CANH_BAO_HOC_VU", "Kịch bản cảnh báo học vụ"],
-      ["HS-BL01", "D23CQKD03", "DANG_HOC", "Kịch bản hết bảo lưu"],
-      ["B23DCKD008", "D23CQVT04", "DANG_HOC", "Kịch bản chuyển lớp thứ hai"],
-    ].map(([ma, lop, tt, label]) => `<button type="button" class="ghost" data-quick="${ma}|${lop}|${tt}">${label}</button>`).join("");
+  updateExamSummary();
+}
+
+function renderDashboard(data) {
+  const kpis = $("#kpis");
+  if (kpis) {
+    const k = data.kpi || {};
+    const p = data.pipeline || {};
+    const cards = [
+      ["Lượt thi đã nạp (Fact)", p.fact_bai || 0],
+      ["Điểm trung bình toàn kho", k.diem_tb || 0],
+      ["Phiên học đã nạp (Fact)", p.fact_phien || 0],
+      ["Tổng thời lượng học (phút)", k.tong_phut || 0],
+      ["Sinh viên đang theo dõi", k.hoc_sinh_hien_tai || 0],
+      ["Phiên bản SCD Type 2", k.phien_ban_scd || 0],
+    ];
+    kpis.innerHTML = cards.map(([name, value]) => `
+      <div class="kpi-card">
+        <span>${esc(name)}</span>
+        <b>${num(value)}</b>
+      </div>
+    `).join("");
   }
+  bars($("#bars-mon"), data.theo_mon, "ten_mon", "diem_tb");
+  bars($("#bars-ngay"), data.theo_ngay, "ngay", "so_luot");
 }
 
 function renderOlap(data) {
@@ -150,7 +160,7 @@ function renderOlap(data) {
   const note = $("#olap-note");
   const sql = $("#olap-sql");
   const result = $("#olap-result");
-  if (title) title.textContent = data.thao_tac || "Kết quả";
+  if (title) title.textContent = data.thao_tac || "Kết quả phân tích";
   if (note) note.textContent = data.mo_ta || "";
   if (sql) sql.textContent = data.sql || "";
   if (!result) return;
@@ -170,23 +180,25 @@ function renderFanout(sample, summary) {
   const fanout = $("#fanout");
   if (!fanout) return;
   if (!sample) {
-    fanout.textContent = "Chưa có học sinh nào vừa có nhiều bài thi vừa có nhiều phiên học trên cùng một môn.";
+    fanout.innerHTML = "<strong>Đối chiếu:</strong> Toàn bộ kho dữ liệu có <b>" + (summary.ca_hai || 0) + "</b> cặp có cả điểm thi và chuyên cần, <b>" + (summary.chi_co_diem || 0) + "</b> cặp chỉ có điểm thi, <b>" + (summary.chi_co_chuyen_can || 0) + "</b> cặp chỉ có chuyên cần.";
     return;
   }
   fanout.innerHTML = `
-    <strong>${esc(sample.ma_hoc_sinh)} · ${esc(sample.ma_mon)}</strong>:
-    ${sample.so_luot_thi} bài và ${sample.so_phien} phiên.
-    Tổng điểm đúng ${num(sample.tong_diem_dung)}, tổng phút đúng ${num(sample.tong_phut_dung)}.
-    Nếu JOIN thẳng hai fact thì thành ${num(sample.so_dong_khi_join_thang)} dòng,
-    tổng điểm bị kéo thành ${num(sample.tong_diem_bi_nhan)}, tổng phút thành ${num(sample.tong_phut_bi_nhan)}.
-    Toàn bộ drill-across: ${summary.chi_co_diem} cặp chỉ có điểm, ${summary.chi_co_chuyen_can} cặp chỉ có chuyên cần, ${summary.ca_hai} cặp có cả hai.
-    Đang hiện ${summary.so_dong_hien}/${summary.so_dong} dòng.
+    <strong>Minh họa chống bẫy Fan-Out trên cặp (${esc(sample.ma_hoc_sinh)} – ${esc(sample.ma_mon)}):</strong><br>
+    • Thực tế: Sinh viên có <b>${sample.so_luot_thi}</b> bài thi (tổng điểm <b>${num(sample.tong_diem_dung)}</b>) và <b>${sample.so_phien}</b> phiên học (tổng phút <b>${num(sample.tong_phut_dung)}</b>).<br>
+    • Nếu <em>JOIN trực tiếp hai Fact</em>: Tích số tạo thành <b>${num(sample.so_dong_khi_join_thang)} dòng</b> (thổi phồng tổng điểm lên <b>${num(sample.tong_diem_bi_nhan)}</b> và tổng phút lên <b>${num(sample.tong_phut_bi_nhan)}</b>).<br>
+    • Kỹ thuật <strong>Drill-Across</strong>: Tổng hợp độc lập từng Fact rồi <code>FULL OUTER JOIN</code> giúp loại trừ hoàn toàn sai số.
   `;
 }
 
 async function loadDashboard() {
   if (!$("#page-dash")) return;
-  renderDashboard(await api("/api/dashboard"));
+  try {
+    const data = await api("/api/dashboard");
+    renderDashboard(data);
+  } catch (err) {
+    toast(err.message, false);
+  }
 }
 
 async function loadQuiz() {
@@ -194,17 +206,34 @@ async function loadQuiz() {
   const quiz = $("#quiz");
   if (!deSel || !quiz) return;
   if (!deSel.value) return;
-  const data = await api(`/api/de-thi/${deSel.value}/cau-hoi`);
-  state.questions = data.cau_hoi || [];
-  state.started = Date.now();
-  quiz.innerHTML = state.questions.map((q, index) => `
-    <div class="quiz-q">
-      <p><b>Câu ${index + 1}.</b> ${esc(q.noi_dung)}</p>
-      ${["a", "b", "c", "d"].map((key) => `
-        <label class="choice"><input type="radio" name="q${q.ma_cau}" value="${key.toUpperCase()}"> ${key.toUpperCase()}. ${esc(q[`phuong_an_${key}`])}</label>
-      `).join("")}
-    </div>
-  `).join("") + `<button id="btn-nop">Nộp bài</button><div id="quiz-result"></div>`;
+  updateExamSummary();
+  try {
+    const data = await api(`/api/de-thi/${deSel.value}/cau-hoi`);
+    state.questions = data.cau_hoi || [];
+    state.started = Date.now();
+    if (!state.questions.length) {
+      quiz.innerHTML = "<p class='empty-state'>Đề thi hiện chưa có câu hỏi.</p>";
+      return;
+    }
+    quiz.innerHTML = state.questions.map((q, index) => `
+      <div class="quiz-q">
+        <p><b>Câu ${index + 1}:</b> ${esc(q.noi_dung)}</p>
+        <div class="quiz-choices">
+          ${["a", "b", "c", "d"].map((key) => `
+            <label class="choice">
+              <input type="radio" name="q${q.ma_cau}" value="${key.toUpperCase()}">
+              <span><b>${key.toUpperCase()}.</b> ${esc(q[`phuong_an_${key}`])}</span>
+            </label>
+          `).join("")}
+        </div>
+      </div>
+    `).join("") + `
+      <button type="button" id="btn-nop" class="btn-primary">Nộp bài thi</button>
+      <div id="quiz-result"></div>
+    `;
+  } catch (err) {
+    quiz.innerHTML = `<p class='empty-state'>Lỗi tải câu hỏi: ${esc(err.message)}</p>`;
+  }
 }
 
 function renderLesson() {
@@ -212,17 +241,30 @@ function renderLesson() {
   const lesson = $("#lesson");
   if (!baiSel || !lesson || !state.meta) return;
   const bai = (state.meta.bai_hoc || []).find((row) => row.ma_bai === baiSel.value);
-  if (!bai) return;
+  if (!bai) {
+    lesson.innerHTML = "<div class='empty-state'>Vui lòng chọn bài học từ danh mục.</div>";
+    return;
+  }
   state.tuongTac = 1;
+  const defaultMin = Math.max(1, Math.round(bai.thoi_luong_phut * 0.8));
   lesson.innerHTML = `
-    <p>${esc(bai.ten_bai)} · ${esc(bai.loai_noi_dung)} · chuẩn ${bai.thoi_luong_phut} phút.</p>
-    <label>Số phút ghi nhận <input id="lesson-min" type="number" min="1" max="${bai.thoi_luong_phut}" value="${Math.max(1, Math.round(bai.thoi_luong_phut * 0.8))}"></label>
-    <p>Số lần bấm tương tác: <b id="tap-count">1</b></p>
-    <div class="chips">
-      <button type="button" id="btn-tap" class="ghost">Thêm một tương tác</button>
-      <button type="button" id="btn-phien">Ghi phiên vào OLTP</button>
+    <div class="lesson-info">
+      <h3>${esc(bai.ten_bai)}</h3>
+      <p class="subtext">Loại bài: <b>${esc(bai.loai_noi_dung)}</b> &nbsp;|&nbsp; Thời lượng quy chuẩn: <b>${bai.thoi_luong_phut} phút</b></p>
     </div>
-    <p id="lesson-result" class="hint"></p>
+    <div class="lesson-control" style="margin-top: 14px;">
+      <label class="field-label" for="lesson-min">Thời gian sinh viên đã học (phút):</label>
+      <input id="lesson-min" type="number" min="1" max="${bai.thoi_luong_phut * 2}" value="${defaultMin}" style="width: 140px;">
+    </div>
+    <div class="lesson-control" style="margin-top: 12px;">
+      <span class="field-label">Ghi nhận mức độ tương tác:</span>
+      <p style="font-size: 14px;">Số lần tương tác: <b id="tap-count" style="color: var(--color-primary); font-size: 16px;">1</b></p>
+    </div>
+    <div class="lesson-actions">
+      <button type="button" id="btn-tap" class="btn-secondary">➕ Thêm tương tác</button>
+      <button type="button" id="btn-phien" class="btn-primary">✓ Hoàn thành phiên học</button>
+    </div>
+    <div id="lesson-result" class="hint-msg"></div>
   `;
 }
 
@@ -244,84 +286,72 @@ async function loadScd() {
 
   const scdTable = $("#scd-table");
   const scdFacts = $("#scd-facts");
-  if (!scdTable && !scdFacts) return; // trang OLTP không có bảng lịch sử
+  if (!scdTable && !scdFacts) return; // Nếu đang ở cổng LMS thì không có bảng BI
   try {
     const data = await api(`/api/hoc-sinh/${ma}/scd`);
     if (scdTable) {
       scdTable.innerHTML = table(
-        ["Ver", "Lớp", "Trạng thái", "Lý do", "Start_Date", "End_Date", "Is_Current", "Khóa"],
+        ["Phiên bản", "Lớp", "Trạng thái học vụ", "Lý do biến động", "Ngày bắt đầu", "Ngày kết thúc", "Hiệu lực", "Surrogate Key"],
         (data.phien_ban || []).map((row) => [row.version_no, row.lop, row.trang_thai_hoc_vu, row.ly_do, row.start_date, row.end_date, row.is_current, row.hoc_sinh_key]),
         (row) => (row[6] ? "current" : ""),
       );
     }
     if (scdFacts) {
       scdFacts.innerHTML = table(
-        ["Ngày", "Đề", "Điểm", "Khóa HS", "Ver", "Lớp tại lúc thi", "Trạng thái lúc thi"],
+        ["Ngày nộp bài", "Tên đề thi", "Điểm số", "Khóa ngoại gắn vào Fact", "Phiên bản lúc thi", "Lớp tại thời điểm thi", "Trạng thái lúc thi"],
         (data.bai_gan_day || []).map((row) => [row.ngay, row.ten_de, row.diem_so, row.hoc_sinh_key, row.version_no, row.lop, row.trang_thai_hoc_vu]),
       );
     }
   } catch (err) {
-    if (scdTable) scdTable.innerHTML = `<p class='hint'>${esc(err.message)}</p>`;
+    if (scdTable) scdTable.innerHTML = `<p class='empty-state'>${esc(err.message)}</p>`;
     if (scdFacts) scdFacts.innerHTML = "";
   }
 }
 
-function pushLog(event) {
-  const log = $("#log");
-  if (!log) return;
-  const li = document.createElement("li");
-  li.className = event.type || "";
-  const when = event.luc ? String(event.luc).slice(11, 19) : new Date().toLocaleTimeString("vi-VN");
-  if (event.type === "etl") {
-    li.textContent = `${when}  ETL #${event.batch_id}: bài ${event.loaded_exam}/${event.src_exam}, phiên ${event.loaded_session}/${event.src_session}, loại ${(event.rejected_exam || 0) + (event.rejected_session || 0)}, SCD mới ${event.scd_new}, ${event.duration_ms} ms`;
-  } else if (event.type === "oltp") {
-    li.textContent = `${when}  OLTP ${event.su_kien} · ${event.ma_hs} · ${event.diem ?? ""}`;
-  } else if (event.type === "scd") {
-    li.textContent = `${when}  SCD ${event.ma_hs} → ${event.lop} / ${event.trang_thai}`;
-  } else if (event.type === "error") {
-    li.textContent = event.message;
-  } else {
-    li.textContent = `${when}  ${event.su_kien || event.type || "su_kien"}`;
-  }
-  log.prepend(li);
-  while (log.children.length > 50) log.lastChild.remove();
-}
-
 async function loadQuality() {
   if (!$("#page-chat")) return;
-  const data = await api("/api/chat-luong");
-  const qKpis = $("#q-kpis");
-  if (qKpis) {
-    const cards = [
-      ["Nguồn bài", data.tong.src_exam],
-      ["Nạp fact bài", data.tong.loaded_exam],
-      ["Loại bài", data.tong.rejected_exam],
-      ["Summary khớp", data.khop_summary ? "Có" : "Không"],
-    ];
-    qKpis.innerHTML = cards.map(([name, value]) => `<div class="kpi"><span>${name}</span><b>${typeof value === "number" ? num(value) : value}</b></div>`).join("");
-  }
-  const qBatch = $("#q-batch");
-  if (qBatch) {
-    qBatch.innerHTML = table(
-      ["Mẻ", "Nguồn gọi", "Bài nguồn", "Nạp", "Loại", "Phiên nạp", "SCD mới", "ms", "TT"],
-      (data.me || []).map((row) => [row.batch_id, row.trigger_name, row.src_exam, row.loaded_exam, row.rejected_exam, row.loaded_session, row.scd_new, row.duration_ms, row.status]),
-    );
-  }
-  const qReject = $("#q-reject");
-  if (qReject) {
-    qReject.innerHTML = table(
-      ["ID", "Nguồn", "Mã nguồn", "Lý do", "Lúc"],
-      (data.loai || []).map((row) => [row.id, row.nguon, row.nguon_id, row.ly_do, row.created_at]),
-    );
-  }
-  const qPlan = $("#q-plan");
-  if (qPlan) {
-    try {
-      const plan = await api("/api/chat-luong/explain");
-      qPlan.textContent = Object.entries(plan).map(([name, item]) => `${name}\n${item.sql}\n${(item.ke_hoach || []).join("\n")}`).join("\n\n");
-    } catch (err) {
-      qPlan.textContent = err.message;
+  try {
+    const data = await api("/api/chat-luong");
+    const qKpis = $("#q-kpis");
+    if (qKpis) {
+      const cards = [
+        ["Tổng bài thi nguồn (OLTP)", data.tong.src_exam || 0],
+        ["Bài thi đã nạp vào Fact", data.tong.loaded_exam || 0],
+        ["Bản ghi bị Quality Gate loại", data.tong.rejected_exam || 0],
+        ["Bất biến Nguồn = Nạp + Loại", data.khop_summary ? "BẢO TOÀN (100%)" : "LỆCH"],
+      ];
+      qKpis.innerHTML = cards.map(([name, value]) => `
+        <div class="kpi-card">
+          <span>${esc(name)}</span>
+          <b>${typeof value === "number" ? num(value) : esc(value)}</b>
+        </div>
+      `).join("");
     }
+    const qBatch = $("#q-batch");
+    if (qBatch) {
+      qBatch.innerHTML = table(
+        ["Batch ID", "Trigger", "Bài nguồn", "Nạp Fact", "Bị loại", "Phiên nạp", "SCD mới", "Thời gian (ms)", "Trạng thái"],
+        (data.me || []).map((row) => [row.batch_id, row.trigger_name, row.src_exam, row.loaded_exam, row.rejected_exam, row.loaded_session, row.scd_new, row.duration_ms, row.status]),
+      );
+    }
+    const qReject = $("#q-reject");
+    if (qReject) {
+      qReject.innerHTML = table(
+        ["Mã Reject", "Nguồn", "Mã nguồn", "Lý do từ chối (7 luật Quality Gate)", "Thời điểm phát hiện"],
+        (data.loai || []).map((row) => [row.id, row.nguon, row.nguon_id, row.ly_do, row.created_at]),
+      );
+    }
+    const qPlan = $("#q-plan");
+    if (qPlan) {
+      try {
+        const plan = await api("/api/chat-luong/explain");
+        qPlan.textContent = Object.entries(plan).map(([name, item]) => `=== ${name} ===\n${item.sql}\n${(item.ke_hoach || []).join("\n")}`).join("\n\n");
+      } catch (err) {
+        qPlan.textContent = err.message;
+      }
+    }
+  } catch (err) {
+    toast(err.message, false);
   }
 }
 
@@ -346,66 +376,85 @@ function shiftMuc(step) {
 }
 
 function connect() {
-  if (!$("#ws-dot") && !$("#ws-text") && !$("#log")) return;
+  const dot = $("#ws-dot");
+  const text = $("#ws-text");
+  if (!dot && !text) return;
   const proto = location.protocol === "https:" ? "wss" : "ws";
   const socket = new WebSocket(`${proto}://${location.host}/ws/live`);
   socket.onopen = () => {
-    const dot = $("#ws-dot");
-    const text = $("#ws-text");
     if (dot) dot.classList.add("on");
-    if (text) text.textContent = "Đang nghe dòng";
+    if (text) text.textContent = "Kho đang kết nối trực tiếp";
     socket.send("ping");
   };
   socket.onmessage = (message) => {
     try {
       const event = JSON.parse(message.data);
-      pushLog(event);
-      if (event.type === "etl" && $("#page-dash") && $("#page-dash").classList.contains("active")) loadDashboard().catch(() => {});
-      if (event.type === "etl" && $("#page-chat") && $("#page-chat").classList.contains("active")) loadQuality().catch(() => {});
+      if (event.type === "etl") {
+        if ($("#page-dash") && $("#page-dash").classList.contains("active")) loadDashboard().catch(() => {});
+        if ($("#page-chat") && $("#page-chat").classList.contains("active")) loadQuality().catch(() => {});
+      }
     } catch (_e) {}
   };
   socket.onclose = () => {
-    const dot = $("#ws-dot");
-    const text = $("#ws-text");
     if (dot) dot.classList.remove("on");
-    if (text) text.textContent = "Mất nối, đang thử lại";
-    setTimeout(connect, 1500);
+    if (text) text.textContent = "Mất kết nối kho";
+    setTimeout(connect, 2000);
   };
 }
 
-function show(page) {
+// Chuyển trang BI
+function showBiPage(page) {
   const target = $(`#page-${page}`);
   if (!target) return;
-  $$(".page").forEach((el) => el.classList.remove("active"));
+  $$(".bi-section").forEach((el) => el.classList.remove("active"));
   target.classList.add("active");
-  $$("nav button").forEach((btn) => btn.classList.toggle("active", btn.dataset.page === page));
+  $$(".bi-nav-item").forEach((btn) => btn.classList.toggle("active", btn.dataset.page === page));
+
   if (page === "dash") loadDashboard().catch((err) => toast(err.message, false));
-  if (page === "scd") loadScd().catch((err) => toast(err.message, false));
+  if (page === "scd") {
+    loadScd().catch((err) => toast(err.message, false));
+    if ($("#btn-across")) $("#btn-across").click();
+  }
+  if (page === "olap") {
+    const defaultPreset = document.querySelector(".btn-preset[data-preset='roll-up']");
+    if (defaultPreset && !$("#olap-result").hasChildNodes()) defaultPreset.click();
+  }
   if (page === "chat") loadQuality().catch((err) => toast(err.message, false));
-  if (page === "hoc") renderLesson();
+}
+
+// Chuyển tab LMS
+function showLmsTab(tab) {
+  const target = $(`#pane-${tab}`);
+  if (!target) return;
+  $$(".lms-tab-pane").forEach((el) => el.classList.remove("active"));
+  target.classList.add("active");
+  $$(".lms-nav-btn").forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
+
+  if (tab === "hoc") renderLesson();
+  if (tab === "hocvu") {
+    const hsSel = $("#hs-select");
+    const scdHs = $("#scd-hs");
+    if (hsSel && scdHs) scdHs.value = hsSel.value;
+    loadScd().catch(() => {});
+  }
 }
 
 document.addEventListener("click", async (event) => {
-  const pageBtn = event.target.closest("nav button[data-page]");
-  if (pageBtn) show(pageBtn.dataset.page);
-
-  const member = event.target.closest("[data-hs]");
-  if (member) {
-    const hsSel = $("#hs-select");
-    if (hsSel) hsSel.value = member.dataset.hs;
-    toast(`Đang thao tác với ${member.textContent.trim()}`);
+  // Navigation LMS Tabs
+  const lmsTabBtn = event.target.closest(".lms-nav-btn[data-tab]");
+  if (lmsTabBtn) {
+    showLmsTab(lmsTabBtn.dataset.tab);
+    return;
   }
 
-  const quick = event.target.closest("[data-quick]");
-  if (quick) {
-    const [ma, lop, tt] = quick.dataset.quick.split("|");
-    if ($("#scd-hs")) $("#scd-hs").value = ma;
-    if ($("#scd-lop")) $("#scd-lop").value = lop;
-    if ($("#scd-tt")) $("#scd-tt").value = tt;
-    const btnScd = $("#btn-scd");
-    if (btnScd) btnScd.click();
+  // Navigation BI Pages
+  const biPageBtn = event.target.closest(".bi-nav-item[data-page]");
+  if (biPageBtn) {
+    showBiPage(biPageBtn.dataset.page);
+    return;
   }
 
+  // Preset OLAP buttons
   const presetBtn = event.target.closest("[data-preset]");
   if (presetBtn) {
     try {
@@ -413,10 +462,16 @@ document.addEventListener("click", async (event) => {
     } catch (err) {
       toast(err.message, false);
     }
+    return;
   }
 
-  if (event.target.id === "btn-refresh") loadDashboard().catch((err) => toast(err.message, false));
+  // Refresh Dashboard
+  if (event.target.id === "btn-refresh") {
+    loadDashboard().then(() => toast("Đã làm mới số liệu Dashboard"));
+    return;
+  }
 
+  // Nộp bài thi LMS
   if (event.target.id === "btn-nop") {
     const answers = {};
     state.questions.forEach((q) => {
@@ -428,23 +483,41 @@ document.addEventListener("click", async (event) => {
       const data = await api("/api/hoc-tap/nop-bai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ma_hs: $("#hs-select") ? $("#hs-select").value : "", ma_de: $("#de-select") ? $("#de-select").value : "", answers, thoi_gian_giay: seconds }),
+        body: JSON.stringify({
+          ma_hs: $("#hs-select") ? $("#hs-select").value : "",
+          ma_de: $("#de-select") ? $("#de-select").value : "",
+          answers,
+          thoi_gian_giay: seconds,
+        }),
       });
-      const lines = (data.ket_qua.chi_tiet || []).map((row) => `${row.dung ? "Đúng" : "Sai"} · chọn ${row.chon || "trống"} · đáp án ${row.dap_an}`).join("<br>");
       const qr = $("#quiz-result");
-      if (qr) qr.innerHTML = `<p><b>Điểm ${num(data.ket_qua.diem)}</b> · đúng ${data.ket_qua.so_cau_dung}/${data.ket_qua.tong_so_cau}.</p>${lines}`;
-      toast(`Đã nộp, điểm ${data.ket_qua.diem}`);
+      if (qr) {
+        const details = (data.ket_qua.chi_tiet || []).map((row, idx) => `
+          <div>Câu ${idx + 1}: ${row.dung ? "<b style='color:#166534;'>Đúng ✓</b>" : "<b style='color:#dc2626;'>Sai ✗</b>"} (Chọn: ${row.chon || "Trống"} | Đáp án: ${row.dap_an})</div>
+        `).join("");
+        qr.innerHTML = `
+          <div class="quiz-result-box">
+            <div class="quiz-score-badge">Kết quả: ${num(data.ket_qua.diem)} / 10 điểm (Đúng ${data.ket_qua.so_cau_dung}/${data.ket_qua.tong_so_cau} câu)</div>
+            <div class="quiz-detail-list">${details}</div>
+          </div>
+        `;
+      }
+      toast(`Đã nộp bài thành công! Điểm: ${data.ket_qua.diem}`);
     } catch (err) {
       toast(err.message, false);
     }
+    return;
   }
 
+  // Thêm tương tác bài học
   if (event.target.id === "btn-tap") {
     state.tuongTac += 1;
     const tc = $("#tap-count");
     if (tc) tc.textContent = state.tuongTac;
+    return;
   }
 
+  // Ghi phiên học LMS
   if (event.target.id === "btn-phien") {
     const minutes = Number($("#lesson-min") ? $("#lesson-min").value : 1);
     try {
@@ -459,13 +532,15 @@ document.addEventListener("click", async (event) => {
         }),
       });
       const lr = $("#lesson-result");
-      if (lr) lr.textContent = `Đã ghi phiên. Điểm chuyên cần ${data.diem_chuyen_can}, video tính ${data.so_video}.`;
-      toast("Phiên học đã vào OLTP");
+      if (lr) lr.textContent = `✓ Đã ghi nhận phiên học. Điểm chuyên cần đạt: ${num(data.diem_chuyen_can)}, video ghi nhận: ${data.so_video ? "Đạt yêu cầu" : "Chưa đủ thời lượng"}.`;
+      toast("Đã ghi nhận phiên học thành công!");
     } catch (err) {
       toast(err.message, false);
     }
+    return;
   }
 
+  // Lưu thay đổi học vụ SCD2
   if (event.target.id === "btn-scd") {
     try {
       const data = await api("/api/admin/hoc-vu", {
@@ -484,74 +559,19 @@ document.addEventListener("click", async (event) => {
           if ($("#scd-tt")) student.trang_thai_hoc_vu = $("#scd-tt").value;
         }
       }
-      toast(`SCD lý do ${data.ly_do || "OK"}`);
+      const resMsg = $("#hocvu-result");
+      if (resMsg) {
+        resMsg.textContent = `✓ Hồ sơ đã được cập nhật thành công (Lý do biến động: ${data.ly_do || "Cập nhật học vụ"}).`;
+      }
+      toast(`Cập nhật thành công: ${data.ly_do || "OK"}`);
       await loadScd();
     } catch (err) {
       toast(err.message, false);
     }
+    return;
   }
 
-  if (event.target.id === "sim-start") {
-    try {
-      const data = await api("/api/simulator/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          students_per_tick: Number($("#sim-n") ? $("#sim-n").value : 3),
-          interval_ms: Number($("#sim-ms") ? $("#sim-ms").value : 800),
-          include_bad: $("#sim-bad") ? $("#sim-bad").checked : true,
-          include_members: $("#sim-mem") ? $("#sim-mem").checked : false,
-        }),
-      });
-      toast("Bộ sinh đang chạy");
-      const simKpis = $("#sim-kpis");
-      if (simKpis) simKpis.innerHTML = `<div class="kpi"><span>Trạng thái</span><b>${data.running ? "Đang chảy" : "Dừng"}</b></div>`;
-    } catch (err) {
-      toast(err.message, false);
-    }
-  }
-
-  if (event.target.id === "sim-stop") {
-    try {
-      const data = await api("/api/simulator/stop", { method: "POST" });
-      toast(data.running ? "Vẫn chạy" : "Đã dừng bộ sinh", !data.running);
-    } catch (err) {
-      toast(err.message, false);
-    }
-  }
-
-  if (event.target.id === "btn-e2e") {
-    try {
-      const data = await api("/api/demo/e2e", { method: "POST" });
-      const demoNote = $("#demo-note");
-      if (demoNote) {
-        demoNote.textContent = data.fact
-          ? `OLTP tăng sau mốc ${data.truoc}. Fact điểm ${data.fact.diem_so}, khóa học sinh ${data.fact.hoc_sinh_key}, phiên bản ${data.fact.version_no}, lớp ${data.fact.lop}.`
-          : `Đã ghi OLTP (lan_lam_id ${data.lan_lam_id || ""}). ${data.etl_status || ""}`;
-      }
-      toast("Kịch bản end-to-end xong");
-    } catch (err) {
-      toast(err.message, false);
-    }
-  }
-
-  if (event.target.id === "btn-bad") {
-    try {
-      const data = await api("/api/demo/ban-ghi-ban", { method: "POST" });
-      const demoNote = $("#demo-note");
-      if (demoNote) {
-        if (data.ly_do !== undefined) {
-          demoNote.textContent = `Bài ${data.lan_lam_id} không vào fact (${data.vao_fact ? "có" : "không"}). Lý do: ${data.ly_do}`;
-        } else {
-          demoNote.textContent = `Đã bơm bản ghi bẩn vào OLTP (lan_lam_id ${data.lan_lam_id || ""}). ${data.etl_status || ""}`;
-        }
-      }
-      toast("Kịch bản bản ghi lỗi đã chạy");
-    } catch (err) {
-      toast(err.message, false);
-    }
-  }
-
+  // Thao tác OLAP tùy chỉnh
   if (["btn-rollup", "btn-drill", "btn-slice", "btn-dice", "btn-pivot", "btn-swap"].includes(event.target.id)) {
     try {
       if (event.target.id === "btn-rollup") shiftMuc(1);
@@ -567,7 +587,15 @@ document.addEventListener("click", async (event) => {
       if (event.target.id === "btn-slice") thao = "Slice";
       if (event.target.id === "btn-dice") thao = "Dice";
       if (event.target.id === "btn-pivot" || event.target.id === "btn-swap") thao = "Pivot";
-      const body = { ...filters(), thao_tac: thao, kieu: thao === "Pivot" ? "pivot" : "bang", hang: $("#p-hang") ? $("#p-hang").value : "lop", cot: $("#p-cot") ? $("#p-cot").value : "mon" };
+
+      const body = {
+        ...filters(),
+        thao_tac: thao,
+        kieu: thao === "Pivot" ? "pivot" : "bang",
+        hang: $("#p-hang") ? $("#p-hang").value : "lop",
+        cot: $("#p-cot") ? $("#p-cot").value : "mon",
+      };
+
       if (thao === "Slice") {
         body.lop = "";
         body.tu_ngay = "";
@@ -577,7 +605,7 @@ document.addEventListener("click", async (event) => {
       if (thao === "Dice") {
         const used = [body.ma_mon, body.lop, body.tu_ngay && body.den_ngay].filter(Boolean).length;
         if (used < 2) {
-          toast("Dice cần ít nhất hai điều kiện, ví dụ môn và lớp.", false);
+          toast("Dice cần ít nhất hai điều kiện (ví dụ môn và lớp).", false);
           return;
         }
       }
@@ -589,8 +617,10 @@ document.addEventListener("click", async (event) => {
     } catch (err) {
       toast(err.message, false);
     }
+    return;
   }
 
+  // Chạy Drill-Across
   if (event.target.id === "btn-across") {
     try {
       const lop = $("#ax-lop") ? $("#ax-lop").value : "";
@@ -598,51 +628,30 @@ document.addEventListener("click", async (event) => {
       const data = await api(`/api/olap/drill-across?lop=${encodeURIComponent(lop)}&ma_mon=${encodeURIComponent(mon)}`);
       const acrossTable = $("#across-table");
       if (acrossTable) acrossTable.innerHTML = table(data.cot, data.dong);
-      const acrossNote = $("#across-note");
-      if (acrossNote) acrossNote.textContent = data.mo_ta || "";
       renderFanout(data.vi_du_nhan_ban, data);
     } catch (err) {
       toast(err.message, false);
     }
-  }
-
-  if (event.target.id === "btn-reset") {
-    const word = window.prompt("Gõ RESET để xóa và sinh lại dữ liệu mẫu");
-    if (word !== "RESET") return;
-    try {
-      toast("Đang làm lại dữ liệu...");
-      await api("/api/reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ xac_nhan: "RESET" }),
-      });
-      bindMeta(await api("/api/meta"));
-      if ($("#page-dash")) await loadDashboard();
-      if ($("#page-scd")) await loadScd().catch(() => {});
-      toast("Đã reset dữ liệu (ETL do Dagster xử lý)");
-    } catch (err) {
-      toast(err.message, false);
-    }
-  }
-
-  if (event.target.id === "btn-bench") {
-    try {
-      const data = await api("/api/chat-luong/bench");
-      const benchNote = $("#bench-note");
-      if (benchNote) benchNote.textContent = `${data.so_vong} vòng: summary ${data.summary_ms} ms trên ${data.dong_summary} dòng tổng hợp; quét fact ${data.atomic_ms} ms trên ${data.dong_fact} dòng.`;
-    } catch (err) {
-      toast(err.message, false);
-    }
+    return;
   }
 });
 
 function bindStaticEvents() {
   const deSel = $("#de-select");
   if (deSel) deSel.addEventListener("change", () => loadQuiz().catch((err) => toast(err.message, false)));
+
   const baiSel = $("#bai-select");
   if (baiSel) baiSel.addEventListener("change", renderLesson);
+
   const hsSel = $("#hs-select");
-  if (hsSel) hsSel.addEventListener("change", () => { const scd = $("#scd-hs"); if (scd) scd.value = hsSel.value; });
+  if (hsSel) hsSel.addEventListener("change", () => {
+    const scd = $("#scd-hs");
+    if (scd) {
+      scd.value = hsSel.value;
+      loadScd().catch(() => {});
+    }
+  });
+
   const scdHs = $("#scd-hs");
   if (scdHs) scdHs.addEventListener("change", () => loadScd().catch((err) => toast(err.message, false)));
 }
@@ -650,20 +659,19 @@ function bindStaticEvents() {
 async function boot() {
   try {
     bindStaticEvents();
-    if ($("#quiz") || $("#lesson") || $("#hs-select") || $("#de-select") || $("#bai-select") || $("#scd-hs") || $("#f-mon") || $("#ax-mon")) {
-      bindMeta(await api("/api/meta"));
-    }
+
+    // Tải Metadata dùng chung
+    const meta = await api("/api/meta");
+    bindMeta(meta);
+
+    // Nếu ở cổng LMS (/hoc-tap)
     if ($("#quiz")) await loadQuiz();
     if ($("#lesson")) renderLesson();
+
+    // Nếu ở cổng BI (/bi)
     if ($("#page-dash")) await loadDashboard();
     if ($("#page-scd") && $("#scd-table")) await loadScd().catch(() => {});
-    const log = $("#log");
-    if (log) {
-      try {
-        const recent = await api("/api/stream/recent");
-        (recent.su_kien || []).forEach(pushLog);
-      } catch (_e) {}
-    }
+
     connect();
   } catch (err) {
     toast(err.message, false);

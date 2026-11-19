@@ -1,31 +1,728 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Cube xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ddl2="http://schemas.microsoft.com/analysisservices/2003/engine/2" xmlns:ddl2_2="http://schemas.microsoft.com/analysisservices/2003/engine/2/2" xmlns:ddl100_100="http://schemas.microsoft.com/analysisservices/2008/engine/100/100" xmlns:ddl200="http://schemas.microsoft.com/analysisservices/2010/engine/200" xmlns:ddl200_200="http://schemas.microsoft.com/analysisservices/2010/engine/200/200" xmlns:ddl300="http://schemas.microsoft.com/analysisservices/2011/engine/300" xmlns:ddl300_300="http://schemas.microsoft.com/analysisservices/2011/engine/300/300" xmlns:ddl400="http://schemas.microsoft.com/analysisservices/2012/engine/400" xmlns:ddl400_400="http://schemas.microsoft.com/analysisservices/2012/engine/400/400" xmlns:ddl500="http://schemas.microsoft.com/analysisservices/2013/engine/500" xmlns:ddl500_500="http://schemas.microsoft.com/analysisservices/2013/engine/500/500" xmlns:dwd="http://schemas.microsoft.com/DataWarehouse/Designer/1.0" dwd:design-time-name="a887b325-dd89-484e-84c9-ca5a967342c5" xmlns="http://schemas.microsoft.com/analysisservices/2003/engine">
+﻿<Cube xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ddl2="http://schemas.microsoft.com/analysisservices/2003/engine/2" xmlns:ddl2_2="http://schemas.microsoft.com/analysisservices/2003/engine/2/2" xmlns:ddl100_100="http://schemas.microsoft.com/analysisservices/2008/engine/100/100" xmlns:ddl200="http://schemas.microsoft.com/analysisservices/2010/engine/200" xmlns:ddl200_200="http://schemas.microsoft.com/analysisservices/2010/engine/200/200" xmlns:ddl300="http://schemas.microsoft.com/analysisservices/2011/engine/300" xmlns:ddl300_300="http://schemas.microsoft.com/analysisservices/2011/engine/300/300" xmlns:ddl400="http://schemas.microsoft.com/analysisservices/2012/engine/400" xmlns:ddl400_400="http://schemas.microsoft.com/analysisservices/2012/engine/400/400" xmlns:ddl500="http://schemas.microsoft.com/analysisservices/2013/engine/500" xmlns:ddl500_500="http://schemas.microsoft.com/analysisservices/2013/engine/500/500" xmlns:dwd="http://schemas.microsoft.com/DataWarehouse/Designer/1.0" dwd:design-time-name="d9467a7a-8347-48c3-901b-d9ccf385e81b" xmlns="http://schemas.microsoft.com/analysisservices/2003/engine">
   <ID>HocTapOLAP</ID>
   <Name>HocTapOLAP</Name>
-  <Language>1066</Language>
-  <Collation>Vietnamese_CI_AS</Collation>
   <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
   <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+  <Annotations>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramLayout</Name>
+      <Value>
+        <dds xmlns="">
+          <diagram fontclsid="{0BE35203-8F91-11CE-9DE3-00AA004BB851}" mouseiconclsid="{0BE35204-8F91-11CE-9DE3-00AA004BB851}" defaultlayout="MSDDS.Rectilinear" defaultlineroute="MSDDS.Rectilinear" version="7" nextobject="16" scale="100" pagebreakanchorx="0" pagebreakanchory="0" pagebreaksizex="0" pagebreaksizey="0" scrollleft="-235" scrolltop="699" gridx="150" gridy="150" marginx="5000" marginy="5000" zoom="92" x="16964" y="16525" backcolor="16119285" defaultpersistence="2" PrintPageNumbersMode="3" PrintMarginTop="0" PrintMarginBottom="635" PrintMarginLeft="0" PrintMarginRight="0" marqueeselectionmode="0" mousepointer="0" snaptogrid="0" autotypeannotation="1" showscrollbars="1" viewpagebreaks="0" donotforceconnectorsbehindshapes="1" backpictureclsid="{00000000-0000-0000-0000-000000000000}">
+            <font>
+              <ddsxmlobjectstreamwrapper binary="010000009001153e0100065461686f6d61" />
+            </font>
+            <mouseicon>
+              <ddsxmlobjectstreamwrapper binary="6c74000000000000" />
+            </mouseicon>
+          </diagram>
+          <layoutmanager>
+            <ddsxmlobj />
+          </layoutmanager>
+          <ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="dim_thoi_gian" left="6799" top="5972" logicalid="1" controlid="1" masterid="0" hint1="0" hint2="0" width="3000" height="4642" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobjectstreaminitwrapper binary="000e0000b80b000022120000" />
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dim_thoi_gian" vartype="8" />
+              </ddsxmlobj>
+            </layoutobject>
+            <shape groupshapeid="0" groupnode="0" />
+          </ddscontrol>
+          <ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="dim_de_thi" left="274" top="13676" logicalid="2" controlid="2" masterid="0" hint1="0" hint2="0" width="3000" height="3508" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobjectstreaminitwrapper binary="000e0000b80b0000b40d0000" />
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dim_de_thi" vartype="8" />
+              </ddsxmlobj>
+            </layoutobject>
+            <shape groupshapeid="0" groupnode="0" />
+          </ddscontrol>
+          <ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="dim_hoc_sinh" left="8586" top="12552" logicalid="3" controlid="3" masterid="0" hint1="0" hint2="0" width="3402" height="5000" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobjectstreaminitwrapper binary="000e00004a0d000088130000" />
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dim_hoc_sinh" vartype="8" />
+              </ddsxmlobj>
+            </layoutobject>
+            <shape groupshapeid="0" groupnode="0" />
+          </ddscontrol>
+          <ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="fact_chuyen_can" left="11328" top="5152" logicalid="4" controlid="4" masterid="0" hint1="0" hint2="0" width="3387" height="5000" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobjectstreaminitwrapper binary="000e00003b0d000088130000" />
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="fact_chuyen_can" vartype="8" />
+              </ddsxmlobj>
+            </layoutobject>
+            <shape groupshapeid="0" groupnode="0" />
+          </ddscontrol>
+          <ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="dim_mon_hoc" left="11521" top="0" logicalid="5" controlid="5" masterid="0" hint1="0" hint2="0" width="3000" height="2752" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobjectstreaminitwrapper binary="000e0000b80b0000c00a0000" />
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dim_mon_hoc" vartype="8" />
+              </ddsxmlobj>
+            </layoutobject>
+            <shape groupshapeid="0" groupnode="0" />
+          </ddscontrol>
+          <ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="dim_bai_hoc" left="14388" top="12552" logicalid="6" controlid="6" masterid="0" hint1="0" hint2="0" width="3069" height="3130" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobjectstreaminitwrapper binary="000e0000fd0b00003a0c0000" />
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dim_bai_hoc" vartype="8" />
+              </ddsxmlobj>
+            </layoutobject>
+            <shape groupshapeid="0" groupnode="0" />
+          </ddscontrol>
+          <ddscontrol controlprogid="DdsShapes.DdsObjectManagedBridge" tooltip="fact_ket_qua_thi" left="382" top="2513" logicalid="7" controlid="7" masterid="0" hint1="0" hint2="0" width="3508" height="5000" noresize="0" nomove="0" nodefaultattachpoints="0" autodrag="1" usedefaultiddshape="1" selectable="1" showselectionhandles="1" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobjectstreaminitwrapper binary="000e0000b40d000088130000" />
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="fact_ket_qua_thi" vartype="8" />
+              </ddsxmlobj>
+            </layoutobject>
+            <shape groupshapeid="0" groupnode="0" />
+          </ddscontrol>
+          <ddscontrol controlprogid="MSDDS.Polyline.080.1" left="9499" top="5152" logicalid="8" controlid="8" masterid="0" hint1="0" hint2="0" width="2129" height="1891" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobj>
+                <polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" />
+              </ddsxmlobj>
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dataSet.Relations[FK_cc_date]" vartype="8" />
+                <property name="Virtual" value="0" vartype="11" />
+                <property name="VisibleAP" value="0" vartype="3" />
+              </ddsxmlobj>
+            </layoutobject>
+            <connector lineroutestyle="MSDDS.Rectilinear" sourceid="1" destid="4" sourceattachpoint="13" destattachpoint="10" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+              <point x="9799" y="6643" />
+              <point x="10709" y="6643" />
+              <point x="10709" y="5452" />
+              <point x="11328" y="5452" />
+            </connector>
+          </ddscontrol>
+          <ddscontrol controlprogid="MSDDS.Polyline.080.1" left="3590" top="5813" logicalid="9" controlid="9" masterid="0" hint1="0" hint2="0" width="3509" height="3980" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobj>
+                <polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" />
+              </ddsxmlobj>
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dataSet.Relations[FK_exam_date]" vartype="8" />
+                <property name="Virtual" value="0" vartype="11" />
+                <property name="VisibleAP" value="0" vartype="3" />
+              </ddsxmlobj>
+            </layoutobject>
+            <connector lineroutestyle="MSDDS.Rectilinear" sourceid="1" destid="7" sourceattachpoint="22" destattachpoint="27" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+              <point x="6799" y="9393" />
+              <point x="4728" y="9393" />
+              <point x="4728" y="6113" />
+              <point x="3890" y="6113" />
+            </connector>
+          </ddscontrol>
+          <ddscontrol controlprogid="MSDDS.Polyline.080.1" left="186" top="7213" logicalid="10" controlid="10" masterid="0" hint1="0" hint2="0" width="888" height="6963" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobj>
+                <polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" />
+              </ddsxmlobj>
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dataSet.Relations[FK_exam_de]" vartype="8" />
+                <property name="Virtual" value="0" vartype="11" />
+                <property name="VisibleAP" value="0" vartype="3" />
+              </ddsxmlobj>
+            </layoutobject>
+            <connector lineroutestyle="MSDDS.Rectilinear" sourceid="2" destid="7" sourceattachpoint="0" destattachpoint="1" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+              <point x="674" y="13676" />
+              <point x="674" y="11852" />
+              <point x="486" y="11852" />
+              <point x="486" y="7513" />
+            </connector>
+          </ddscontrol>
+          <ddscontrol controlprogid="MSDDS.Polyline.080.1" left="9888" top="9852" logicalid="11" controlid="11" masterid="0" hint1="0" hint2="0" width="2333" height="3200" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobj>
+                <polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" />
+              </ddsxmlobj>
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dataSet.Relations[FK_cc_hs]" vartype="8" />
+                <property name="Virtual" value="0" vartype="11" />
+                <property name="VisibleAP" value="0" vartype="3" />
+              </ddsxmlobj>
+            </layoutobject>
+            <connector lineroutestyle="MSDDS.Rectilinear" sourceid="3" destid="4" sourceattachpoint="4" destattachpoint="1" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+              <point x="10287" y="12552" />
+              <point x="10287" y="11352" />
+              <point x="11921" y="11352" />
+              <point x="11921" y="10152" />
+            </connector>
+          </ddscontrol>
+          <ddscontrol controlprogid="MSDDS.Polyline.080.1" left="3590" top="6363" logicalid="12" controlid="12" masterid="0" hint1="0" hint2="0" width="5296" height="9089" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobj>
+                <polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" />
+              </ddsxmlobj>
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dataSet.Relations[FK_exam_hs]" vartype="8" />
+                <property name="Virtual" value="0" vartype="11" />
+                <property name="VisibleAP" value="0" vartype="3" />
+              </ddsxmlobj>
+            </layoutobject>
+            <connector lineroutestyle="MSDDS.Rectilinear" sourceid="3" destid="7" sourceattachpoint="18" destattachpoint="29" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+              <point x="8586" y="15052" />
+              <point x="6057" y="15052" />
+              <point x="6057" y="6663" />
+              <point x="3890" y="6663" />
+            </connector>
+          </ddscontrol>
+          <ddscontrol controlprogid="MSDDS.Polyline.080.1" left="13271" top="9852" logicalid="13" controlid="13" masterid="0" hint1="0" hint2="0" width="3051" height="3200" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobj>
+                <polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" />
+              </ddsxmlobj>
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dataSet.Relations[FK_cc_bai]" vartype="8" />
+                <property name="Virtual" value="0" vartype="11" />
+                <property name="VisibleAP" value="0" vartype="3" />
+              </ddsxmlobj>
+            </layoutobject>
+            <connector lineroutestyle="MSDDS.Rectilinear" sourceid="6" destid="4" sourceattachpoint="4" destattachpoint="7" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+              <point x="15922" y="12552" />
+              <point x="15922" y="11352" />
+              <point x="13571" y="11352" />
+              <point x="13571" y="10152" />
+            </connector>
+          </ddscontrol>
+          <ddscontrol controlprogid="MSDDS.Polyline.080.1" left="12622" top="2253" logicalid="14" controlid="14" masterid="0" hint1="0" hint2="0" width="799" height="3199" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobj>
+                <polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" />
+              </ddsxmlobj>
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dataSet.Relations[FK_cc_mon]" vartype="8" />
+                <property name="Virtual" value="0" vartype="11" />
+                <property name="VisibleAP" value="0" vartype="3" />
+              </ddsxmlobj>
+            </layoutobject>
+            <connector lineroutestyle="MSDDS.Rectilinear" sourceid="5" destid="4" sourceattachpoint="5" destattachpoint="4" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+              <point x="13021" y="2752" />
+              <point x="13021" y="5152" />
+            </connector>
+          </ddscontrol>
+          <ddscontrol controlprogid="MSDDS.Polyline.080.1" left="3590" top="977" logicalid="15" controlid="15" masterid="0" hint1="0" hint2="0" width="8231" height="3786" noresize="0" nomove="0" nodefaultattachpoints="1" autodrag="0" usedefaultiddshape="0" selectable="1" showselectionhandles="0" allownudging="1" isannotation="0" dontautolayout="0" groupcollapsed="0" tabstop="1" visible="1" snaptogrid="0">
+            <control>
+              <ddsxmlobj>
+                <polyline endtypedst="6" endtypesrc="3" usercolor="1973790" linestyle="0" linerender="1" customendtypedstid="0" customendtypesrcid="0" adornsvisible="1" />
+              </ddsxmlobj>
+            </control>
+            <layoutobject>
+              <ddsxmlobj>
+                <property name="LogicalObject" value="dataSet.Relations[FK_exam_mon]" vartype="8" />
+                <property name="Virtual" value="0" vartype="11" />
+                <property name="VisibleAP" value="0" vartype="3" />
+              </ddsxmlobj>
+            </layoutobject>
+            <connector lineroutestyle="MSDDS.Rectilinear" sourceid="5" destid="7" sourceattachpoint="14" destattachpoint="21" segmenteditmode="0" bendpointeditmode="0" bendpointvisibility="0" relatedid="0" virtual="0">
+              <point x="11521" y="1376" />
+              <point x="7525" y="1376" />
+              <point x="7525" y="4463" />
+              <point x="3890" y="4463" />
+            </connector>
+          </ddscontrol>
+        </dds>
+      </Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:ShowFriendlyNames</Name>
+      <Value>true</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:ShowRelationshipNames</Name>
+      <Value>false</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:UseDiagramDefaultLayout</Name>
+      <Value>true</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramViewPortLeft</Name>
+      <Value>-235</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramViewPortTop</Name>
+      <Value>699</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramBoundingLeft</Name>
+      <Value>274</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramBoundingTop</Name>
+      <Value>0</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramZoom</Name>
+      <Value>92</Value>
+    </Annotation>
+  </Annotations>
   <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
   <State>Unprocessed</State>
-  <Dimensions><Dimension dwd:design-time-name="f80ee665-9d13-4b18-9da8-4814d8e6be74"><ID>dim_thoi_gian</ID><Name>dim_thoi_gian</Name><DimensionID>dim_thoi_gian</DimensionID><Attributes><Attribute dwd:design-time-name="aee0de90-14ea-4889-99da-dba75f904ace"><AttributeID>Ngay</AttributeID></Attribute><Attribute dwd:design-time-name="adb46edb-af0a-4642-815f-9d0397146d65"><AttributeID>Thang</AttributeID></Attribute><Attribute dwd:design-time-name="b4233716-e8b0-433b-bb57-b2466ebbcc85"><AttributeID>Hoc ky</AttributeID></Attribute><Attribute dwd:design-time-name="7eeb15ba-1aeb-4625-9691-76ca73255ea4"><AttributeID>Nam hoc</AttributeID></Attribute><Attribute dwd:design-time-name="e654fa01-5204-4c42-bfe8-148ba5e6ec5a"><AttributeID>Thu</AttributeID></Attribute><Attribute dwd:design-time-name="ec5188a3-6380-4dc1-8ce4-9e8b2ab9af8e"><AttributeID>Tuan</AttributeID></Attribute><Attribute dwd:design-time-name="b116d92b-a772-410a-a424-006c5cd1ba9c"><AttributeID>Quy</AttributeID></Attribute><Attribute dwd:design-time-name="e44efc34-edbd-415f-9b27-da6fb2c59983"><AttributeID>Nam</AttributeID></Attribute></Attributes><Hierarchies><Hierarchy dwd:design-time-name="08a09214-0baf-46a8-93e9-585f8e85160f"><HierarchyID>H_ThoiGian</HierarchyID></Hierarchy></Hierarchies></Dimension><Dimension dwd:design-time-name="5800a46a-d39e-4acb-aa41-b8bf48eea7c2"><ID>dim_hoc_sinh</ID><Name>dim_hoc_sinh</Name><DimensionID>dim_hoc_sinh</DimensionID><Attributes><Attribute dwd:design-time-name="7dc0a899-d72e-485f-b59b-033cb9f3cf9f"><AttributeID>Hoc sinh</AttributeID></Attribute><Attribute dwd:design-time-name="a78075b2-9404-48e6-9e5b-1cb4acfd0eba"><AttributeID>Trang thai</AttributeID></Attribute><Attribute dwd:design-time-name="5f9d2218-75e0-42cf-8cc8-c4ab22525c51"><AttributeID>lop</AttributeID></Attribute><Attribute dwd:design-time-name="8d3a977c-b2b2-47f0-abdd-a2a9ef99917c"><AttributeID>ma_hoc_sinh</AttributeID></Attribute><Attribute dwd:design-time-name="7c875265-ccc1-4144-8860-4283f2b32cdc"><AttributeID>is_current</AttributeID></Attribute></Attributes><Hierarchies><Hierarchy dwd:design-time-name="7764f764-a376-4b78-a0d3-7166274c6518"><HierarchyID>H_HocSinh</HierarchyID></Hierarchy></Hierarchies></Dimension><Dimension dwd:design-time-name="4fb69d00-45d6-4a73-98df-181bb8b4b991"><ID>dim_mon_hoc</ID><Name>dim_mon_hoc</Name><DimensionID>dim_mon_hoc</DimensionID><Attributes><Attribute dwd:design-time-name="35cf20cc-7077-4325-8cec-9f748a60ad5c"><AttributeID>ten_mon</AttributeID></Attribute><Attribute dwd:design-time-name="ec62993c-9403-4253-aa4b-5c63938505b3"><AttributeID>khoa</AttributeID></Attribute><Attribute dwd:design-time-name="081e347a-5d2c-4339-9fb1-4f53d5cb528e"><AttributeID>ma_mon</AttributeID></Attribute><Attribute dwd:design-time-name="f2defce8-a2b3-4dc9-b14a-c23880ba0356"><AttributeID>so_tin_chi</AttributeID></Attribute></Attributes><Hierarchies><Hierarchy dwd:design-time-name="545148ad-18a0-41a6-8d89-93106ae24493"><HierarchyID>H_HocThuat</HierarchyID></Hierarchy></Hierarchies></Dimension><Dimension dwd:design-time-name="f76b0cb8-8a7c-4521-883b-7e014c15959b"><ID>dim_de_thi</ID><Name>dim_de_thi</Name><DimensionID>dim_de_thi</DimensionID><Attributes><Attribute dwd:design-time-name="c16972ff-74a1-4fea-99c8-2ede2e269f7c"><AttributeID>ten_de</AttributeID></Attribute><Attribute dwd:design-time-name="dc1457a7-9945-462c-827d-3e8a30f16bf8"><AttributeID>ma_mon</AttributeID></Attribute><Attribute dwd:design-time-name="315142d2-82ad-4273-b141-a8ce5e39e23a"><AttributeID>loai</AttributeID></Attribute><Attribute dwd:design-time-name="f0ee1d54-fb61-4241-9c9d-6e057ef8d374"><AttributeID>do_kho</AttributeID></Attribute></Attributes><Hierarchies><Hierarchy dwd:design-time-name="6267f603-394a-435e-8a4f-30fa88127546"><HierarchyID>H_DeThi</HierarchyID></Hierarchy></Hierarchies></Dimension><Dimension dwd:design-time-name="110bfed4-7fb0-4ae9-a14a-cc88ebc56509"><ID>dim_bai_hoc</ID><Name>dim_bai_hoc</Name><DimensionID>dim_bai_hoc</DimensionID><Attributes><Attribute dwd:design-time-name="09c74074-704e-475e-b3b9-be468e156299"><AttributeID>ten_bai</AttributeID></Attribute><Attribute dwd:design-time-name="7f1436f1-0e3f-478b-89e1-ab1b0b3a19de"><AttributeID>ma_mon</AttributeID></Attribute><Attribute dwd:design-time-name="65e02b0c-a17b-452f-9dce-f0e0db885041"><AttributeID>loai_noi_dung</AttributeID></Attribute></Attributes><Hierarchies><Hierarchy dwd:design-time-name="19677194-fe48-4af9-96a9-d6ba7f89cebe"><HierarchyID>H_BaiHoc</HierarchyID></Hierarchy></Hierarchies></Dimension></Dimensions>
+  <Language>1066</Language>
+  <Collation>Vietnamese_CI_AS</Collation>
+  <Dimensions>
+    <Dimension dwd:design-time-name="a633e00a-8a8d-4634-bb59-b9ad3ff8dc76">
+      <ID>dim_thoi_gian</ID>
+      <Name>dim_thoi_gian</Name>
+      <DimensionID>dim_thoi_gian</DimensionID>
+      <Attributes>
+        <Attribute dwd:design-time-name="6082ac28-992e-4c1b-9394-b6b6308c0a3d">
+          <AttributeID>Ngay</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="211d3451-a9eb-4954-8088-02f7503e574f">
+          <AttributeID>Thang</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="8bcf1aac-2120-4d37-857a-36001974148b">
+          <AttributeID>Hoc ky</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="ad7b02a3-becf-40d5-bc42-8fbc628cb43e">
+          <AttributeID>Nam hoc</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="17446060-bc42-4ed4-abb8-2665e8ffcea1">
+          <AttributeID>Thu</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="586d3a27-6ed5-495e-a184-e152672be884">
+          <AttributeID>Tuan</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="4b2fc1c8-1016-4ea9-a15d-3288d0938a45">
+          <AttributeID>Quy</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="35b809ea-88a3-4436-b0c3-e0a0da204d0e">
+          <AttributeID>Nam</AttributeID>
+        </Attribute>
+      </Attributes>
+      <Hierarchies>
+        <Hierarchy dwd:design-time-name="94e67fb9-4a28-45fd-b6d7-4de215fa0ac0">
+          <HierarchyID>H_ThoiGian</HierarchyID>
+        </Hierarchy>
+      </Hierarchies>
+    </Dimension>
+    <Dimension dwd:design-time-name="63b1d482-8bbd-47ee-bd51-c497cf0a2887">
+      <ID>dim_hoc_sinh</ID>
+      <Name>dim_hoc_sinh</Name>
+      <DimensionID>dim_hoc_sinh</DimensionID>
+      <Attributes>
+        <Attribute dwd:design-time-name="7c6315f0-f247-415d-8881-24b0e77ef5ad">
+          <AttributeID>Hoc sinh</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="87b98596-f1b7-40c0-a659-ae2d53a7ea6f">
+          <AttributeID>Trang thai</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="c621bf27-2616-4a03-b04c-9410976d5993">
+          <AttributeID>lop</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="3130d09f-a2d8-4694-9770-ca955b41de40">
+          <AttributeID>ma_hoc_sinh</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="1554c0bc-1bf2-458f-809b-2b247e68d3b7">
+          <AttributeID>is_current</AttributeID>
+        </Attribute>
+      </Attributes>
+      <Hierarchies>
+        <Hierarchy dwd:design-time-name="37d74d39-f187-484b-ba4c-8c874173b6b2">
+          <HierarchyID>H_HocSinh</HierarchyID>
+        </Hierarchy>
+      </Hierarchies>
+    </Dimension>
+    <Dimension dwd:design-time-name="e5d8d5f5-356b-4629-ae52-c5a9c7938a49">
+      <ID>dim_mon_hoc</ID>
+      <Name>dim_mon_hoc</Name>
+      <DimensionID>dim_mon_hoc</DimensionID>
+      <Attributes>
+        <Attribute dwd:design-time-name="c7ad59ba-9a1f-44fc-b89b-26c7b3c1c307">
+          <AttributeID>ten_mon</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="46197fac-27bf-4a71-8ee1-cb65603bb0a2">
+          <AttributeID>khoa</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="83adf2fe-8193-496c-9794-33dea7b2a2b6">
+          <AttributeID>ma_mon</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="6e32f3e2-eda8-45f6-8370-2657d715f8e7">
+          <AttributeID>so_tin_chi</AttributeID>
+        </Attribute>
+      </Attributes>
+      <Hierarchies>
+        <Hierarchy dwd:design-time-name="1a9b055b-9e8c-43ba-988c-7588a14ce024">
+          <HierarchyID>H_HocThuat</HierarchyID>
+        </Hierarchy>
+      </Hierarchies>
+    </Dimension>
+    <Dimension dwd:design-time-name="f2364725-7ca9-4daa-a7ed-7aeb8b3503cd">
+      <ID>dim_de_thi</ID>
+      <Name>dim_de_thi</Name>
+      <DimensionID>dim_de_thi</DimensionID>
+      <Attributes>
+        <Attribute dwd:design-time-name="83be60e8-a1cb-4a66-83f4-7530082f1ba0">
+          <AttributeID>ten_de</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="57390ed4-fbc6-482e-85e8-3ff3fc6e9ce3">
+          <AttributeID>ma_mon</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="3732fb8e-b6a2-4bac-878f-dbd5eb59f7a7">
+          <AttributeID>loai</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="9e882ee8-a22c-45cc-95cd-3456e0984d1d">
+          <AttributeID>do_kho</AttributeID>
+        </Attribute>
+      </Attributes>
+      <Hierarchies>
+        <Hierarchy dwd:design-time-name="3ed26837-8266-4081-95e3-8f070f864b75">
+          <HierarchyID>H_DeThi</HierarchyID>
+        </Hierarchy>
+      </Hierarchies>
+    </Dimension>
+    <Dimension dwd:design-time-name="864193d2-5737-4f76-985f-4fc2acd0cf77">
+      <ID>dim_bai_hoc</ID>
+      <Name>dim_bai_hoc</Name>
+      <DimensionID>dim_bai_hoc</DimensionID>
+      <Attributes>
+        <Attribute dwd:design-time-name="f5db4ae1-9e59-42e6-804a-27c2c45ee20a">
+          <AttributeID>ten_bai</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="3c8e590a-aab8-4112-93fb-462f9cea1660">
+          <AttributeID>ma_mon</AttributeID>
+        </Attribute>
+        <Attribute dwd:design-time-name="169e2b9e-5c94-4ad0-ba8b-d3d5930dfb05">
+          <AttributeID>loai_noi_dung</AttributeID>
+        </Attribute>
+      </Attributes>
+      <Hierarchies>
+        <Hierarchy dwd:design-time-name="5ae5bf23-ea39-4c01-9348-66048a77c801">
+          <HierarchyID>H_BaiHoc</HierarchyID>
+        </Hierarchy>
+      </Hierarchies>
+    </Dimension>
+  </Dimensions>
   <MeasureGroups>
-    <MeasureGroup dwd:design-time-name="83e4be19-c7d4-42a3-a314-c6ad64390c85"><ID>Ket qua thi</ID><Name>Ket qua thi</Name><CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp><LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate><LastProcessed>0001-01-01T00:00:00Z</LastProcessed><State>Unprocessed</State><Measures><Measure dwd:design-time-name="5ee0677e-70f2-4abb-a58d-6a2c74deee6a"><ID>Tong diem</ID><Name>Tổng điểm</Name><AggregateFunction>Sum</AggregateFunction><Source dwd:design-time-name="48ad74d0-258b-4085-910a-895187e2237d"><DataType>Double</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="a1f24a16-0a37-49a1-9e6a-2853ffe06804"><TableID>fact_ket_qua_thi</TableID><ColumnID>diem_so</ColumnID></Source></Source><FormatString>0.00</FormatString><Visible>false</Visible></Measure><Measure dwd:design-time-name="981efa7c-d50e-40fc-b407-6243d3be10e6"><ID>So cau dung</ID><Name>Số câu đúng</Name><AggregateFunction>Sum</AggregateFunction><Source dwd:design-time-name="23767bc4-62f3-4522-8cae-4888e6098e18"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="f7211b9e-f90e-4e56-b961-deccbf537222"><TableID>fact_ket_qua_thi</TableID><ColumnID>so_cau_dung</ColumnID></Source></Source><FormatString>#,##0</FormatString></Measure><Measure dwd:design-time-name="e2b1a7dc-77c7-4f10-a5b7-733d00a65820"><ID>Tong so cau</ID><Name>Tổng số câu</Name><AggregateFunction>Sum</AggregateFunction><Source dwd:design-time-name="b08c4ab5-0cfa-4e65-83c8-d7c0212c38e5"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="fa91da94-f88c-448c-ac1f-56d20fd4be70"><TableID>fact_ket_qua_thi</TableID><ColumnID>tong_so_cau</ColumnID></Source></Source><FormatString>#,##0</FormatString></Measure><Measure dwd:design-time-name="ff810200-1803-48fd-8290-b66dda7819d6"><ID>So luot thi</ID><Name>Số lượt thi</Name><AggregateFunction>Count</AggregateFunction><DataType>BigInt</DataType><Source dwd:design-time-name="22bdf5a3-1125-4019-8112-b670e55f34cf"><DataType>BigInt</DataType><Source xsi:type="RowBinding" dwd:design-time-name="1cd7c1d6-b0f6-4eb3-9702-d586182b65a8"><TableID>fact_ket_qua_thi</TableID></Source></Source><FormatString>#,##0</FormatString></Measure></Measures><StorageMode>Molap</StorageMode><ProcessingMode>Regular</ProcessingMode><Dimensions><Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="be7f59d7-0a99-450e-a985-8b20e4688da0"><CubeDimensionID>dim_hoc_sinh</CubeDimensionID><Attributes><Attribute dwd:design-time-name="75d137ab-cb9c-4f68-b3c7-4333489f183c"><AttributeID>Hoc sinh</AttributeID><KeyColumns><KeyColumn dwd:design-time-name="45206dd9-cb1d-4ecf-8dbd-360870abaf78"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="63aa78b8-4f0e-4f24-b185-4ca8b666f3d7"><TableID>fact_ket_qua_thi</TableID><ColumnID>hoc_sinh_key</ColumnID></Source></KeyColumn></KeyColumns><Type>Granularity</Type></Attribute></Attributes></Dimension><Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="ba0a946b-c764-4bc7-bc96-ad09ef1b2fd8"><CubeDimensionID>dim_thoi_gian</CubeDimensionID><Attributes><Attribute dwd:design-time-name="69ba3f03-4e0d-4bc7-90ff-9f691f42c8ff"><AttributeID>Ngay</AttributeID><KeyColumns><KeyColumn dwd:design-time-name="b7785f90-fcde-4b47-8a66-1257a27ce0a5"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="f76d82ea-3510-4e1e-808d-645627a7bf3a"><TableID>fact_ket_qua_thi</TableID><ColumnID>date_key</ColumnID></Source></KeyColumn></KeyColumns><Type>Granularity</Type></Attribute></Attributes></Dimension><Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="bd560382-1a54-44c4-ab97-60c7deed453c"><CubeDimensionID>dim_mon_hoc</CubeDimensionID><Attributes><Attribute dwd:design-time-name="b6c12b79-b116-42bf-8383-f0c925ee8a25"><AttributeID>ten_mon</AttributeID><KeyColumns><KeyColumn dwd:design-time-name="670724ad-85d1-48fe-9353-5d10b391404d"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="a8732a45-2dd9-4cb3-bed6-683f0df7adef"><TableID>fact_ket_qua_thi</TableID><ColumnID>mon_hoc_key</ColumnID></Source></KeyColumn></KeyColumns><Type>Granularity</Type></Attribute></Attributes></Dimension><Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="90b27cd8-86bf-463e-a333-35c99686b68f"><CubeDimensionID>dim_de_thi</CubeDimensionID><Attributes><Attribute dwd:design-time-name="5a9aa9fe-2ebd-4367-900c-0762c4dbd63b"><AttributeID>ten_de</AttributeID><KeyColumns><KeyColumn dwd:design-time-name="013baa52-6378-43d7-8992-26032cd1b085"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="8fbea2ef-53c0-4fa0-b9cd-3b2d0b52e5ac"><TableID>fact_ket_qua_thi</TableID><ColumnID>de_thi_key</ColumnID></Source></KeyColumn></KeyColumns><Type>Granularity</Type></Attribute></Attributes></Dimension></Dimensions><Partitions /></MeasureGroup>
-    <MeasureGroup dwd:design-time-name="9d5e2d49-00d1-47cf-b610-80ceb370f481"><ID>Chuyen can</ID><Name>Chuyen can</Name><CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp><LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate><LastProcessed>0001-01-01T00:00:00Z</LastProcessed><State>Unprocessed</State><Measures><Measure dwd:design-time-name="c63c6f35-126f-42e0-8028-eba1a6f1c8a2"><ID>Tong phut</ID><Name>Tổng phút</Name><AggregateFunction>Sum</AggregateFunction><Source dwd:design-time-name="5ada9f92-bf82-4695-b4c4-cb178a2e2089"><DataType>Double</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="ad0c444e-b0ce-4495-b0cd-3971686a8bb2"><TableID>fact_chuyen_can</TableID><ColumnID>thoi_luong_phut</ColumnID></Source></Source><FormatString>#,##0.00</FormatString></Measure><Measure dwd:design-time-name="e9fc2de0-6485-4971-93a0-e52c90211d84"><ID>So video</ID><Name>Số video</Name><AggregateFunction>Sum</AggregateFunction><Source dwd:design-time-name="d3eab76e-63b9-492d-b6fb-8b6989cce2ae"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="57212fc7-c0ae-4d95-b89f-1fce4e1cf17f"><TableID>fact_chuyen_can</TableID><ColumnID>so_video_da_xem</ColumnID></Source></Source><FormatString>#,##0</FormatString></Measure><Measure dwd:design-time-name="fc50868f-2dba-45ad-9c8c-20d3749d8e57"><ID>Tong diem chuyen can</ID><Name>Tổng điểm chuyên cần</Name><AggregateFunction>Sum</AggregateFunction><Source dwd:design-time-name="48f093cf-ac7e-41ee-b6a7-fb46629553a5"><DataType>Double</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="3b613e1e-f780-4106-894f-692f77daffbb"><TableID>fact_chuyen_can</TableID><ColumnID>diem_chuyen_can</ColumnID></Source></Source><FormatString>0.00</FormatString><Visible>false</Visible></Measure><Measure dwd:design-time-name="9e763983-f961-41b6-8876-936d58722d69"><ID>So phien</ID><Name>Số phiên</Name><AggregateFunction>Count</AggregateFunction><DataType>BigInt</DataType><Source dwd:design-time-name="3ade8269-dddc-4115-a46a-4c47099d92e4"><DataType>BigInt</DataType><Source xsi:type="RowBinding" dwd:design-time-name="0a90d763-a302-4970-9f13-2c144ba94863"><TableID>fact_chuyen_can</TableID></Source></Source><FormatString>#,##0</FormatString></Measure></Measures><StorageMode>Molap</StorageMode><ProcessingMode>Regular</ProcessingMode><Dimensions><Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="3b7f94b9-f649-4c01-bc30-97bbddbf8e7c"><CubeDimensionID>dim_hoc_sinh</CubeDimensionID><Attributes><Attribute dwd:design-time-name="5e40382d-bcbd-44ec-8163-57764938e92a"><AttributeID>Hoc sinh</AttributeID><KeyColumns><KeyColumn dwd:design-time-name="221c79fb-f711-48b9-82c2-4854e9195275"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="1bbc194a-9964-4f26-847e-96d9611e0bb3"><TableID>fact_chuyen_can</TableID><ColumnID>hoc_sinh_key</ColumnID></Source></KeyColumn></KeyColumns><Type>Granularity</Type></Attribute></Attributes></Dimension><Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="a0ce396e-e350-4df2-94b2-daa419873ad0"><CubeDimensionID>dim_thoi_gian</CubeDimensionID><Attributes><Attribute dwd:design-time-name="c524fa23-1d81-4c29-97ed-42cefe069534"><AttributeID>Ngay</AttributeID><KeyColumns><KeyColumn dwd:design-time-name="c60c7736-a769-4a58-9fd4-4c6c1510a01e"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="8c16088d-3367-4be2-aab6-0a4fb154a033"><TableID>fact_chuyen_can</TableID><ColumnID>date_key</ColumnID></Source></KeyColumn></KeyColumns><Type>Granularity</Type></Attribute></Attributes></Dimension><Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="167600ff-b2f9-438d-9d70-c165f0bfab91"><CubeDimensionID>dim_mon_hoc</CubeDimensionID><Attributes><Attribute dwd:design-time-name="24f41a7e-0c5d-43c5-a0eb-5929f7636844"><AttributeID>ten_mon</AttributeID><KeyColumns><KeyColumn dwd:design-time-name="2482f9fa-2d0d-40ed-b030-6fe4c9085c3b"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="de375085-9bd4-4e6f-90ec-2746d4105bf9"><TableID>fact_chuyen_can</TableID><ColumnID>mon_hoc_key</ColumnID></Source></KeyColumn></KeyColumns><Type>Granularity</Type></Attribute></Attributes></Dimension><Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="402362b7-71e4-45f3-9d02-b16f98167b2f"><CubeDimensionID>dim_bai_hoc</CubeDimensionID><Attributes><Attribute dwd:design-time-name="b9573893-bed7-483b-9822-4d5b471298bc"><AttributeID>ten_bai</AttributeID><KeyColumns><KeyColumn dwd:design-time-name="b253746e-2589-40a7-af18-2c10b1f5718f"><DataType>Integer</DataType><Source xsi:type="ColumnBinding" dwd:design-time-name="c17868ed-2cc8-4144-9821-88f372c7eb86"><TableID>fact_chuyen_can</TableID><ColumnID>bai_hoc_key</ColumnID></Source></KeyColumn></KeyColumns><Type>Granularity</Type></Attribute></Attributes></Dimension></Dimensions><Partitions /></MeasureGroup>
+    <MeasureGroup dwd:design-time-name="441c8fb6-dd5e-4572-8ddb-f24c897bfa33">
+      <ID>Ket qua thi</ID>
+      <Name>Ket qua thi</Name>
+      <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+      <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+      <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+      <State>Unprocessed</State>
+      <Measures>
+        <Measure dwd:design-time-name="78067519-fe99-47ae-babe-93547a17e5d1">
+          <ID>Tong diem</ID>
+          <Name>Tổng điểm</Name>
+          <Source dwd:design-time-name="9a9d1653-2762-4cbe-b948-729f51806ea0">
+            <DataType>Double</DataType>
+            <Source xsi:type="ColumnBinding" dwd:design-time-name="a79172dd-a439-4f63-a075-c849d9705516">
+              <TableID>fact_ket_qua_thi</TableID>
+              <ColumnID>diem_so</ColumnID>
+            </Source>
+          </Source>
+          <Visible>false</Visible>
+          <FormatString>0.00</FormatString>
+        </Measure>
+        <Measure dwd:design-time-name="e95c521f-aff5-4b8d-8214-d82ae9de10b0">
+          <ID>So cau dung</ID>
+          <Name>Số câu đúng</Name>
+          <Source dwd:design-time-name="4bdf88db-bc22-42f6-af3d-fdeb64f19ed0">
+            <DataType>Integer</DataType>
+            <Source xsi:type="ColumnBinding" dwd:design-time-name="2587a87b-e7fd-4e2f-bf9b-0b5aa29b2a34">
+              <TableID>fact_ket_qua_thi</TableID>
+              <ColumnID>so_cau_dung</ColumnID>
+            </Source>
+          </Source>
+          <FormatString>#,##0</FormatString>
+        </Measure>
+        <Measure dwd:design-time-name="b2d6fe4c-53c4-4020-8bab-857388a26c95">
+          <ID>Tong so cau</ID>
+          <Name>Tổng số câu</Name>
+          <Source dwd:design-time-name="e22e1b44-f0ff-489e-99cc-29a012c8d88f">
+            <DataType>Integer</DataType>
+            <Source xsi:type="ColumnBinding" dwd:design-time-name="7934a779-cbd1-44d6-a12d-3fc6522ab785">
+              <TableID>fact_ket_qua_thi</TableID>
+              <ColumnID>tong_so_cau</ColumnID>
+            </Source>
+          </Source>
+          <FormatString>#,##0</FormatString>
+        </Measure>
+        <Measure dwd:design-time-name="e0cb18ee-8eab-49b3-9d87-cb4420a5ab74">
+          <ID>So luot thi</ID>
+          <Name>Số lượt thi</Name>
+          <AggregateFunction>Count</AggregateFunction>
+          <DataType>BigInt</DataType>
+          <Source dwd:design-time-name="664fa8d0-0854-4093-9155-d6b9112d33de">
+            <DataType>BigInt</DataType>
+            <Source xsi:type="RowBinding" dwd:design-time-name="0d892f42-7df2-4981-8124-7930eabaaef3">
+              <TableID>fact_ket_qua_thi</TableID>
+            </Source>
+          </Source>
+          <FormatString>#,##0</FormatString>
+        </Measure>
+      </Measures>
+      <StorageMode>Molap</StorageMode>
+      <ProcessingMode>Regular</ProcessingMode>
+      <Dimensions>
+        <Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="6328784c-66d1-43fc-87c4-27a366d9e575">
+          <CubeDimensionID>dim_hoc_sinh</CubeDimensionID>
+          <Attributes>
+            <Attribute dwd:design-time-name="2c9f767c-41c6-4801-a467-55f1ef0c92b6">
+              <AttributeID>Hoc sinh</AttributeID>
+              <KeyColumns>
+                <KeyColumn dwd:design-time-name="ba98e609-0284-40c9-b4cd-bc1e1a97e1d8">
+                  <DataType>Integer</DataType>
+                  <Source xsi:type="ColumnBinding" dwd:design-time-name="ea581d12-2fd1-40f1-94f9-5fc40f806d8b">
+                    <TableID>fact_ket_qua_thi</TableID>
+                    <ColumnID>hoc_sinh_key</ColumnID>
+                  </Source>
+                </KeyColumn>
+              </KeyColumns>
+              <Type>Granularity</Type>
+            </Attribute>
+          </Attributes>
+        </Dimension>
+        <Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="9f78a45d-f0ac-4f4f-be48-516da07c6e7c">
+          <CubeDimensionID>dim_thoi_gian</CubeDimensionID>
+          <Attributes>
+            <Attribute dwd:design-time-name="663ff8e8-d764-4482-a75f-88b7e638fd64">
+              <AttributeID>Ngay</AttributeID>
+              <KeyColumns>
+                <KeyColumn dwd:design-time-name="454ccd0e-68fb-4e1b-a6f6-f3af113e4b13">
+                  <DataType>Integer</DataType>
+                  <Source xsi:type="ColumnBinding" dwd:design-time-name="eedbb125-e2c2-4976-8885-38aa418700d5">
+                    <TableID>fact_ket_qua_thi</TableID>
+                    <ColumnID>date_key</ColumnID>
+                  </Source>
+                </KeyColumn>
+              </KeyColumns>
+              <Type>Granularity</Type>
+            </Attribute>
+          </Attributes>
+        </Dimension>
+        <Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="d6b18cde-3ad5-4222-b62a-2d16be7bbdff">
+          <CubeDimensionID>dim_mon_hoc</CubeDimensionID>
+          <Attributes>
+            <Attribute dwd:design-time-name="cc4c5811-cdcf-4f7f-b63a-b238d1565781">
+              <AttributeID>ten_mon</AttributeID>
+              <KeyColumns>
+                <KeyColumn dwd:design-time-name="676234f1-1eb0-47f1-97c5-5a2adc22a61c">
+                  <DataType>Integer</DataType>
+                  <Source xsi:type="ColumnBinding" dwd:design-time-name="fa6d8669-5a00-4a01-ba5b-72ff966409aa">
+                    <TableID>fact_ket_qua_thi</TableID>
+                    <ColumnID>mon_hoc_key</ColumnID>
+                  </Source>
+                </KeyColumn>
+              </KeyColumns>
+              <Type>Granularity</Type>
+            </Attribute>
+          </Attributes>
+        </Dimension>
+        <Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="7a5da589-e1d1-479d-8799-133a75ca4415">
+          <CubeDimensionID>dim_de_thi</CubeDimensionID>
+          <Attributes>
+            <Attribute dwd:design-time-name="19039788-c81e-4f70-ae53-ab1b7bf852e6">
+              <AttributeID>ten_de</AttributeID>
+              <KeyColumns>
+                <KeyColumn dwd:design-time-name="82efb8cd-060b-440e-a7b0-f0df38bcd60e">
+                  <DataType>Integer</DataType>
+                  <Source xsi:type="ColumnBinding" dwd:design-time-name="a5c1a2bc-1eaf-472f-964d-aa8d44a0554e">
+                    <TableID>fact_ket_qua_thi</TableID>
+                    <ColumnID>de_thi_key</ColumnID>
+                  </Source>
+                </KeyColumn>
+              </KeyColumns>
+              <Type>Granularity</Type>
+            </Attribute>
+          </Attributes>
+        </Dimension>
+      </Dimensions>
+      <Partitions />
+    </MeasureGroup>
+    <MeasureGroup dwd:design-time-name="7b102b2f-5c07-4c3d-b466-5710f8c7fef2">
+      <ID>Chuyen can</ID>
+      <Name>Chuyen can</Name>
+      <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+      <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+      <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+      <State>Unprocessed</State>
+      <Measures>
+        <Measure dwd:design-time-name="97a02e73-6d94-4642-bc03-66f3a4d72b39">
+          <ID>Tong phut</ID>
+          <Name>Tổng phút</Name>
+          <Source dwd:design-time-name="67b93328-1728-499e-8123-e89e9e35c51e">
+            <DataType>Double</DataType>
+            <Source xsi:type="ColumnBinding" dwd:design-time-name="422769d4-9001-4bfa-b887-a848cd49773c">
+              <TableID>fact_chuyen_can</TableID>
+              <ColumnID>thoi_luong_phut</ColumnID>
+            </Source>
+          </Source>
+          <FormatString>#,##0.00</FormatString>
+        </Measure>
+        <Measure dwd:design-time-name="d192517d-f343-4209-9fb0-5bbb84fee8a3">
+          <ID>So video</ID>
+          <Name>Số video</Name>
+          <Source dwd:design-time-name="0648c7f0-e8bd-4620-8048-91e450459637">
+            <DataType>Integer</DataType>
+            <Source xsi:type="ColumnBinding" dwd:design-time-name="e9596d60-f1d0-47c9-aa9f-4c7a286f0b1b">
+              <TableID>fact_chuyen_can</TableID>
+              <ColumnID>so_video_da_xem</ColumnID>
+            </Source>
+          </Source>
+          <FormatString>#,##0</FormatString>
+        </Measure>
+        <Measure dwd:design-time-name="987b9424-6507-47f1-a74f-3cbb5a600cb9">
+          <ID>Tong diem chuyen can</ID>
+          <Name>Tổng điểm chuyên cần</Name>
+          <Source dwd:design-time-name="653f940f-78f2-4129-bb6d-0b881a145c00">
+            <DataType>Double</DataType>
+            <Source xsi:type="ColumnBinding" dwd:design-time-name="0973799c-2edf-4cc4-a392-0ccb3b6b5eda">
+              <TableID>fact_chuyen_can</TableID>
+              <ColumnID>diem_chuyen_can</ColumnID>
+            </Source>
+          </Source>
+          <Visible>false</Visible>
+          <FormatString>0.00</FormatString>
+        </Measure>
+        <Measure dwd:design-time-name="8459f1ed-3887-49b7-a881-de9702add782">
+          <ID>So phien</ID>
+          <Name>Số phiên</Name>
+          <AggregateFunction>Count</AggregateFunction>
+          <DataType>BigInt</DataType>
+          <Source dwd:design-time-name="67b8a9ae-ed12-403d-8e16-8d05a6b61bf4">
+            <DataType>BigInt</DataType>
+            <Source xsi:type="RowBinding" dwd:design-time-name="b0b8e1a1-bf56-4de1-97eb-957850851a7b">
+              <TableID>fact_chuyen_can</TableID>
+            </Source>
+          </Source>
+          <FormatString>#,##0</FormatString>
+        </Measure>
+      </Measures>
+      <StorageMode>Molap</StorageMode>
+      <ProcessingMode>Regular</ProcessingMode>
+      <Dimensions>
+        <Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="08618c2c-be8f-43bb-9ab1-7f1b8c0fc767">
+          <CubeDimensionID>dim_hoc_sinh</CubeDimensionID>
+          <Attributes>
+            <Attribute dwd:design-time-name="72865216-6672-40fe-bd5a-0eaae74627c5">
+              <AttributeID>Hoc sinh</AttributeID>
+              <KeyColumns>
+                <KeyColumn dwd:design-time-name="788832c6-5989-4c20-ac81-b7446d4b7b14">
+                  <DataType>Integer</DataType>
+                  <Source xsi:type="ColumnBinding" dwd:design-time-name="0a9d5e79-98f3-42d5-8a02-096d413a46e0">
+                    <TableID>fact_chuyen_can</TableID>
+                    <ColumnID>hoc_sinh_key</ColumnID>
+                  </Source>
+                </KeyColumn>
+              </KeyColumns>
+              <Type>Granularity</Type>
+            </Attribute>
+          </Attributes>
+        </Dimension>
+        <Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="0e564fb9-9516-4fa7-b4b2-f62b72e6f677">
+          <CubeDimensionID>dim_thoi_gian</CubeDimensionID>
+          <Attributes>
+            <Attribute dwd:design-time-name="ff198949-2c25-4e80-964b-47fa5fe1b5e3">
+              <AttributeID>Ngay</AttributeID>
+              <KeyColumns>
+                <KeyColumn dwd:design-time-name="faf947bc-75ae-4592-ace9-f46bb38ad09c">
+                  <DataType>Integer</DataType>
+                  <Source xsi:type="ColumnBinding" dwd:design-time-name="55e59cc1-651a-4531-98b2-4f28a5d90720">
+                    <TableID>fact_chuyen_can</TableID>
+                    <ColumnID>date_key</ColumnID>
+                  </Source>
+                </KeyColumn>
+              </KeyColumns>
+              <Type>Granularity</Type>
+            </Attribute>
+          </Attributes>
+        </Dimension>
+        <Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="705a63fe-0a86-45b8-8941-d015cf143c1c">
+          <CubeDimensionID>dim_mon_hoc</CubeDimensionID>
+          <Attributes>
+            <Attribute dwd:design-time-name="1de13d7f-ca48-4299-836a-108d485d5192">
+              <AttributeID>ten_mon</AttributeID>
+              <KeyColumns>
+                <KeyColumn dwd:design-time-name="65e5a2d8-5bde-42af-a5b9-1343cd73df06">
+                  <DataType>Integer</DataType>
+                  <Source xsi:type="ColumnBinding" dwd:design-time-name="23cbccf2-5030-4fcf-b805-d9f4e4013d96">
+                    <TableID>fact_chuyen_can</TableID>
+                    <ColumnID>mon_hoc_key</ColumnID>
+                  </Source>
+                </KeyColumn>
+              </KeyColumns>
+              <Type>Granularity</Type>
+            </Attribute>
+          </Attributes>
+        </Dimension>
+        <Dimension xsi:type="RegularMeasureGroupDimension" dwd:design-time-name="0bcb2ab2-e837-43c7-b6f7-128db2916c99">
+          <CubeDimensionID>dim_bai_hoc</CubeDimensionID>
+          <Attributes>
+            <Attribute dwd:design-time-name="3f58dcd1-b5f2-4653-9138-7fe20ae6a0d1">
+              <AttributeID>ten_bai</AttributeID>
+              <KeyColumns>
+                <KeyColumn dwd:design-time-name="f2e23e13-ba80-48d0-9820-3e9132d0b4f7">
+                  <DataType>Integer</DataType>
+                  <Source xsi:type="ColumnBinding" dwd:design-time-name="a10a921f-8735-49e8-b77e-8d3db08bc07b">
+                    <TableID>fact_chuyen_can</TableID>
+                    <ColumnID>bai_hoc_key</ColumnID>
+                  </Source>
+                </KeyColumn>
+              </KeyColumns>
+              <Type>Granularity</Type>
+            </Attribute>
+          </Attributes>
+        </Dimension>
+      </Dimensions>
+      <Partitions />
+    </MeasureGroup>
   </MeasureGroups>
-  <Source dwd:design-time-name="5419dbb5-d96c-4ff9-aed5-f7896d62a6c5"><DataSourceViewID>DW_QuanLyHocTap</DataSourceViewID></Source>
+  <Source dwd:design-time-name="71274a69-ed58-47e0-9aa6-421c76f32768">
+    <DataSourceViewID>DW_QuanLyHocTap</DataSourceViewID>
+  </Source>
   <MdxScripts>
-    <MdxScript dwd:design-time-name="dfa1751b-4f0c-4eba-a308-5f739e2b8adf">
+    <MdxScript dwd:design-time-name="a1d4db29-384c-4e49-b8c1-4cceef726886">
       <ID>MdxScript</ID>
       <Name>MdxScript</Name>
+      <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+      <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
       <Commands>
-        <Command><Text>CALCULATE;
+        <Command>
+          <Text>CALCULATE;
 CREATE MEMBER CURRENTCUBE.[Measures].[Điểm trung bình]
  AS IIF([Measures].[Số lượt thi] = 0, NULL, [Measures].[Tổng điểm] / [Measures].[Số lượt thi]),
  FORMAT_STRING = "0.00", ASSOCIATED_MEASURE_GROUP = 'Ket qua thi';
 CREATE MEMBER CURRENTCUBE.[Measures].[Điểm chuyên cần]
  AS IIF([Measures].[Số phiên] = 0, NULL, [Measures].[Tổng điểm chuyên cần] / [Measures].[Số phiên]),
- FORMAT_STRING = "0.00", ASSOCIATED_MEASURE_GROUP = 'Chuyen can';</Text></Command>
+ FORMAT_STRING = "0.00", ASSOCIATED_MEASURE_GROUP = 'Chuyen can';</Text>
+        </Command>
       </Commands>
     </MdxScript>
   </MdxScripts>
